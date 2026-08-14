@@ -16,11 +16,16 @@
 
       // These saves are explicitly defined by their special rules/items and
       // should not be reconstructed from mundane equipment.
-      if (name === "tyrion") unit.fixedArmourSave = 1;
-      if (name === "korhil") unit.fixedArmourSave = 3;
+      if (name.includes("tyrion")) unit.fixedArmourSave = 1;
+      if (name.includes("korhil")) unit.fixedArmourSave = 3;
     }
 
-    for (const item of data.factionMagicItems || []) {
+    const highElfItems = [
+      ...(data.factionMagicItems || []),
+      ...(data.faction?.specialCharacterOnlyItems || [])
+    ];
+
+    for (const item of highElfItems) {
       const name = String(item.name || "").toLowerCase();
       if (name === "armour of caledor") {
         // Dragon Armour with an additional +1 save: 4+ before shield/mount bonuses.
@@ -54,6 +59,8 @@
   getSelectedEquipmentIds = function(entry, unit) {
     const ids = new Set(oldGetSelectedEquipmentIds(entry, unit));
 
+    // Special characters keep their fixed equipment, and cavalry regiments
+    // inherit equipment carried by their unit mount (notably barding).
     for (const id of unit.fixedEquipment || []) ids.add(id);
     for (const id of unit.unitMount?.equipment || []) ids.add(id);
 
@@ -65,9 +72,10 @@
   }
 
   function selectedMagicArmourEffects(entry, unit) {
+    // Do not include champion items here: this function calculates the parent
+    // unit/character save. Champion rows are deliberately kept separate.
     const ids = [
       ...(entry.magicItems || []),
-      ...(entry.champion?.magicItems || []),
       ...(unit.fixedMagicItems || [])
     ];
 
