@@ -1,0 +1,38 @@
+name: Chaos smoke test
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-chaos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JavaScript syntax
+        run: |
+          node --check bootstrap.js
+          node --check chaos_extensions.js
+          node --check chaos_final_fixes.js
+      - name: Decode and validate Chaos payload
+        run: |
+          python - <<'PY'
+          import base64, gzip, json, pathlib
+          payload = pathlib.Path('data/whr_chaos_v0_1.payload').read_text().strip()
+          print('payload chars:', len(payload))
+          raw = base64.b64decode(payload, validate=True)
+          print('gzip bytes:', len(raw), raw[:4])
+          decoded = gzip.decompress(raw)
+          print('json bytes:', len(decoded))
+          data = json.loads(decoded)
+          print('faction id:', data.get('faction', {}).get('id'))
+          for key in ('characters','regiments','warMachines','specialCharacters'):
+              value = data.get('faction', {}).get(key)
+              assert isinstance(value, list), f'{key} missing/not a list'
+              print(key, len(value))
+          assert isinstance(data.get('globalArmyRules'), dict)
+          assert isinstance(data.get('equipment'), list)
+          assert isinstance(data.get('profiles'), list)
+          assert isinstance(data.get('mounts'), list)
+          print('Chaos payload valid')
+          PY
