@@ -1,0 +1,87 @@
+// Shared behaviour for common magic items whose rules affect army construction/points.
+(() => {
+  const ENDLESS_BANNER_ID = "endless_banner";
+
+  function selectedEquipmentHasMissileWeapon(entry, unit) {
+    const ids = typeof getSelectedEquipmentIds === "function"
+      ? getSelectedEquipmentIds(entry, unit)
+      : [];
+
+    return ids.some(id => {
+      const equipment = equipmentById?.get?.(id);
+      const type = String(equipment?.type || "").toLowerCase();
+      const name = String(equipment?.name || humanise(id) || "").toLowerCase();
+      return type.includes("missile") || /\b(bow|longbow|crossbow|handgun|pistol|javelin|sling|throwing weapon|blowpipe)\b/.test(name);
+    });
+  }
+
+  function endlessBannerEligible(entry, unit) {
+    if (!entry || !unit || entry.sectionKey !== "regiments") return false;
+    if (Number(entry.size || 0) < 40) return false;
+    if (selectedEquipmentHasMissileWeapon(entry, unit)) return false;
+    return true;
+  }
+
+  function endlessBannerDiscount(total) {
+    const cap = Number(state.pointsLimit || 0) >= 3000 ? 100 : 50;
+    return Math.min(Number(total || 0) * 0.20, cap);
+  }
+
+  // Endless Banner is a regiment-only banner and explicitly cannot be carried by a BSB.
+  const previousGetAllowedMagicItems = getAllowedMagicItems;
+  getAllowedMagicItems = function(unit, context) {
+    return previousGetAllowedMagicItems(unit, context)
+      .filter(item => item.id !== ENDLESS_BANNER_ID);
+  };
+
+  // Hide Endless Banner from regiments that cannot legally take it. If an old saved
+  // roster contains an illegal selection, leave it visible and show a warning so the
+  // user can correct it rather than silently changing their saved army.
+  const previousRenderMagicBannerEditor = renderMagicBannerEditor;
+  renderMagicBannerEditor = function(entry, unit) {
+    const eligible = endlessBannerEligible(entry, unit);
+    const selected = entry.magicBanner === ENDLESS_BANNER_ID;
+
+    if (eligible || selected) {
+      const html = previousRenderMagicBannerEditor(entry, unit);
+      if (!selected || eligible) return html;
+      return html + `<div class="warning-box">Endless Banner requires at least 40 models and cannot be carried by a regiment with missile weapons.</div>`;
+    }
+
+    const common = state.data.commonMagicItems;
+    const faction = state.data.factionMagicItems;
+    state.data.commonMagicItems = (common || []).filter(item => item.id !== ENDLESS_BANNER_ID);
+    state.data.factionMagicItems = (faction || []).filter(item => item.id !== ENDLESS_BANNER_ID);
+    try {
+      return previousRenderMagicBannerEditor(entry, unit);
+    } finally {
+      state.data.commonMagicItems = common;
+      state.data.factionMagicItems = faction;
+    }
+  };
+
+  const previousSaveEditor = saveEditor;
+  saveEditor = function() {
+    if (state.draft?.magicBanner === ENDLESS_BANNER_ID) {
+      const unit = getUnit(state.draft.sectionKey, state.draft.unitId);
+      if (!endlessBannerEligible(state.draft, unit)) {
+        window.alert("Endless Banner can only be carried by a regiment of at least 40 models with no missile weapons.");
+        return;
+      }
+    }
+    return previousSaveEditor();
+  };
+
+  // Apply the effect after all ordinary unit, option, champion and banner costs have
+  // been calculated, so every screen that calls calculateEntry receives the same total.
+  const previousCalculateEntry = calculateEntry;
+  calculateEntry = function(entry) {
+    const total = previousCalculateEntry(entry);
+    if (entry?.magicBanner !== ENDLESS_BANNER_ID) return total;
+
+    const unit = getUnit(entry.sectionKey, entry.unitId);
+    if (!endlessBannerEligible(entry, unit)) return total;
+
+    return total - endlessBannerDiscount(total);
+  };
+})();
