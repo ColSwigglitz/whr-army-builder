@@ -16,6 +16,14 @@
     return empire.commonMagicItems || [];
   }
 
+  async function loadCompactFactionPayload(payloadFile) {
+    const payloadResponse = await nativeFetch(`./data/${payloadFile}`, { cache:"no-store" });
+    if (!payloadResponse.ok) throw new Error(`Could not load ${payloadFile} (${payloadResponse.status})`);
+    const data = JSON.parse(await inflateBase64Gzip(await payloadResponse.text()));
+    if (!data.commonMagicItems?.length) data.commonMagicItems = await loadCommonMagicItems();
+    return data;
+  }
+
   function addProfile(data, profile) {
     data.profiles = data.profiles || [];
     if (!data.profiles.some(p => p.id === profile.id)) data.profiles.push(profile);
@@ -75,11 +83,13 @@
     const url = typeof input === "string" ? input : input?.url || "";
 
     if (url.endsWith("data/whr_high_elves_v0_1.json") || url.endsWith("/whr_high_elves_v0_1.json")) {
-      const payloadResponse = await nativeFetch("./data/whr_high_elves_v0_1.payload", { cache:"no-store" });
-      if (!payloadResponse.ok) return payloadResponse;
-      const highElves = JSON.parse(await inflateBase64Gzip(await payloadResponse.text()));
-      highElves.commonMagicItems = await loadCommonMagicItems();
+      const highElves = await loadCompactFactionPayload("whr_high_elves_v0_1.payload");
       return new Response(JSON.stringify(highElves), {status:200,headers:{"Content-Type":"application/json"}});
+    }
+
+    if (url.endsWith("data/whr_chaos_v0_1.json") || url.endsWith("/whr_chaos_v0_1.json")) {
+      const chaos = await loadCompactFactionPayload("whr_chaos_v0_1.payload");
+      return new Response(JSON.stringify(chaos), {status:200,headers:{"Content-Type":"application/json"}});
     }
 
     if (url.endsWith("data/whr_orcs_goblins_v0_1.json") || url.endsWith("/whr_orcs_goblins_v0_1.json")) {
