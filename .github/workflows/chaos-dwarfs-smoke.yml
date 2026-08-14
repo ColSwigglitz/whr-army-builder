@@ -63,14 +63,16 @@ jobs:
               const h=createEntry('warMachines',hell); h.optionSelections.extra_crew=2;
               const hellCost=calculateEntry(h);
 
-              const orcHero=state.data.faction.characters.find(u=>u.id==='common_orc_hero');
+              const orcHero=state.data.faction.characters.find(u=>/Common Orc Hero/i.test(u.name||''));
+              if (!orcHero) throw new Error('Common Orc Hero not found');
               state.draft=createEntry('characters',orcHero);
               const orcMagic=getAllowedMagicItems(orcHero,'character').some(i=>String(i.id).startsWith('og_'));
-              const fireborn=state.data.faction.regiments.find(u=>u.id==='kdaii_fireborn');
+              const fireborn=state.data.faction.regiments.find(u=>/K['’]?daii Fireborn/i.test(u.name||''));
+              if (!fireborn) throw new Error("K'daii Fireborn not found");
               state.draft=createEntry('regiments',fireborn); state.draft.champion.selected=true;
               const daemonReward=getAllowedMagicItems(fireborn,'champion').some(i=>String(i.id).startsWith('cd_daemon_'));
 
-              const earth=state.data.faction.warMachines.find(u=>u.id==='earth_shaker');
+              const earth=state.data.faction.warMachines.find(u=>/Earth Shaker/i.test(u.name||''));
               const pad=rosterPadRow(createEntry('warMachines',earth));
               const crewPrinted=/Chaos Dwarf Crew|Chaos Dwarf Warriors/.test(pad);
               return { classic, old, modern, fireglaiveCost, magmaCost, hellCost, orcMagic, daemonReward, crewPrinted, faction:state.data.faction.name };
