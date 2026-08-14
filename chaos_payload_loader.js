@@ -31,6 +31,22 @@
         }
       }
 
+      // A Daemon Prince using the Small reward may carry the battle standard.
+      // Keep this as an explicit builder option; the final Chaos validation
+      // enforces Small/no-wings and the special Chaos Banner allowance.
+      const daemonPrince = (data.faction?.characters || []).find(unit => unit.id === "daemon_prince");
+      if (daemonPrince) {
+        daemonPrince.options = daemonPrince.options || [];
+        if (!daemonPrince.options.some(option => option.id === "battle_standard")) {
+          daemonPrince.options.push({
+            id: "battle_standard",
+            label: "Battle Standard Bearer",
+            type: "toggle",
+            cost: { value: 0 }
+          });
+        }
+      }
+
       return new Response(JSON.stringify(data), {
         status: 200,
         headers: { "Content-Type": "application/json" }
