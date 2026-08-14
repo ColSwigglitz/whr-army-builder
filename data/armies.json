@@ -14,10 +14,10 @@
       "id": "high_elves",
       "name": "High Elves",
       "subtitle": "The hosts of Ulthuan",
-      "description": "High Elves army data skeleton created and ready to be populated.",
+      "description": "Build a High Elf army with disciplined infantry, elite warriors, swift cavalry, mages, dragons, chariots and bolt throwers.",
       "dataFile": "whr_high_elves_v0_1.json",
-      "available": false,
-      "badge": "Coming Soon"
+      "available": true,
+      "badge": "Available"
     },
     {
       "id": "orcs_goblins",
