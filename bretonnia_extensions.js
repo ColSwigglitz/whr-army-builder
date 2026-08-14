@@ -3,6 +3,28 @@
   // Bretonnia is a standalone data file, so enrich it here with the shared
   // common magic-item pool and a few schema details used by the generic UI.
   const previousFetch = window.fetch.bind(window);
+
+  function enrichCommonMagicArmour(items) {
+    const byName = new Map((items || []).map(item => [String(item.name || "").toLowerCase(), item]));
+    const base = (name, value) => { const item = byName.get(name); if (item) item.armourSaveBase = value; };
+    const modifier = (name, value) => { const item = byName.get(name); if (item) item.armourSaveModifier = value; };
+    const fixed = (name, value) => { const item = byName.get(name); if (item) item.fixedArmourSave = value; };
+
+    base("armour of endurance", 5);
+    base("armour of resilience", 5); modifier("armour of resilience", 1);
+    base("oaken armour", 6);
+    base("adamant armour", 5);
+    base("dawn armour", 5);
+    base("trollhide armour", 6);
+    base("emerald armour", 6);
+    base("armour of fortune", 5);
+    fixed("armour of meteoric iron", 2);
+    base("armour of unyielding", 5);
+    base("armour of protection", 5);
+    base("armour of brilliance", 5);
+    modifier("enchanted shield", 1);
+  }
+
   window.fetch = async function(input, init) {
     const response = await previousFetch(input, init);
     const url = typeof input === "string" ? input : input?.url || "";
@@ -20,6 +42,7 @@
           data.commonMagicItems = empire.commonMagicItems || [];
         }
       }
+      enrichCommonMagicArmour(data.commonMagicItems);
 
       for (const unit of data.faction?.regiments || []) {
         // WHR permits any regiment with a standard bearer to carry a magic banner.
@@ -36,6 +59,12 @@
           }
         }
       }
+
+      // Named magic armour/shields still contribute their mundane armour type.
+      const louen = (data.faction?.specialCharacters || []).find(unit => unit.id === "louen");
+      if (louen) louen.fixedEquipment = [...new Set([...(louen.fixedEquipment || []), "heavy_armour"])];
+      const tancred = (data.faction?.specialCharacters || []).find(unit => unit.id === "tancred");
+      if (tancred) tancred.fixedEquipment = [...new Set([...(tancred.fixedEquipment || []), "shield"])];
 
       return new Response(JSON.stringify(data), {
         status: response.status,
