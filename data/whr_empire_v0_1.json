@@ -1,0 +1,6211 @@
+{
+  "meta": {
+    "schemaVersion": "0.1",
+    "game": "Warhammer Renaissance",
+    "source": "WHR Armies 2026-27 final version",
+    "faction": "The Empire",
+    "notes": [
+      "Prototype structured data model for the WHR Army Builder.",
+      "Rules text is retained where it affects army construction; battlefield-only rules are generally kept as reference text.",
+      "Points values and restrictions are based on the uploaded Armies Compendium.",
+      "The Steam Tank entry is internally inconsistent in the source: its heading says 230 pts, while the variants text describes the default configuration as 250 pts. This file preserves 230 as the listed base cost and records the discrepancy in sourceNotes."
+    ]
+  },
+  "globalArmyRules": {
+    "minimumRegimentPercentage": 50,
+    "minimumRegimentModelPoints": 50,
+    "minimumUnitSize": {
+      "infantry": 5,
+      "cavalry": 5,
+      "monstrous_regiment": 3
+    },
+    "specialCharactersUnique": true,
+    "magicItemsUnique": true,
+    "general": {
+      "mustBeAmongHighestLeadership": true,
+      "battleStandardBearerEligible": false,
+      "regimentalChampionEligible": false
+    },
+    "command": {
+      "normalRegiment": {
+        "musician": {
+          "default": true,
+          "cost": 0
+        },
+        "standardBearer": {
+          "default": true,
+          "cost": 0
+        }
+      },
+      "fastCavalry": {
+        "musician": {
+          "default": true,
+          "cost": 0
+        },
+        "standardBearer": {
+          "default": false,
+          "cost": 10
+        }
+      },
+      "monstrousRegiment": {
+        "musician": {
+          "default": true,
+          "cost": 0
+        },
+        "standardBearer": {
+          "default": false,
+          "cost": 10
+        }
+      },
+      "skirmisher": {
+        "standardBearerAllowed": false
+      }
+    }
+  },
+  "equipment": [
+    {
+      "id": "shield",
+      "name": "Shield",
+      "type": "armour"
+    },
+    {
+      "id": "light_armour",
+      "name": "Light Armour",
+      "type": "armour"
+    },
+    {
+      "id": "heavy_armour",
+      "name": "Heavy Armour",
+      "type": "armour"
+    },
+    {
+      "id": "full_plate_armour",
+      "name": "Full Plate Armour",
+      "type": "armour",
+      "rules": "4+ armour save on its own."
+    },
+    {
+      "id": "barding",
+      "name": "Barding",
+      "type": "mount_armour"
+    },
+    {
+      "id": "flail",
+      "name": "Flail",
+      "type": "melee_weapon"
+    },
+    {
+      "id": "additional_hand_weapon",
+      "name": "Additional Hand Weapon",
+      "type": "melee_weapon"
+    },
+    {
+      "id": "spear",
+      "name": "Spear",
+      "type": "melee_weapon"
+    },
+    {
+      "id": "halberd",
+      "name": "Halberd",
+      "type": "melee_weapon"
+    },
+    {
+      "id": "double_handed_weapon",
+      "name": "Double Handed Weapon",
+      "type": "melee_weapon"
+    },
+    {
+      "id": "lance",
+      "name": "Lance",
+      "type": "melee_weapon"
+    },
+    {
+      "id": "pike",
+      "name": "Pike",
+      "type": "melee_weapon"
+    },
+    {
+      "id": "bow",
+      "name": "Bow",
+      "type": "missile_weapon"
+    },
+    {
+      "id": "longbow",
+      "name": "Longbow",
+      "type": "missile_weapon"
+    },
+    {
+      "id": "crossbow",
+      "name": "Crossbow",
+      "type": "missile_weapon"
+    },
+    {
+      "id": "handgun",
+      "name": "Handgun",
+      "type": "missile_weapon"
+    },
+    {
+      "id": "pistol",
+      "name": "Pistol",
+      "type": "missile_weapon"
+    },
+    {
+      "id": "two_pistols",
+      "name": "Two Pistols",
+      "type": "missile_weapon"
+    },
+    {
+      "id": "repeating_handgun",
+      "name": "Repeating Handgun",
+      "type": "experimental_missile_weapon"
+    },
+    {
+      "id": "repeating_pistol",
+      "name": "Repeating Pistol",
+      "type": "experimental_missile_weapon"
+    },
+    {
+      "id": "hochland_long_rifle",
+      "name": "Hochland Long Rifle",
+      "type": "experimental_missile_weapon"
+    },
+    {
+      "id": "blunderbuss",
+      "name": "Blunderbuss",
+      "type": "experimental_missile_weapon"
+    },
+    {
+      "id": "man_catcher",
+      "name": "Man Catcher",
+      "type": "experimental_melee_weapon"
+    },
+    {
+      "id": "hook_halberd",
+      "name": "Hook Halberd",
+      "type": "experimental_melee_weapon"
+    },
+    {
+      "id": "ball_and_chain",
+      "name": "Ball and Chain",
+      "type": "experimental_melee_weapon"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "empire_lord",
+      "name": "Empire Lord",
+      "stats": {
+        "M": 4,
+        "WS": 6,
+        "BS": 6,
+        "S": 4,
+        "T": 4,
+        "W": 3,
+        "I": 6,
+        "A": 4,
+        "Ld": 9
+      }
+    },
+    {
+      "id": "empire_hero",
+      "name": "Empire Hero",
+      "stats": {
+        "M": 4,
+        "WS": 5,
+        "BS": 5,
+        "S": 4,
+        "T": 4,
+        "W": 2,
+        "I": 5,
+        "A": 3,
+        "Ld": 8
+      }
+    },
+    {
+      "id": "empire_bsb",
+      "name": "Empire BSB",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 4,
+        "S": 4,
+        "T": 3,
+        "W": 2,
+        "I": 4,
+        "A": 2,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "warrior_priest",
+      "name": "Warrior Priest",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 3,
+        "S": 4,
+        "T": 4,
+        "W": 2,
+        "I": 4,
+        "A": 2,
+        "Ld": 8
+      }
+    },
+    {
+      "id": "wizard_lord",
+      "name": "Wizard Lord",
+      "stats": {
+        "M": 4,
+        "WS": 3,
+        "BS": 3,
+        "S": 4,
+        "T": 4,
+        "W": 4,
+        "I": 6,
+        "A": 3,
+        "Ld": 8
+      }
+    },
+    {
+      "id": "master_wizard",
+      "name": "Master Wizard",
+      "stats": {
+        "M": 4,
+        "WS": 3,
+        "BS": 3,
+        "S": 4,
+        "T": 4,
+        "W": 3,
+        "I": 5,
+        "A": 2,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "wizard_champion",
+      "name": "Wizard Champion",
+      "stats": {
+        "M": 4,
+        "WS": 3,
+        "BS": 3,
+        "S": 4,
+        "T": 4,
+        "W": 2,
+        "I": 4,
+        "A": 1,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "wizard",
+      "name": "Wizard",
+      "stats": {
+        "M": 4,
+        "WS": 3,
+        "BS": 3,
+        "S": 3,
+        "T": 4,
+        "W": 1,
+        "I": 4,
+        "A": 1,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "state_trooper",
+      "name": "State Trooper",
+      "stats": {
+        "M": 4,
+        "WS": 3,
+        "BS": 3,
+        "S": 3,
+        "T": 3,
+        "W": 1,
+        "I": 3,
+        "A": 1,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "swordsman",
+      "name": "Swordsman",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 3,
+        "S": 3,
+        "T": 3,
+        "W": 1,
+        "I": 4,
+        "A": 1,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "knight",
+      "name": "Knight",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 3,
+        "S": 4,
+        "T": 3,
+        "W": 1,
+        "I": 4,
+        "A": 1,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "empire_champion",
+      "name": "Empire Champion",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 4,
+        "S": 4,
+        "T": 3,
+        "W": 1,
+        "I": 4,
+        "A": 2,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "empire_captain",
+      "name": "Empire Captain",
+      "stats": {
+        "M": 4,
+        "WS": 5,
+        "BS": 4,
+        "S": 4,
+        "T": 3,
+        "W": 1,
+        "I": 5,
+        "A": 2,
+        "Ld": 8
+      }
+    },
+    {
+      "id": "grand_commander",
+      "name": "Grand Commander",
+      "stats": {
+        "M": 4,
+        "WS": 6,
+        "BS": 4,
+        "S": 4,
+        "T": 3,
+        "W": 2,
+        "I": 6,
+        "A": 2,
+        "Ld": 9
+      }
+    },
+    {
+      "id": "fighter",
+      "name": "Fighter",
+      "stats": {
+        "M": 4,
+        "WS": 3,
+        "BS": 3,
+        "S": 3,
+        "T": 3,
+        "W": 1,
+        "I": 3,
+        "A": 1,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "kislev_winged_lancer",
+      "name": "Kislev Winged Lancer",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 3,
+        "S": 3,
+        "T": 3,
+        "W": 1,
+        "I": 4,
+        "A": 1,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "flagellant",
+      "name": "Flagellant",
+      "stats": {
+        "M": 4,
+        "WS": 2,
+        "BS": 2,
+        "S": 4,
+        "T": 4,
+        "W": 1,
+        "I": 3,
+        "A": 2,
+        "Ld": 10
+      }
+    },
+    {
+      "id": "dwarf",
+      "name": "Dwarf",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 3,
+        "S": 3,
+        "T": 4,
+        "W": 1,
+        "I": 2,
+        "A": 1,
+        "Ld": 9
+      }
+    },
+    {
+      "id": "halfling",
+      "name": "Halfling",
+      "stats": {
+        "M": 4,
+        "WS": 2,
+        "BS": 4,
+        "S": 2,
+        "T": 2,
+        "W": 1,
+        "I": 5,
+        "A": 1,
+        "Ld": 8
+      }
+    },
+    {
+      "id": "ogre",
+      "name": "Ogre",
+      "stats": {
+        "M": 6,
+        "WS": 3,
+        "BS": 2,
+        "S": 4,
+        "T": 5,
+        "W": 3,
+        "I": 3,
+        "A": 2,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "fighter_champion",
+      "name": "Fighter Champion",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 4,
+        "S": 4,
+        "T": 3,
+        "W": 1,
+        "I": 4,
+        "A": 2,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "kislev_captain",
+      "name": "Kislev Captain",
+      "stats": {
+        "M": 4,
+        "WS": 5,
+        "BS": 4,
+        "S": 4,
+        "T": 3,
+        "W": 1,
+        "I": 5,
+        "A": 2,
+        "Ld": 8
+      }
+    },
+    {
+      "id": "prophet_of_doom",
+      "name": "Prophet of Doom",
+      "stats": {
+        "M": 4,
+        "WS": 3,
+        "BS": 3,
+        "S": 5,
+        "T": 4,
+        "W": 1,
+        "I": 4,
+        "A": 3,
+        "Ld": 10
+      }
+    },
+    {
+      "id": "dwarf_champion",
+      "name": "Dwarf Champion",
+      "stats": {
+        "M": 4,
+        "WS": 5,
+        "BS": 4,
+        "S": 4,
+        "T": 4,
+        "W": 1,
+        "I": 3,
+        "A": 2,
+        "Ld": 9
+      }
+    },
+    {
+      "id": "halfling_champion",
+      "name": "Halfling Champion",
+      "stats": {
+        "M": 4,
+        "WS": 3,
+        "BS": 5,
+        "S": 3,
+        "T": 2,
+        "W": 1,
+        "I": 6,
+        "A": 2,
+        "Ld": 8
+      }
+    },
+    {
+      "id": "ogre_champion",
+      "name": "Ogre Champion",
+      "stats": {
+        "M": 6,
+        "WS": 4,
+        "BS": 3,
+        "S": 5,
+        "T": 5,
+        "W": 3,
+        "I": 4,
+        "A": 3,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "warhorse",
+      "name": "Warhorse",
+      "stats": {
+        "M": 8,
+        "WS": 3,
+        "BS": 0,
+        "S": 3,
+        "T": 3,
+        "W": 1,
+        "I": 3,
+        "A": 1,
+        "Ld": 5
+      }
+    },
+    {
+      "id": "pegasus",
+      "name": "Pegasus",
+      "stats": {
+        "M": 8,
+        "WS": 3,
+        "BS": 0,
+        "S": 4,
+        "T": 4,
+        "W": 1,
+        "I": 4,
+        "A": 2,
+        "Ld": 5
+      }
+    },
+    {
+      "id": "griffon",
+      "name": "Griffon",
+      "stats": {
+        "M": 6,
+        "WS": 5,
+        "BS": 0,
+        "S": 6,
+        "T": 5,
+        "W": 5,
+        "I": 7,
+        "A": 4,
+        "Ld": 8
+      }
+    },
+    {
+      "id": "engineer",
+      "name": "Engineer",
+      "stats": {
+        "M": 4,
+        "WS": 3,
+        "BS": 4,
+        "S": 3,
+        "T": 3,
+        "W": 1,
+        "I": 3,
+        "A": 1,
+        "Ld": 7
+      }
+    },
+    {
+      "id": "war_machine",
+      "name": "War Machine",
+      "stats": {
+        "M": null,
+        "WS": null,
+        "BS": null,
+        "S": null,
+        "T": 7,
+        "W": 3,
+        "I": null,
+        "A": null,
+        "Ld": null
+      }
+    },
+    {
+      "id": "war_wagon",
+      "name": "War Wagon",
+      "stats": {
+        "M": null,
+        "WS": null,
+        "BS": null,
+        "S": 6,
+        "T": 6,
+        "W": 4,
+        "I": null,
+        "A": null,
+        "Ld": null
+      }
+    },
+    {
+      "id": "steam_tank",
+      "name": "Steam Tank",
+      "stats": {
+        "M": null,
+        "WS": 2,
+        "BS": 4,
+        "S": 7,
+        "T": 10,
+        "W": 5,
+        "I": null,
+        "A": null,
+        "Ld": null
+      }
+    },
+    {
+      "id": "kurt_helborg",
+      "name": "Reiksmarshall Kurt Helborg",
+      "stats": {
+        "M": 4,
+        "WS": 7,
+        "BS": 6,
+        "S": 4,
+        "T": 4,
+        "W": 3,
+        "I": 6,
+        "A": 4,
+        "Ld": 9
+      }
+    },
+    {
+      "id": "elector_count",
+      "name": "Elector Count",
+      "stats": {
+        "M": 4,
+        "WS": 5,
+        "BS": 5,
+        "S": 4,
+        "T": 4,
+        "W": 3,
+        "I": 4,
+        "A": 3,
+        "Ld": 9
+      }
+    },
+    {
+      "id": "supreme_patriarch",
+      "name": "Supreme Patriarch",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 3,
+        "S": 4,
+        "T": 4,
+        "W": 4,
+        "I": 6,
+        "A": 3,
+        "Ld": 9
+      }
+    },
+    {
+      "id": "volkmar",
+      "name": "Grand Theogonist Volkmar",
+      "stats": {
+        "M": 4,
+        "WS": 5,
+        "BS": 3,
+        "S": 4,
+        "T": 4,
+        "W": 3,
+        "I": 5,
+        "A": 3,
+        "Ld": 10
+      }
+    },
+    {
+      "id": "karl_franz",
+      "name": "The Emperor Karl Franz",
+      "stats": {
+        "M": 4,
+        "WS": 6,
+        "BS": 6,
+        "S": 4,
+        "T": 4,
+        "W": 3,
+        "I": 6,
+        "A": 4,
+        "Ld": 10
+      }
+    },
+    {
+      "id": "magnus",
+      "name": "Magnus the Pious",
+      "stats": {
+        "M": 4,
+        "WS": 6,
+        "BS": 6,
+        "S": 4,
+        "T": 4,
+        "W": 3,
+        "I": 6,
+        "A": 4,
+        "Ld": 10
+      }
+    },
+    {
+      "id": "ludwig_schwarzhelm",
+      "name": "Ludwig Schwarzhelm",
+      "stats": {
+        "M": 4,
+        "WS": 5,
+        "BS": 4,
+        "S": 4,
+        "T": 4,
+        "W": 3,
+        "I": 5,
+        "A": 3,
+        "Ld": 9
+      }
+    },
+    {
+      "id": "tzarina_katarin",
+      "name": "Tzarina Katarin",
+      "stats": {
+        "M": 4,
+        "WS": 4,
+        "BS": 3,
+        "S": 3,
+        "T": 3,
+        "W": 3,
+        "I": 5,
+        "A": 3,
+        "Ld": 10
+      }
+    },
+    {
+      "id": "normal_horse",
+      "name": "Normal Horse",
+      "stats": {
+        "M": 8,
+        "WS": null,
+        "BS": null,
+        "S": null,
+        "T": null,
+        "W": null,
+        "I": null,
+        "A": null,
+        "Ld": null
+      }
+    }
+  ],
+  "mounts": [
+    {
+      "id": "normal_horse",
+      "name": "Normal Horse",
+      "profileId": "normal_horse",
+      "type": "steed",
+      "rules": [],
+      "displayProfileOnRoster": true
+    },
+    {
+      "id": "warhorse",
+      "name": "Warhorse",
+      "profileId": "warhorse",
+      "type": "steed",
+      "rules": [],
+      "displayProfileOnRoster": true
+    },
+    {
+      "id": "pegasus",
+      "name": "Pegasus",
+      "profileId": "pegasus",
+      "type": "steed",
+      "rules": [
+        "fly"
+      ],
+      "displayProfileOnRoster": true
+    },
+    {
+      "id": "griffon",
+      "name": "Griffon",
+      "profileId": "griffon",
+      "type": "large_monster",
+      "rules": [
+        "terror",
+        "fly"
+      ],
+      "displayProfileOnRoster": true
+    }
+  ],
+  "commonMagicItems": [
+    {
+      "id": "biting_blade",
+      "name": "Biting Blade",
+      "category": "magic_weapon",
+      "cost": 10,
+      "rules": "-2 to armour save.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "blade_leaping_copper",
+      "name": "Blade of Leaping Copper",
+      "category": "magic_weapon",
+      "cost": 10,
+      "rules": "+1A.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "blades_lorenzo",
+      "name": "Blades of Lorenzo",
+      "category": "magic_weapon",
+      "cost": 10,
+      "rules": "Two hand weapons, +3 WS.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "sword_swift_slaying",
+      "name": "Sword of Swift Slaying",
+      "category": "magic_weapon",
+      "cost": 10,
+      "rules": "Always strike first.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "sword_might",
+      "name": "Sword of Might",
+      "category": "magic_weapon",
+      "cost": 15,
+      "rules": "+1S.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "wyrmslayer_sword",
+      "name": "Wyrmslayer Sword",
+      "category": "magic_weapon",
+      "cost": 15,
+      "rules": "Always wound on 4+ or better. Large targets have no armour save.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "heart_seeker",
+      "name": "Heart Seeker",
+      "category": "magic_weapon",
+      "cost": 15,
+      "rules": "May re-roll missed attacks.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "sky_arrow_naloer",
+      "name": "Sky Arrow of Naloer",
+      "category": "magic_weapon",
+      "cost": 15,
+      "rules": "One use only. S10 shot against models flying high.",
+      "requirements": [
+        "Bearer must have short bow, bow or longbow."
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "blade_sea_gold",
+      "name": "Blade of Sea Gold",
+      "category": "magic_weapon",
+      "cost": 20,
+      "rules": "-3 to armour save.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "flail_of_skulls",
+      "name": "Flail of Skulls",
+      "category": "magic_weapon",
+      "cost": 20,
+      "rules": "Flail. 1 wound = 2 wounds.",
+      "requirements": [
+        "bearer_can_take_flail"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "blessed_sword",
+      "name": "Blessed Sword",
+      "category": "magic_weapon",
+      "cost": 20,
+      "rules": "WS 10.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "star_lance",
+      "name": "Star Lance",
+      "category": "magic_weapon",
+      "cost": 20,
+      "rules": "Lance. S10 on the charge.",
+      "requirements": [
+        "bearer_can_take_lance"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "parrying_blade",
+      "name": "Parrying Blade",
+      "category": "magic_weapon",
+      "cost": 25,
+      "rules": "Enemy models in base contact have one less A.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "venom_sword",
+      "name": "Venom Sword",
+      "category": "magic_weapon",
+      "cost": 25,
+      "rules": "1 wound = 1D6 wounds.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "blade_leaping_bronze",
+      "name": "Blade of Leaping Bronze",
+      "category": "magic_weapon",
+      "cost": 30,
+      "rules": "+2A.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "ogre_blade",
+      "name": "Ogre Blade",
+      "category": "magic_weapon",
+      "cost": 30,
+      "rules": "+2S.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "broadsword_ensorcelled_iron",
+      "name": "Broadsword of Ensorcelled Iron",
+      "category": "magic_weapon",
+      "cost": 30,
+      "rules": "Double handed weapon, +1 to hit.",
+      "requirements": [
+        "bearer_can_take_double_handed_weapon"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "berserker_sword",
+      "name": "Berserker Sword",
+      "category": "magic_weapon",
+      "cost": 30,
+      "rules": "Bearer gains frenzy and +1S.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "sword_fortitude",
+      "name": "Sword of Fortitude",
+      "category": "magic_weapon",
+      "cost": 35,
+      "rules": "Bearer and bearer’s regiment are immune to psychology.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "gromril_blade",
+      "name": "Gromril Blade",
+      "category": "magic_weapon",
+      "cost": 35,
+      "rules": "No armour save allowed.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "mace_helsturm",
+      "name": "Mace of Helsturm",
+      "category": "magic_weapon",
+      "cost": 35,
+      "rules": "Forfeit normal attacks; make one S10 attack, 1 wound = 1D6 wounds.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "sword_teclis",
+      "name": "Sword of Teclis",
+      "category": "magic_weapon",
+      "cost": 40,
+      "rules": "Wounds automatically.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "blade_darting_steel",
+      "name": "Blade of Darting Steel",
+      "category": "magic_weapon",
+      "cost": 40,
+      "rules": "Hits automatically.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "giant_blade",
+      "name": "Giant Blade",
+      "category": "magic_weapon",
+      "cost": 45,
+      "rules": "+3S.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "dragon_blade",
+      "name": "Dragon Blade",
+      "category": "magic_weapon",
+      "cost": 45,
+      "rules": "Each hit becomes two hits.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "sword_heroes",
+      "name": "Sword of Heroes",
+      "category": "magic_weapon",
+      "cost": 50,
+      "rules": "Against T5+ opponents: +3S; 1 wound = 1D3 wounds.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "blade_leaping_gold",
+      "name": "Blade of Leaping Gold",
+      "category": "magic_weapon",
+      "cost": 60,
+      "rules": "+3A.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "daemon_slayer",
+      "name": "Daemon Slayer",
+      "category": "magic_weapon",
+      "cost": 85,
+      "rules": "Against Daemons hits inflict 1D3 wounds with no armour save; otherwise +3S and 1D3 wounds.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "dragon_slayer",
+      "name": "Dragon Slayer",
+      "category": "magic_weapon",
+      "cost": 85,
+      "rules": "Against Dragons hits inflict 1D3 wounds with no armour save; otherwise +3S and 1D3 wounds.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "abolisher_blade",
+      "name": "Abolisher Blade",
+      "category": "magic_weapon",
+      "cost": 100,
+      "rules": "Bearer may not carry other magic items. Magic items in base contact do not work.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "frost_blade",
+      "name": "Frost Blade",
+      "category": "magic_weapon",
+      "cost": 100,
+      "rules": "A wounded opponent is killed instantly.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "hydra_sword",
+      "name": "Hydra Sword",
+      "category": "magic_weapon",
+      "cost": 125,
+      "rules": "Each hit becomes 1D6 hits.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "hellfire_sword",
+      "name": "Hellfire Sword",
+      "category": "magic_weapon",
+      "cost": 125,
+      "rules": "S10, Flaming; slain enemies cause panic in their regiment.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "dragonhelm",
+      "name": "Dragonhelm",
+      "category": "magic_armour",
+      "cost": 10,
+      "rules": "Immune to fire-based attacks and breath weapons; immune to terror.",
+      "requirements": [
+        "bearer_can_wear_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "enchanted_shield",
+      "name": "Enchanted Shield",
+      "category": "magic_armour",
+      "cost": 10,
+      "rules": "+1 armour save.",
+      "requirements": [
+        "bearer_can_take_shield"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "armour_endurance",
+      "name": "Armour of Endurance",
+      "category": "magic_armour",
+      "cost": 10,
+      "rules": "Heavy armour. 6+ ward save.",
+      "requirements": [
+        "bearer_can_take_heavy_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "shield_ptolos",
+      "name": "Shield of Ptolos",
+      "category": "magic_armour",
+      "cost": 15,
+      "rules": "1+ armour save vs shooting only; cannot be improved.",
+      "requirements": [
+        "bearer_can_take_shield"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "armour_resilience",
+      "name": "Armour of Resilience",
+      "category": "magic_armour",
+      "cost": 15,
+      "rules": "Heavy armour. +1 armour save.",
+      "requirements": [
+        "bearer_can_take_heavy_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "oaken_armour",
+      "name": "Oaken Armour",
+      "category": "magic_armour",
+      "cost": 15,
+      "rules": "Light armour. +1W.",
+      "requirements": [
+        "bearer_can_take_light_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "charmed_shield",
+      "name": "Charmed Shield",
+      "category": "magic_armour",
+      "cost": 20,
+      "rules": "Discount the first potentially wounding hit suffered.",
+      "requirements": [
+        "bearer_can_take_shield"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "adamant_armour",
+      "name": "Adamant Armour",
+      "category": "magic_armour",
+      "cost": 25,
+      "rules": "Heavy armour. +1T.",
+      "requirements": [
+        "bearer_can_take_heavy_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "dawn_armour",
+      "name": "Dawn Armour",
+      "category": "magic_armour",
+      "cost": 25,
+      "rules": "Heavy armour. Re-roll failed armour saves.",
+      "requirements": [
+        "bearer_can_take_heavy_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "trollhide_armour",
+      "name": "Trollhide Armour",
+      "category": "magic_armour",
+      "cost": 25,
+      "rules": "Light armour. Regeneration save 4+.",
+      "requirements": [
+        "bearer_can_take_light_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "shining_shield",
+      "name": "Shining Shield",
+      "category": "magic_armour",
+      "cost": 25,
+      "rules": "Enemies suffer -1 to hit against bearer and mount.",
+      "requirements": [
+        "bearer_can_take_shield"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "emerald_armour",
+      "name": "Emerald Armour",
+      "category": "magic_armour",
+      "cost": 25,
+      "rules": "Light armour. Ignore first wound suffered.",
+      "requirements": [
+        "bearer_can_take_light_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "armour_fortune",
+      "name": "Armour of Fortune",
+      "category": "magic_armour",
+      "cost": 30,
+      "rules": "Heavy armour. Ward save 5+.",
+      "requirements": [
+        "bearer_can_take_heavy_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "armour_meteoric_iron",
+      "name": "Armour of Meteoric Iron",
+      "category": "magic_armour",
+      "cost": 30,
+      "rules": "Light armour. 2+ armour save that cannot be improved.",
+      "requirements": [
+        "bearer_can_take_light_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "parrying_shield",
+      "name": "Parrying Shield",
+      "category": "magic_armour",
+      "cost": 40,
+      "rules": "Enemy models in base contact have one less A.",
+      "requirements": [
+        "bearer_can_take_shield"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "shield_magic_immunity",
+      "name": "Shield of Magic Immunity",
+      "category": "magic_armour",
+      "cost": 50,
+      "rules": "Bearer is immune to spell effects.",
+      "requirements": [
+        "bearer_can_take_shield"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "spelleater_shield",
+      "name": "Spelleater Shield",
+      "category": "magic_armour",
+      "cost": 50,
+      "rules": "Natural dispel 4+; dispelled spells destroyed on a further 4+.",
+      "requirements": [
+        "bearer_can_take_shield"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "armour_unyielding",
+      "name": "Armour of Unyielding",
+      "category": "magic_armour",
+      "cost": 50,
+      "rules": "Heavy armour. +2T.",
+      "requirements": [
+        "bearer_can_take_heavy_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "armour_protection",
+      "name": "Armour of Protection",
+      "category": "magic_armour",
+      "cost": 60,
+      "rules": "Heavy armour. Ward save 4+.",
+      "requirements": [
+        "bearer_can_take_heavy_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "armour_brilliance",
+      "name": "Armour of Brilliance",
+      "category": "magic_armour",
+      "cost": 70,
+      "rules": "Heavy armour. Enemies suffer -2 to hit bearer and mount.",
+      "requirements": [
+        "bearer_can_take_heavy_armour"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "potion_healing",
+      "name": "Potion of Healing",
+      "category": "enchanted_item",
+      "cost": 10,
+      "rules": "Recover 1D6 lost wounds; living models only; one use.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "nullstone_ring",
+      "name": "Nullstone Ring",
+      "category": "enchanted_item",
+      "cost": 10,
+      "rules": "No model in base contact can cast spells.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "ghost_ring",
+      "name": "Ghost Ring",
+      "category": "enchanted_item",
+      "cost": 10,
+      "rules": "Bearer and mount can move through solid objects and terrain.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "talisman_ravensdark",
+      "name": "Talisman of Ravensdark",
+      "category": "enchanted_item",
+      "cost": 10,
+      "rules": "Flying creatures and riders cannot strike bearer or mount in melee.",
+      "requirements": [
+        "bearer_not_flying"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "orb_thunder",
+      "name": "Orb of Thunder",
+      "category": "enchanted_item",
+      "cost": 10,
+      "rules": "Bound spell, one use; drives off creatures flying high and prevents flying movement while in play.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "crimson_amulet",
+      "name": "Crimson Amulet",
+      "category": "enchanted_item",
+      "cost": 15,
+      "rules": "Automatically passes characteristic tests except LD.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "van_horstmann_speculum",
+      "name": "Van Horstmann’s Speculum",
+      "category": "enchanted_item",
+      "cost": 15,
+      "rules": "In a challenge bearer uses opponent’s A, WS and S and attacks simultaneously.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "amulet_fire",
+      "name": "Amulet of Fire",
+      "category": "enchanted_item",
+      "cost": 20,
+      "rules": "Natural dispel 4+, once per magic phase.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "potion_strength",
+      "name": "Potion of Strength",
+      "category": "enchanted_item",
+      "cost": 20,
+      "rules": "+3S for one melee round; one use.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "pipes_doom",
+      "name": "Pipes of Doom",
+      "category": "enchanted_item",
+      "cost": 20,
+      "rules": "Charging cavalry must pass LD test or charge fails.",
+      "requirements": [
+        "Models on foot only."
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "drums_swift_reform",
+      "name": "Drums of Swift Reform",
+      "category": "enchanted_item",
+      "cost": 20,
+      "rules": "Bearer’s regiment may reform before and after normal/march move.",
+      "requirements": [
+        "Models on foot only."
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "black_gem_gnar",
+      "name": "Black Gem of Gnar",
+      "category": "enchanted_item",
+      "cost": 20,
+      "rules": "In a challenge neither side nor mounts strike in first melee round.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "drums_marching",
+      "name": "Drums of Marching",
+      "category": "enchanted_item",
+      "cost": 20,
+      "rules": "Bearer’s regiment may march with enemies within 8 inches.",
+      "requirements": [
+        "infantry_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "talisman_luck",
+      "name": "Talisman of Luck",
+      "category": "enchanted_item",
+      "cost": 25,
+      "rules": "Re-roll one personal die roll; one use.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "jade_amulet",
+      "name": "Jade Amulet",
+      "category": "enchanted_item",
+      "cost": 30,
+      "rules": "+1T.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "ring_volans",
+      "name": "Ring of Volans",
+      "category": "enchanted_item",
+      "cost": 30,
+      "rules": "Bound spell; select eligible College Magic spell before battle; one use.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "claw_nagash",
+      "name": "Claw of Nagash",
+      "category": "enchanted_item",
+      "cost": 35,
+      "rules": "Bound spell; one living model within 8 inches suffers 1D6 wounds, no armour save; one use.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "ring_corin",
+      "name": "Ring of Corin",
+      "category": "enchanted_item",
+      "cost": 45,
+      "rules": "Bound spell; destroy named magic item within 12 inches if correctly identified; cannot target scrolls.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "horn_urgok",
+      "name": "Horn of Urgok",
+      "category": "enchanted_item",
+      "cost": 50,
+      "rules": "Bound spell; casts Horn of Andar; three uses.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "ruby_chalice",
+      "name": "Ruby Chalice",
+      "category": "enchanted_item",
+      "cost": 50,
+      "rules": "Enemies suffer -2 to hit with missiles against bearer, mount and regiment.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "crown_command",
+      "name": "Crown of Command",
+      "category": "enchanted_item",
+      "cost": 50,
+      "rules": "LD 10.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "talisman_obsidian",
+      "name": "Talisman of Obsidian",
+      "category": "enchanted_item",
+      "cost": 75,
+      "rules": "Bearer/regiment cannot cast; spells against them are automatically dispelled except Total Power.",
+      "requirements": [],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "skull_staff",
+      "name": "Skull Staff",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Reveal magic items and spells of enemy models within 12 inches on request.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "enchanted_mirror",
+      "name": "Enchanted Mirror",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Bearer’s dispel attempts always succeed on 4+ or better.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "staff_stealing",
+      "name": "Staff of Stealing",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Steal one enemy magic card after winds of magic; one use.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "power_scroll",
+      "name": "Power Scroll",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Automatically powers one spell; one use.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "infusion_white",
+      "name": "Infusion of White",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Gain 1D6 personal magic cards; on 6 wizard ODs after phase; one use.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "seerstone",
+      "name": "Seerstone",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Extra power cards may extend eligible spell range by 12 inches each.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "cloak_horrors",
+      "name": "Cloak of Horrors",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Amber-only; allows/enhances Savage Beast of Horrors.",
+      "requirements": [
+        "wizard_only",
+        "amber_lore_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "stormcrow_staff",
+      "name": "Stormcrow Staff",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Celestial-only bound spell targeting flyers.",
+      "requirements": [
+        "wizard_only",
+        "celestial_lore_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "teclis_textbook",
+      "name": "Teclis’ Textbook",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Wizard may use any one College Magic lore instead of normal lore.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "flameforged_cape",
+      "name": "Flameforged Cape",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Bright-only; allows/enhances Scarlet Scimitar.",
+      "requirements": [
+        "wizard_only",
+        "bright_lore_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "purple_reaper",
+      "name": "Purple Reaper",
+      "category": "arcane_item",
+      "cost": 20,
+      "rules": "Amethyst-only; allows/enhances Purple Scythe.",
+      "requirements": [
+        "wizard_only",
+        "amethyst_lore_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "dispel_magic_scroll",
+      "name": "Dispel Magic Scroll",
+      "category": "arcane_item",
+      "cost": 25,
+      "rules": "Automatically dispels one enemy spell, including Total Power; one use. Up to two unless Veto One Spell is used.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "ring_darkness",
+      "name": "Ring of Darkness",
+      "category": "arcane_item",
+      "cost": 30,
+      "rules": "Bound spell; wizard becomes ethereal; remains in play.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "amulet_steel",
+      "name": "Amulet of Steel",
+      "category": "arcane_item",
+      "cost": 30,
+      "rules": "Gold-only bound spell modifying armour saves of target unit.",
+      "requirements": [
+        "wizard_only",
+        "gold_lore_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "crown_shadows",
+      "name": "Crown of Shadows",
+      "category": "arcane_item",
+      "cost": 30,
+      "rules": "Grey-only; allows/enhances Crown of Taidron.",
+      "requirements": [
+        "wizard_only",
+        "grey_lore_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "book_secrets",
+      "name": "Book of Secrets",
+      "category": "arcane_item",
+      "cost": 40,
+      "rules": "After winds of magic, discard unassigned cards and draw replacements.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "white_cloak",
+      "name": "White Cloak",
+      "category": "arcane_item",
+      "cost": 40,
+      "rules": "Light-only; allows/enhances Shimmering Cloak.",
+      "requirements": [
+        "wizard_only",
+        "light_lore_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "wand_resurrection",
+      "name": "Wand of Resurrection",
+      "category": "arcane_item",
+      "cost": 50,
+      "rules": "Jade-only; successful Jade spells can revive eligible rank-and-file models.",
+      "requirements": [
+        "wizard_only",
+        "jade_lore_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "book_ashur",
+      "name": "Book of Ashur",
+      "category": "arcane_item",
+      "cost": 50,
+      "rules": "+1 magic level; does not increase magic item allowance.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "orb_forbidden_knowledge",
+      "name": "Orb of Forbidden Knowledge",
+      "category": "arcane_item",
+      "cost": 50,
+      "rules": "Counts as two levels higher for casting and dispelling.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "destroy_magic_scroll",
+      "name": "Destroy Magic Scroll",
+      "category": "arcane_item",
+      "cost": 50,
+      "rules": "Automatically dispels; on 4+ destroys the spell; one use.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "chalice_sorcery",
+      "name": "Chalice of Sorcery",
+      "category": "arcane_item",
+      "cost": 75,
+      "rules": "Once per magic phase cast a spell for free; may wound wizard and empty chalice.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "staff_three_sisters",
+      "name": "Staff of the Three Sisters",
+      "category": "arcane_item",
+      "cost": 75,
+      "rules": "Dispel attempts always succeed on 3+ or better.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "doomfire_ring",
+      "name": "Doomfire Ring",
+      "category": "arcane_item",
+      "cost": 75,
+      "rules": "Bound spell; 2D6 flaming S4 hits at 24 inches; three uses.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "wand_jet",
+      "name": "Wand of Jet",
+      "category": "arcane_item",
+      "cost": 75,
+      "rules": "Reduce spell casting cost by one power card; bearer sacrifices characteristics each use.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "staff_flaming_death",
+      "name": "Staff of Flaming Death",
+      "category": "arcane_item",
+      "cost": 75,
+      "rules": "Bound spell; 1D6 flaming S5 hits at 12 inches.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "staff_many_coloured_traitor",
+      "name": "Staff of the Many Coloured Traitor",
+      "category": "arcane_item",
+      "cost": 125,
+      "rules": "Successful dispels against bearer’s spells must be re-rolled; excludes bound spells.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "scroll_familiar",
+      "name": "Scroll Familiar",
+      "category": "familiar",
+      "cost": 10,
+      "rules": "May carry two scrolls for its master.",
+      "requirements": [
+        "wizard_only",
+        "wizard_on_foot_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "warrior_familiar",
+      "name": "Warrior Familiar",
+      "category": "familiar",
+      "cost": 30,
+      "rules": "Must be slain before hits can be allocated to master in melee; always strikes first.",
+      "requirements": [
+        "wizard_only",
+        "wizard_on_foot_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "spell_familiar",
+      "name": "Spell Familiar",
+      "category": "familiar",
+      "cost": 30,
+      "rules": "Adds one spell from master’s lore not already possessed.",
+      "requirements": [
+        "wizard_only",
+        "wizard_on_foot_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "endless_banner",
+      "name": "Endless Banner",
+      "category": "magic_banner",
+      "cost": 0,
+      "rules": "20% regiment discount, max 50 pts (100 in 3000+ battles); requires 40+ models; no missile weapons; not BSB.",
+      "requirements": [
+        "regiment_standard_only",
+        "minimum_models_40",
+        "no_missile_weapons",
+        "not_bsb"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_champions",
+      "name": "Banner of Champions",
+      "category": "magic_banner",
+      "cost": 0,
+      "rules": "Eligible regimental champion points count towards Regiments rather than Characters/Monsters/War Machines/Chariots.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "flaming_standard",
+      "name": "Flaming Standard",
+      "category": "magic_banner",
+      "cost": 10,
+      "rules": "All melee and missile attacks count as flaming and magical.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "impetuous_standard",
+      "name": "Impetuous Standard",
+      "category": "magic_banner",
+      "cost": 10,
+      "rules": "Enemies declaring Stand & Shoot against bearer’s charge hold instead.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "bifrost_banner",
+      "name": "Bifrost Banner",
+      "category": "magic_banner",
+      "cost": 20,
+      "rules": "Treat difficult terrain, steep slopes and water as open terrain for movement.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "assault_banner",
+      "name": "Assault Banner",
+      "category": "magic_banner",
+      "cost": 20,
+      "rules": "+1S on first charge; not mounts; one use.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_legion",
+      "name": "Banner of Legion",
+      "category": "magic_banner",
+      "cost": 25,
+      "rules": "May claim up to +4 rank bonus.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "phalanx_standard",
+      "name": "Phalanx Standard",
+      "category": "magic_banner",
+      "cost": 25,
+      "rules": "One extra rank fights to front with one attack.",
+      "requirements": [
+        "Infantry only."
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_spell_protection",
+      "name": "Banner of Spell Protection",
+      "category": "magic_banner",
+      "cost": 30,
+      "rules": "Natural dispel 4+.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_glory",
+      "name": "Banner of Glory",
+      "category": "magic_banner",
+      "cost": 30,
+      "rules": "+1 WS, not mounts.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_might",
+      "name": "Banner of Might",
+      "category": "magic_banner",
+      "cost": 30,
+      "rules": "+1 to hit on first charge, not mounts; one use.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "scarecrow_banner",
+      "name": "Scarecrow Banner",
+      "category": "magic_banner",
+      "cost": 30,
+      "rules": "Cannot be charged by flying units; immune to hunting falcons/Flock of Doom targeting.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "rending_banner",
+      "name": "Rending Banner",
+      "category": "magic_banner",
+      "cost": 40,
+      "rules": "All attacks, including shooting, inflict -1 armour save; not mounts.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_speed",
+      "name": "Banner of Speed",
+      "category": "magic_banner",
+      "cost": 40,
+      "rules": "+1 movement allowance; applies to steeds for cavalry.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_arcane_warding",
+      "name": "Banner of Arcane Warding",
+      "category": "magic_banner",
+      "cost": 40,
+      "rules": "4+ natural dispel even against Total Power; successful dispel rebounds spell.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_missile_protection",
+      "name": "Banner of Missile Protection",
+      "category": "magic_banner",
+      "cost": 50,
+      "rules": "4+ ward save vs all shooting including ranged spells.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "valorous_standard",
+      "name": "Valorous Standard",
+      "category": "magic_banner",
+      "cost": 50,
+      "rules": "Resolute; no effect on units immune to psychology.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_unyielding",
+      "name": "Banner of Unyielding",
+      "category": "magic_banner",
+      "cost": 50,
+      "rules": "Stubborn; no effect on units immune to psychology.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "standard_shielding",
+      "name": "Standard of Shielding",
+      "category": "magic_banner",
+      "cost": 50,
+      "rules": "+1 armour save, or 6+ if none.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "inspiring_standard",
+      "name": "Inspiring Standard",
+      "category": "magic_banner",
+      "cost": 50,
+      "rules": "May re-roll any LD test; as BSB, units within 18 inches may re-roll LD tests.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_great_deeds",
+      "name": "Banner of Great Deeds",
+      "category": "magic_banner",
+      "cost": 50,
+      "rules": "+1A on first charge, not mounts; one use.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "dread_banner",
+      "name": "Dread Banner",
+      "category": "magic_banner",
+      "cost": 60,
+      "rules": "Regiment causes fear.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_wrath",
+      "name": "Banner of Wrath",
+      "category": "magic_banner",
+      "cost": 80,
+      "rules": "Bound spell; 1D6 flaming S3 hits at 18 inches; may exhaust after use.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "common",
+      "magicItemSlots": 1
+    }
+  ],
+  "factionMagicItems": [
+    {
+      "id": "runefang",
+      "name": "Runefang",
+      "category": "magic_weapon",
+      "cost": 20,
+      "rules": "No armour save. Undead and ethereal troops suffer double wounds.",
+      "requirements": [],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1,
+      "uniqueness": {
+        "armyLimit": 1,
+        "ignoreBuiltInSpecialCharacterCopies": true
+      }
+    },
+    {
+      "id": "dragon_bow",
+      "name": "Dragon Bow",
+      "category": "magic_weapon",
+      "cost": 25,
+      "rules": "Bow. Three magical shots per shooting phase, range 36 inches, S5.",
+      "requirements": [
+        "bearer_can_take_bow"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "sword_justice",
+      "name": "Sword of Justice",
+      "category": "magic_weapon",
+      "cost": 50,
+      "rules": "Re-roll missed to-hit rolls. No armour save.",
+      "requirements": [],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "fearfrost",
+      "name": "Fearfrost",
+      "category": "magic_weapon",
+      "cost": 60,
+      "rules": "No armour save. 1 wound = 1D6 wounds.",
+      "requirements": [],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "hammer_sigmar",
+      "name": "Hammer of Sigmar",
+      "category": "magic_weapon",
+      "cost": 80,
+      "rules": "All hits wound. No armour save.",
+      "requirements": [],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "helm_count_mandred",
+      "name": "Helm of Count Mandred",
+      "category": "magic_armour",
+      "cost": 10,
+      "rules": "Bearer hates Skaven; Skaven fear bearer. +1 armour save.",
+      "requirements": [
+        "bearer_can_wear_armour"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "armour_tarnus",
+      "name": "Armour of Tarnus",
+      "category": "magic_armour",
+      "cost": 25,
+      "rules": "Full plate armour for wizards; may cast spells while wearing it; re-roll armour saves.",
+      "requirements": [
+        "wizard_only"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "icon_magnus",
+      "name": "Icon of Magnus",
+      "category": "enchanted_item",
+      "cost": 10,
+      "rules": "Bearer and regiment are immune to fear.",
+      "requirements": [],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "talisman_ulric",
+      "name": "Talisman of Ulric",
+      "category": "enchanted_item",
+      "cost": 15,
+      "rules": "Bearer recovers one wound at start of each player turn.",
+      "requirements": [],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "imperial_crown",
+      "name": "Imperial Crown",
+      "category": "enchanted_item",
+      "cost": 15,
+      "rules": "If carried by general, units within 18 inches may use general’s LD.",
+      "requirements": [
+        "general_only"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "laurels_victory",
+      "name": "Laurels of Victory",
+      "category": "enchanted_item",
+      "cost": 25,
+      "rules": "Wounds including overkill scored by bearer or mount in challenges count double for combat resolution.",
+      "requirements": [],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "silver_seal",
+      "name": "The Silver Seal",
+      "category": "enchanted_item",
+      "cost": 50,
+      "rules": "Enemies suffer -1 to hit bearer and mount in melee and shooting. Natural dispel 4+.",
+      "requirements": [],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "acolytes",
+      "name": "Acolytes",
+      "category": "arcane_item",
+      "cost": 10,
+      "rules": "Light Wizard on foot may take up to five. One or more acolytes reduce magic-item allowance by one; enable one Light spell per phase to cost one fewer power card when conditions are met.",
+      "requirements": [
+        "wizard_only",
+        "light_lore_only",
+        "wizard_on_foot_only"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "antler_totem",
+      "name": "Antler Totem",
+      "category": "arcane_item",
+      "cost": 15,
+      "rules": "Amber or Jade wizard may choose spells.",
+      "requirements": [
+        "wizard_only",
+        "amber_or_jade_lore"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "knights_panther_standard",
+      "name": "Knights Panther Standard",
+      "category": "magic_banner",
+      "cost": 0,
+      "rules": "Automatically dispels first spell cast against regiment, even Total Power; one use.",
+      "requirements": [
+        "knights_panther_only"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "white_wolf_standard",
+      "name": "White Wolf Standard",
+      "category": "magic_banner",
+      "cost": 0,
+      "rules": "First time unit receives a charge, charging regiment(s) take terror test; one use.",
+      "requirements": [
+        "white_wolf_or_teutogen_only"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "reiksguard_standard",
+      "name": "Reiksguard Standard",
+      "category": "magic_banner",
+      "cost": 20,
+      "rules": "Automatically passes first failed LD test except break tests; one use.",
+      "requirements": [
+        "reiksguard_only"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "carroburg_standard",
+      "name": "Carroburg Standard",
+      "category": "magic_banner",
+      "cost": 20,
+      "rules": "Automatically passes first failed break test; one use.",
+      "requirements": [
+        "greatswords_only"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "standard_imperial_devotion",
+      "name": "Standard of Imperial Devotion",
+      "category": "magic_banner",
+      "cost": 20,
+      "rules": "Regiment is immune to panic.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    },
+    {
+      "id": "banner_defiance",
+      "name": "Banner of Defiance",
+      "category": "magic_banner",
+      "cost": 80,
+      "rules": "Double rank bonus to max +6; never pursue, overrun or flee voluntarily; nullifies hatred and frenzy in regiment.",
+      "requirements": [
+        "standard_only"
+      ],
+      "unique": true,
+      "scope": "empire",
+      "magicItemSlots": 1
+    }
+  ],
+  "faction": {
+    "id": "empire",
+    "name": "The Empire",
+    "armyWideRules": [
+      {
+        "id": "full_plate_armour",
+        "name": "Full Plate Armour",
+        "rules": "Empire full plate armour provides a 4+ armour save on its own.",
+        "builderEffect": null
+      },
+      {
+        "id": "auxiliaries",
+        "name": "Auxiliaries",
+        "rules": "Flagellants, Free Company, Kislev Troops, Halflings, Dwarfs and Ogres are auxiliaries. Only half of the total number of regiments, rounded up, may be auxiliaries.",
+        "builderEffect": {
+          "type": "max_ratio_by_count",
+          "tag": "auxiliary",
+          "againstTag": "regiment",
+          "maximum": 0.5,
+          "rounding": "ceil"
+        }
+      },
+      {
+        "id": "detachments",
+        "name": "Detachments",
+        "rules": "Eligible parent regiments may have up to two detachments; combined detachment size may not exceed the parent regiment including champion. Detachments are at least five models and 50 points, have no standard bearer or musician, and cease to be detachments if joined by characters.",
+        "builderEffect": {
+          "type": "detachment_system",
+          "maximumPerParent": 2,
+          "combinedSizeMaximum": "parent_size_including_champion",
+          "minimumModels": 5,
+          "minimumModelPoints": 50,
+          "allowCharacters": false,
+          "allowStandardBearer": false,
+          "allowMusician": false
+        }
+      }
+    ],
+    "systems": {
+      "detachments": {
+        "parentTags": [
+          "detachment_parent"
+        ],
+        "detachmentTags": [
+          "detachment_eligible"
+        ],
+        "maximumPerParent": 2,
+        "combinedSizeMaximum": "parent_size_including_champion"
+      },
+      "knightlyOrders": {
+        "rule": "Normally only one regiment of each Knightly Order type. If all other Knightly Order types are omitted, multiple regiments of the chosen type may be taken.",
+        "groups": {
+          "reiksguard": [
+            "reiksguard_foot_knights",
+            "mounted_reiksguard_knights"
+          ],
+          "white_wolf_teutogen": [
+            "knights_white_wolf",
+            "teutogen_foot_knights"
+          ],
+          "knights_panther": [
+            "knights_panther"
+          ],
+          "blazing_sun": [
+            "knights_blazing_sun"
+          ]
+        }
+      },
+      "dogsOfWarAuxiliary": {
+        "maximumRegiments": 1,
+        "sourceFaction": "dogs_of_war",
+        "requirements": [
+          "human_regiment"
+        ],
+        "notes": "May be one Regiment of Renown provided it is human."
+      }
+    },
+    "characters": [
+      {
+        "id": "empire_lord",
+        "name": "Empire Lord",
+        "section": "characters",
+        "profileId": "empire_lord",
+        "points": {
+          "type": "fixed",
+          "value": 100
+        },
+        "selection": {},
+        "tags": [
+          "character"
+        ],
+        "equipmentOptions": [
+          {
+            "id": "armour",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 0,
+            "choices": [
+              "light_armour",
+              "heavy_armour",
+              "full_plate_armour"
+            ],
+            "alsoMayTake": [
+              "shield"
+            ]
+          },
+          {
+            "id": "melee_weapon",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 0,
+            "choices": [
+              "flail",
+              "additional_hand_weapon",
+              "spear",
+              "halberd",
+              "double_handed_weapon",
+              "lance"
+            ]
+          },
+          {
+            "id": "missile_weapon",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 10,
+            "choices": [
+              "bow",
+              "longbow",
+              "crossbow",
+              "handgun",
+              "pistol",
+              "two_pistols"
+            ]
+          }
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 20,
+            "freeOptions": [
+              "barding"
+            ]
+          },
+          {
+            "mountId": "pegasus",
+            "cost": 55
+          },
+          {
+            "mountId": "griffon",
+            "cost": 175
+          }
+        ],
+        "magicItems": {
+          "maximum": 3,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "All magic items are unique army-wide unless explicitly stated otherwise.",
+            "Only one magic weapon.",
+            "Only one piece of magic armour; a character who can wear armour may also wear a magical helmet.",
+            "A magic item requiring a mundane counterpart is only legal if the character could take that counterpart.",
+            "Arcane items and familiars are wizard-only."
+          ]
+        },
+        "generalEligible": true
+      },
+      {
+        "id": "empire_hero",
+        "name": "Empire Hero",
+        "section": "characters",
+        "profileId": "empire_hero",
+        "points": {
+          "type": "fixed",
+          "value": 60
+        },
+        "selection": {},
+        "tags": [
+          "character"
+        ],
+        "equipmentOptions": [
+          {
+            "id": "armour",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 0,
+            "choices": [
+              "light_armour",
+              "heavy_armour",
+              "full_plate_armour"
+            ],
+            "alsoMayTake": [
+              "shield"
+            ]
+          },
+          {
+            "id": "melee_weapon",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 0,
+            "choices": [
+              "flail",
+              "additional_hand_weapon",
+              "spear",
+              "halberd",
+              "double_handed_weapon",
+              "lance"
+            ]
+          },
+          {
+            "id": "missile_weapon",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 10,
+            "choices": [
+              "bow",
+              "longbow",
+              "crossbow",
+              "handgun",
+              "pistol",
+              "two_pistols"
+            ]
+          },
+          {
+            "id": "experimental_weapon",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 10,
+            "choices": [
+              "hochland_long_rifle",
+              "repeating_handgun",
+              "repeating_pistol"
+            ],
+            "requirements": [
+              "on_foot",
+              "only_one_empire_hero_in_army_may_take"
+            ]
+          }
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 15,
+            "freeOptions": [
+              "barding"
+            ]
+          },
+          {
+            "mountId": "pegasus",
+            "cost": 50
+          },
+          {
+            "mountId": "griffon",
+            "cost": 170
+          }
+        ],
+        "magicItems": {
+          "maximum": 2,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "All magic items are unique army-wide unless explicitly stated otherwise.",
+            "Only one magic weapon.",
+            "Only one piece of magic armour; a character who can wear armour may also wear a magical helmet.",
+            "A magic item requiring a mundane counterpart is only legal if the character could take that counterpart.",
+            "Arcane items and familiars are wizard-only."
+          ]
+        },
+        "generalEligible": true
+      },
+      {
+        "id": "empire_bsb",
+        "name": "Empire Battle Standard Bearer",
+        "section": "characters",
+        "profileId": "empire_bsb",
+        "points": {
+          "type": "fixed",
+          "value": 80
+        },
+        "selection": {
+          "maximum": 1
+        },
+        "tags": [
+          "character",
+          "battle_standard_bearer"
+        ],
+        "equipmentOptions": [
+          {
+            "id": "armour",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 0,
+            "choices": [
+              "light_armour",
+              "heavy_armour",
+              "full_plate_armour"
+            ]
+          }
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 10,
+            "freeOptions": [
+              "barding"
+            ]
+          }
+        ],
+        "magicItems": {
+          "maximum": 1,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item",
+            "magic_banner"
+          ],
+          "rules": [
+            "All magic items are unique army-wide unless explicitly stated otherwise.",
+            "Only one magic weapon.",
+            "Only one piece of magic armour; a character who can wear armour may also wear a magical helmet.",
+            "A magic item requiring a mundane counterpart is only legal if the character could take that counterpart.",
+            "Arcane items and familiars are wizard-only."
+          ]
+        },
+        "generalEligible": false
+      },
+      {
+        "id": "wizard_lord",
+        "name": "Wizard Lord (Level 4)",
+        "section": "characters",
+        "profileId": "wizard_lord",
+        "points": {
+          "type": "fixed",
+          "value": 240
+        },
+        "selection": {},
+        "tags": [
+          "character"
+        ],
+        "equipmentOptions": [],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0,
+            "freeOptions": [
+              "barding"
+            ]
+          },
+          {
+            "mountId": "pegasus",
+            "cost": 40
+          },
+          {
+            "mountId": "griffon",
+            "cost": 160
+          }
+        ],
+        "magicItems": {
+          "maximum": 4,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item",
+            "arcane_item",
+            "familiar"
+          ],
+          "rules": [
+            "All magic items are unique army-wide unless explicitly stated otherwise.",
+            "Only one magic weapon.",
+            "Only one piece of magic armour; a character who can wear armour may also wear a magical helmet.",
+            "A magic item requiring a mundane counterpart is only legal if the character could take that counterpart.",
+            "Arcane items and familiars are wizard-only."
+          ]
+        },
+        "wizard": {
+          "level": 4,
+          "lores": [
+            "college_magic"
+          ],
+          "conditionalLores": [
+            {
+              "lore": "ice_magic",
+              "requiresTag": "kislev_regiment"
+            }
+          ]
+        },
+        "generalEligible": true
+      },
+      {
+        "id": "master_wizard",
+        "name": "Master Wizard (Level 3)",
+        "section": "characters",
+        "profileId": "master_wizard",
+        "points": {
+          "type": "fixed",
+          "value": 170
+        },
+        "selection": {},
+        "tags": [
+          "character"
+        ],
+        "equipmentOptions": [],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0,
+            "freeOptions": [
+              "barding"
+            ]
+          },
+          {
+            "mountId": "pegasus",
+            "cost": 40
+          }
+        ],
+        "magicItems": {
+          "maximum": 3,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item",
+            "arcane_item",
+            "familiar"
+          ],
+          "rules": [
+            "All magic items are unique army-wide unless explicitly stated otherwise.",
+            "Only one magic weapon.",
+            "Only one piece of magic armour; a character who can wear armour may also wear a magical helmet.",
+            "A magic item requiring a mundane counterpart is only legal if the character could take that counterpart.",
+            "Arcane items and familiars are wizard-only."
+          ]
+        },
+        "wizard": {
+          "level": 3,
+          "lores": [
+            "college_magic"
+          ],
+          "conditionalLores": [
+            {
+              "lore": "ice_magic",
+              "requiresTag": "kislev_regiment"
+            }
+          ]
+        },
+        "generalEligible": true
+      },
+      {
+        "id": "wizard_champion",
+        "name": "Wizard Champion (Level 2)",
+        "section": "characters",
+        "profileId": "wizard_champion",
+        "points": {
+          "type": "fixed",
+          "value": 110
+        },
+        "selection": {},
+        "tags": [
+          "character"
+        ],
+        "equipmentOptions": [],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0,
+            "freeOptions": [
+              "barding"
+            ]
+          },
+          {
+            "mountId": "pegasus",
+            "cost": 40
+          }
+        ],
+        "magicItems": {
+          "maximum": 2,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item",
+            "arcane_item",
+            "familiar"
+          ],
+          "rules": [
+            "All magic items are unique army-wide unless explicitly stated otherwise.",
+            "Only one magic weapon.",
+            "Only one piece of magic armour; a character who can wear armour may also wear a magical helmet.",
+            "A magic item requiring a mundane counterpart is only legal if the character could take that counterpart.",
+            "Arcane items and familiars are wizard-only."
+          ]
+        },
+        "wizard": {
+          "level": 2,
+          "lores": [
+            "college_magic"
+          ],
+          "conditionalLores": [
+            {
+              "lore": "ice_magic",
+              "requiresTag": "kislev_regiment"
+            }
+          ]
+        },
+        "generalEligible": true
+      },
+      {
+        "id": "wizard",
+        "name": "Wizard (Level 1)",
+        "section": "characters",
+        "profileId": "wizard",
+        "points": {
+          "type": "fixed",
+          "value": 50
+        },
+        "selection": {},
+        "tags": [
+          "character"
+        ],
+        "equipmentOptions": [],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0,
+            "freeOptions": [
+              "barding"
+            ]
+          },
+          {
+            "mountId": "pegasus",
+            "cost": 40
+          }
+        ],
+        "magicItems": {
+          "maximum": 1,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item",
+            "arcane_item",
+            "familiar"
+          ],
+          "rules": [
+            "All magic items are unique army-wide unless explicitly stated otherwise.",
+            "Only one magic weapon.",
+            "Only one piece of magic armour; a character who can wear armour may also wear a magical helmet.",
+            "A magic item requiring a mundane counterpart is only legal if the character could take that counterpart.",
+            "Arcane items and familiars are wizard-only."
+          ]
+        },
+        "wizard": {
+          "level": 1,
+          "lores": [
+            "college_magic"
+          ],
+          "conditionalLores": [
+            {
+              "lore": "ice_magic",
+              "requiresTag": "kislev_regiment"
+            }
+          ]
+        },
+        "generalEligible": true
+      },
+      {
+        "id": "warrior_priest",
+        "name": "Warrior Priest",
+        "section": "characters",
+        "profileId": "warrior_priest",
+        "points": {
+          "type": "fixed",
+          "value": 65
+        },
+        "selection": {},
+        "tags": [
+          "character"
+        ],
+        "equipmentOptions": [
+          {
+            "id": "armour",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 0,
+            "choices": [
+              "light_armour",
+              "heavy_armour"
+            ],
+            "alsoMayTake": [
+              "shield"
+            ]
+          },
+          {
+            "id": "melee_weapon",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": 0,
+            "choices": [
+              "flail",
+              "additional_hand_weapon",
+              "double_handed_weapon"
+            ]
+          }
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 10,
+            "freeOptions": [
+              "barding"
+            ]
+          },
+          {
+            "mountId": "warrior_priest_chariot",
+            "cost": 80,
+            "requirements": [
+              "grand_theogonist_not_in_army",
+              "maximum_one_warrior_priest_chariot"
+            ]
+          }
+        ],
+        "magicItems": {
+          "maximum": 1,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "All magic items are unique army-wide unless explicitly stated otherwise.",
+            "Only one magic weapon.",
+            "Only one piece of magic armour; a character who can wear armour may also wear a magical helmet.",
+            "A magic item requiring a mundane counterpart is only legal if the character could take that counterpart.",
+            "Arcane items and familiars are wizard-only."
+          ]
+        },
+        "generalEligible": true,
+        "rules": [
+          "State Troops/Swordsmen led by Warrior Priest, including detachments within 8 inches, become immune to fear and hate all enemies."
+        ]
+      }
+    ],
+    "regiments": [
+      {
+        "id": "halberdiers",
+        "name": "Halberdiers",
+        "section": "regiments",
+        "profileId": "state_trooper",
+        "points": {
+          "type": "per_model",
+          "value": 5
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "halberd"
+        ],
+        "tags": [
+          "regiment",
+          "state_troops",
+          "rank_and_file",
+          "detachment_parent",
+          "detachment_eligible"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "light_armour",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "light_armour"
+            ]
+          },
+          {
+            "id": "shields",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "shield"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Empire Champion",
+          "profileId": "empire_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "spearmen",
+        "name": "Spearmen",
+        "section": "regiments",
+        "profileId": "state_trooper",
+        "points": {
+          "type": "per_model",
+          "value": 5
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "spear"
+        ],
+        "tags": [
+          "regiment",
+          "state_troops",
+          "rank_and_file",
+          "detachment_parent",
+          "detachment_eligible"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "light_armour",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "light_armour"
+            ]
+          },
+          {
+            "id": "shields",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "shield"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Empire Champion",
+          "profileId": "empire_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "pikemen",
+        "name": "Pikemen",
+        "section": "regiments",
+        "profileId": "state_trooper",
+        "points": {
+          "type": "per_model",
+          "value": 8
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "pike"
+        ],
+        "tags": [
+          "regiment",
+          "state_troops",
+          "rank_and_file",
+          "detachment_parent",
+          "detachment_eligible"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "light_armour",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "light_armour"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Empire Champion",
+          "profileId": "empire_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "greatswords",
+        "name": "Greatswords",
+        "section": "regiments",
+        "profileId": "state_trooper",
+        "points": {
+          "type": "per_model",
+          "value": 6
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "double_handed_weapon"
+        ],
+        "tags": [
+          "regiment",
+          "state_troops",
+          "rank_and_file",
+          "detachment_parent",
+          "detachment_eligible"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "light_armour",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "light_armour"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Empire Champion",
+          "profileId": "empire_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "swordsmen",
+        "name": "Swordsmen",
+        "section": "regiments",
+        "profileId": "swordsman",
+        "points": {
+          "type": "per_model",
+          "value": 5.5
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "shield"
+        ],
+        "tags": [
+          "regiment",
+          "rank_and_file",
+          "detachment_parent",
+          "detachment_eligible"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "light_armour",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "light_armour"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Empire Captain",
+          "profileId": "empire_captain",
+          "cost": {
+            "type": "formula",
+            "base": 30,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "archers",
+        "name": "Archers",
+        "section": "regiments",
+        "profileId": "state_trooper",
+        "points": {
+          "type": "per_model",
+          "value": 7
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "longbow"
+        ],
+        "tags": [
+          "regiment",
+          "state_troops",
+          "skirmisher",
+          "detachment_eligible"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "light_armour",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "light_armour"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Empire Champion",
+          "profileId": "empire_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "musician": {
+            "default": true,
+            "cost": 0
+          },
+          "standardBearer": {
+            "allowed": false
+          }
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "crossbowmen",
+        "name": "Crossbowmen",
+        "section": "regiments",
+        "profileId": "state_trooper",
+        "points": {
+          "type": "per_model",
+          "value": 9
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "crossbow"
+        ],
+        "tags": [
+          "regiment",
+          "state_troops",
+          "detachment_eligible"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "light_armour",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "light_armour"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Empire Champion",
+          "profileId": "empire_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "handgunners",
+        "name": "Hand Gunners",
+        "section": "regiments",
+        "profileId": "state_trooper",
+        "points": {
+          "type": "per_model",
+          "value": 9
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "handgun"
+        ],
+        "tags": [
+          "regiment",
+          "state_troops",
+          "detachment_eligible"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "light_armour",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "light_armour"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Empire Champion",
+          "profileId": "empire_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "pistoliers",
+        "name": "Pistoliers",
+        "section": "regiments",
+        "profileId": "state_trooper",
+        "points": {
+          "type": "per_model",
+          "value": 17
+        },
+        "unitType": "cavalry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "light_armour",
+          "two_pistols"
+        ],
+        "tags": [
+          "regiment",
+          "state_troops",
+          "fast_cavalry",
+          "skirmisher"
+        ],
+        "rules": [
+          "Rides normal horses."
+        ],
+        "options": [],
+        "champion": {
+          "name": "Empire Captain",
+          "profileId": "empire_captain",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters",
+          "specialOptions": [
+            {
+              "id": "experimental_weapon",
+              "cost": {
+                "type": "fixed",
+                "value": 10
+              },
+              "requiresRemoveEquipment": "pistol",
+              "choices": [
+                "hochland_long_rifle",
+                "repeating_handgun",
+                "repeating_pistol"
+              ]
+            }
+          ]
+        },
+        "command": {
+          "musician": {
+            "default": true,
+            "cost": 0
+          },
+          "standardBearer": {
+            "default": false,
+            "cost": 10
+          }
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        },
+        "unitMount": {
+          "mountId": "normal_horse",
+          "name": "Normal Horse",
+          "quantity": "per_model",
+          "equipment": []
+        }
+      },
+      {
+        "id": "outriders",
+        "name": "Outriders",
+        "section": "regiments",
+        "profileId": "state_trooper",
+        "points": {
+          "type": "per_model",
+          "value": 17
+        },
+        "unitType": "cavalry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "light_armour",
+          "repeating_handgun"
+        ],
+        "tags": [
+          "regiment",
+          "state_troops"
+        ],
+        "rules": [
+          "Rides barded normal horses."
+        ],
+        "options": [],
+        "champion": {
+          "name": "Empire Captain",
+          "profileId": "empire_captain",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        },
+        "unitMount": {
+          "mountId": "normal_horse",
+          "name": "Normal Horse",
+          "quantity": "per_model",
+          "equipment": [
+            "barding"
+          ]
+        }
+      },
+      {
+        "id": "knights_white_wolf",
+        "name": "Knights of the White Wolf",
+        "section": "regiments",
+        "profileId": "knight",
+        "points": {
+          "type": "per_model",
+          "value": 20
+        },
+        "unitType": "cavalry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {
+          "maximum": 1
+        },
+        "equipment": [
+          "barding",
+          "full_plate_armour",
+          "double_handed_weapon"
+        ],
+        "tags": [
+          "regiment",
+          "knightly_order",
+          "rank_and_file"
+        ],
+        "rules": [],
+        "options": [],
+        "champion": {
+          "name": "Empire Captain",
+          "profileId": "empire_captain",
+          "cost": {
+            "type": "formula",
+            "base": 30,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        },
+        "unitMount": {
+          "mountId": "warhorse",
+          "name": "Warhorse",
+          "quantity": "per_model",
+          "equipment": [
+            "barding"
+          ]
+        }
+      },
+      {
+        "id": "teutogen_foot_knights",
+        "name": "Teutogen Foot Knights",
+        "section": "regiments",
+        "profileId": "knight",
+        "points": {
+          "type": "per_model",
+          "value": 13
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {
+          "maximum": 1
+        },
+        "equipment": [
+          "full_plate_armour",
+          "double_handed_weapon"
+        ],
+        "tags": [
+          "regiment",
+          "knightly_order",
+          "rank_and_file",
+          "detachment_parent"
+        ],
+        "rules": [],
+        "options": [],
+        "champion": {
+          "name": "Empire Captain",
+          "profileId": "empire_captain",
+          "cost": {
+            "type": "formula",
+            "base": 30,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "knights_panther",
+        "name": "Knights Panther",
+        "section": "regiments",
+        "profileId": "knight",
+        "points": {
+          "type": "per_model",
+          "value": 25
+        },
+        "unitType": "cavalry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {
+          "maximum": 1
+        },
+        "equipment": [
+          "barding",
+          "full_plate_armour",
+          "shield",
+          "lance"
+        ],
+        "tags": [
+          "regiment",
+          "knightly_order",
+          "rank_and_file"
+        ],
+        "rules": [],
+        "options": [],
+        "champion": {
+          "name": "Empire Captain",
+          "profileId": "empire_captain",
+          "cost": {
+            "type": "formula",
+            "base": 30,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        },
+        "unitMount": {
+          "mountId": "warhorse",
+          "name": "Warhorse",
+          "quantity": "per_model",
+          "equipment": [
+            "barding"
+          ]
+        }
+      },
+      {
+        "id": "knights_blazing_sun",
+        "name": "Knights of the Blazing Sun",
+        "section": "regiments",
+        "profileId": "knight",
+        "points": {
+          "type": "per_model",
+          "value": 25
+        },
+        "unitType": "cavalry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {
+          "maximum": 1
+        },
+        "equipment": [
+          "barding",
+          "full_plate_armour",
+          "shield",
+          "lance"
+        ],
+        "tags": [
+          "regiment",
+          "knightly_order",
+          "rank_and_file"
+        ],
+        "rules": [],
+        "options": [],
+        "champion": {
+          "name": "Empire Captain",
+          "profileId": "empire_captain",
+          "cost": {
+            "type": "formula",
+            "base": 30,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        },
+        "unitMount": {
+          "mountId": "warhorse",
+          "name": "Warhorse",
+          "quantity": "per_model",
+          "equipment": [
+            "barding"
+          ]
+        }
+      },
+      {
+        "id": "reiksguard_foot_knights",
+        "name": "Reiksguard Foot Knights",
+        "section": "regiments",
+        "profileId": "knight",
+        "points": {
+          "type": "per_model",
+          "value": 11
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {
+          "maximum": 1
+        },
+        "equipment": [
+          "full_plate_armour",
+          "shield"
+        ],
+        "tags": [
+          "regiment",
+          "knightly_order",
+          "rank_and_file",
+          "detachment_parent"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "double_handed_weapons",
+            "type": "replacement",
+            "cost": {
+              "type": "per_model",
+              "value": 2
+            },
+            "removesEquipment": [
+              "shield"
+            ],
+            "addsEquipment": [
+              "double_handed_weapon"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Grand Commander",
+          "profileId": "grand_commander",
+          "cost": {
+            "type": "formula",
+            "base": 50,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "mounted_reiksguard_knights",
+        "name": "Mounted Reiksguard Knights",
+        "section": "regiments",
+        "profileId": "knight",
+        "points": {
+          "type": "per_model",
+          "value": 25
+        },
+        "unitType": "cavalry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {
+          "maximum": 1
+        },
+        "equipment": [
+          "barding",
+          "full_plate_armour",
+          "shield",
+          "lance"
+        ],
+        "tags": [
+          "regiment",
+          "knightly_order",
+          "rank_and_file"
+        ],
+        "rules": [],
+        "options": [],
+        "champion": {
+          "name": "Grand Commander",
+          "profileId": "grand_commander",
+          "cost": {
+            "type": "formula",
+            "base": 50,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        },
+        "unitMount": {
+          "mountId": "warhorse",
+          "name": "Warhorse",
+          "quantity": "per_model",
+          "equipment": [
+            "barding"
+          ]
+        }
+      },
+      {
+        "id": "flagellants",
+        "name": "Flagellants",
+        "section": "regiments",
+        "profileId": "flagellant",
+        "points": {
+          "type": "per_model",
+          "value": 10
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [],
+        "tags": [
+          "regiment",
+          "auxiliary",
+          "rank_and_file"
+        ],
+        "rules": [
+          "Unbreakable.",
+          "Must charge enemy if within charge range."
+        ],
+        "options": [
+          {
+            "id": "flails",
+            "cost": {
+              "type": "per_model",
+              "value": 2
+            },
+            "addsEquipment": [
+              "flail"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Prophet of Doom",
+          "profileId": "prophet_of_doom",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 0
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "musician": {
+            "allowed": false
+          },
+          "standardBearer": {
+            "allowed": false
+          }
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "kislev_winged_lancers",
+        "name": "Kislev Winged Lancers",
+        "section": "regiments",
+        "profileId": "kislev_winged_lancer",
+        "points": {
+          "type": "per_model",
+          "value": 17
+        },
+        "unitType": "cavalry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "light_armour",
+          "shield",
+          "lance"
+        ],
+        "tags": [
+          "regiment",
+          "auxiliary",
+          "kislev_regiment",
+          "fast_cavalry"
+        ],
+        "rules": [
+          "Rides warhorses."
+        ],
+        "options": [
+          {
+            "id": "shrieking_back_banners",
+            "cost": {
+              "type": "per_model",
+              "value": 3
+            },
+            "rules": "Cause fear on turn they charge."
+          }
+        ],
+        "champion": {
+          "name": "Kislev Captain",
+          "profileId": "kislev_captain",
+          "cost": {
+            "type": "formula",
+            "base": 30,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "musician": {
+            "default": true,
+            "cost": 0
+          },
+          "standardBearer": {
+            "default": false,
+            "cost": 10
+          }
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        },
+        "unitMount": {
+          "mountId": "warhorse",
+          "name": "Warhorse",
+          "quantity": "per_model",
+          "equipment": []
+        }
+      },
+      {
+        "id": "kislev_kossars",
+        "name": "Kislev Kossars",
+        "section": "regiments",
+        "profileId": "fighter",
+        "points": {
+          "type": "per_model",
+          "value": 9
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "bow",
+          "double_handed_weapon",
+          "light_armour"
+        ],
+        "tags": [
+          "regiment",
+          "auxiliary",
+          "kislev_regiment",
+          "rank_and_file"
+        ],
+        "rules": [],
+        "options": [],
+        "champion": {
+          "name": "Fighter Champion",
+          "profileId": "fighter_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "kislev_horse_archers",
+        "name": "Kislev Horse Archers",
+        "section": "regiments",
+        "profileId": "fighter",
+        "points": {
+          "type": "per_model",
+          "value": 10
+        },
+        "unitType": "cavalry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "bow"
+        ],
+        "tags": [
+          "regiment",
+          "auxiliary",
+          "kislev_regiment",
+          "fast_cavalry",
+          "skirmisher"
+        ],
+        "rules": [
+          "Rides normal horses."
+        ],
+        "options": [],
+        "champion": {
+          "name": "Fighter Champion",
+          "profileId": "fighter_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "musician": {
+            "default": true,
+            "cost": 0
+          },
+          "standardBearer": {
+            "default": false,
+            "cost": 10
+          }
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        },
+        "unitMount": {
+          "mountId": "normal_horse",
+          "name": "Normal Horse",
+          "quantity": "per_model",
+          "equipment": []
+        }
+      },
+      {
+        "id": "free_company",
+        "name": "Free Company",
+        "section": "regiments",
+        "profileId": "fighter",
+        "points": {
+          "type": "per_model",
+          "value": 5.5
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "additional_hand_weapon"
+        ],
+        "tags": [
+          "regiment",
+          "auxiliary"
+        ],
+        "rules": [],
+        "options": [
+          {
+            "id": "light_armour",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "light_armour"
+            ]
+          },
+          {
+            "id": "state_troop_training",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsTags": [
+              "state_troops",
+              "detachment_eligible"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Fighter Champion",
+          "profileId": "fighter_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "halfling_bowmen",
+        "name": "Halfling Bowmen",
+        "section": "regiments",
+        "profileId": "halfling",
+        "points": {
+          "type": "per_model",
+          "value": 7
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "bow"
+        ],
+        "tags": [
+          "regiment",
+          "auxiliary",
+          "halfling_regiment",
+          "skirmisher"
+        ],
+        "rules": [
+          "Foresters: move through woods without movement penalties."
+        ],
+        "options": [],
+        "champion": {
+          "name": "Halfling Champion",
+          "profileId": "halfling_champion",
+          "cost": {
+            "type": "formula",
+            "base": 10,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "musician": {
+            "default": true,
+            "cost": 0
+          },
+          "standardBearer": {
+            "allowed": false
+          }
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "halfling_militia",
+        "name": "Halfling Militia",
+        "section": "regiments",
+        "profileId": "halfling",
+        "points": {
+          "type": "per_model",
+          "value": 2.5
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "light_armour",
+          "shield"
+        ],
+        "tags": [
+          "regiment",
+          "auxiliary",
+          "halfling_regiment",
+          "rank_and_file"
+        ],
+        "rules": [
+          "Foresters: move through woods without movement penalties."
+        ],
+        "options": [
+          {
+            "id": "spears",
+            "cost": {
+              "type": "per_model",
+              "value": 0.5
+            },
+            "addsEquipment": [
+              "spear"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Halfling Champion",
+          "profileId": "halfling_champion",
+          "cost": {
+            "type": "formula",
+            "base": 10,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "ogre_mercenaries",
+        "name": "Ogre Mercenaries",
+        "section": "regiments",
+        "profileId": "ogre",
+        "points": {
+          "type": "per_model",
+          "value": 24
+        },
+        "unitType": "monstrous_regiment",
+        "size": {
+          "minimum": 3,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "light_armour"
+        ],
+        "tags": [
+          "regiment",
+          "auxiliary"
+        ],
+        "rules": [
+          "Cause fear."
+        ],
+        "options": [
+          {
+            "id": "heavy_armour",
+            "type": "replacement",
+            "cost": {
+              "type": "per_model",
+              "value": 4
+            },
+            "removesEquipment": [
+              "light_armour"
+            ],
+            "addsEquipment": [
+              "heavy_armour"
+            ]
+          },
+          {
+            "id": "weapons",
+            "type": "choice_group",
+            "maximum": 1,
+            "choices": [
+              {
+                "id": "additional_hand_weapons",
+                "cost": {
+                  "type": "per_model",
+                  "value": 6
+                },
+                "addsEquipment": [
+                  "additional_hand_weapon"
+                ]
+              },
+              {
+                "id": "double_handed_weapons",
+                "cost": {
+                  "type": "per_model",
+                  "value": 8
+                },
+                "addsEquipment": [
+                  "double_handed_weapon"
+                ]
+              },
+              {
+                "id": "flails",
+                "cost": {
+                  "type": "per_model",
+                  "value": 8
+                },
+                "addsEquipment": [
+                  "flail"
+                ]
+              }
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Ogre Champion",
+          "profileId": "ogre_champion",
+          "cost": {
+            "type": "formula",
+            "base": 50,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "musician": {
+            "default": true,
+            "cost": 0
+          },
+          "standardBearer": {
+            "default": false,
+            "cost": 10
+          }
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      },
+      {
+        "id": "dwarf_warriors",
+        "name": "Dwarf Warriors",
+        "section": "regiments",
+        "profileId": "dwarf",
+        "points": {
+          "type": "per_model",
+          "value": 8
+        },
+        "unitType": "infantry",
+        "size": {
+          "minimum": 5,
+          "maximum": null
+        },
+        "selection": {},
+        "equipment": [
+          "light_armour"
+        ],
+        "tags": [
+          "regiment",
+          "auxiliary",
+          "rank_and_file"
+        ],
+        "rules": [
+          "Subject to Dwarf special rules from the Dwarfs army book."
+        ],
+        "options": [
+          {
+            "id": "shields",
+            "cost": {
+              "type": "per_model",
+              "value": 1
+            },
+            "addsEquipment": [
+              "shield"
+            ]
+          },
+          {
+            "id": "heavy_armour",
+            "type": "replacement",
+            "cost": {
+              "type": "per_model",
+              "value": 2
+            },
+            "removesEquipment": [
+              "light_armour"
+            ],
+            "addsEquipment": [
+              "heavy_armour"
+            ]
+          },
+          {
+            "id": "melee_weapon",
+            "type": "choice_group",
+            "maximum": 1,
+            "choices": [
+              {
+                "id": "spears",
+                "cost": {
+                  "type": "per_model",
+                  "value": 2
+                },
+                "addsEquipment": [
+                  "spear"
+                ]
+              },
+              {
+                "id": "double_handed_weapons",
+                "cost": {
+                  "type": "per_model",
+                  "value": 3
+                },
+                "addsEquipment": [
+                  "double_handed_weapon"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "crossbows",
+            "cost": {
+              "type": "per_model",
+              "value": 4
+            },
+            "addsEquipment": [
+              "crossbow"
+            ],
+            "requirements": [
+              "no_other_weapons",
+              "no_shields"
+            ]
+          }
+        ],
+        "champion": {
+          "name": "Dwarf Champion",
+          "profileId": "dwarf_champion",
+          "cost": {
+            "type": "formula",
+            "base": 20,
+            "add": {
+              "type": "unit_model_cost"
+            }
+          },
+          "inheritsUnitEquipment": true,
+          "magicItems": {
+            "maximum": 1,
+            "allowedPools": [
+              "common",
+              "empire"
+            ]
+          },
+          "countsTowardUnitSize": true,
+          "pointsCategory": "characters"
+        },
+        "command": {
+          "useGlobalDefaults": true
+        },
+        "magicBanner": {
+          "allowed": "standard_bearer_present",
+          "allowedPools": [
+            "common",
+            "empire"
+          ]
+        }
+      }
+    ],
+    "warMachines": [
+      {
+        "id": "war_wagon",
+        "name": "War Wagon",
+        "section": "war_machines",
+        "profileId": "war_wagon",
+        "points": {
+          "type": "fixed",
+          "value": 100
+        },
+        "selection": {},
+        "tags": [
+          "war_machine",
+          "chariot"
+        ],
+        "composition": {
+          "default": "war_machines",
+          "rules": [
+            {
+              "when": {
+                "instanceNumber": 1
+              },
+              "category": "regiments"
+            }
+          ]
+        },
+        "rules": [
+          "Large chariot pulled by two barded Warhorses and six Engineers.",
+          "Crew carries one each of Hochland long rifle, repeating handgun, blunderbuss, man catcher, hook halberd and ball and chain."
+        ],
+        "crew": {
+          "baseCount": 6,
+          "profileId": "engineer",
+          "name": "Engineers"
+        }
+      },
+      {
+        "id": "mortar",
+        "name": "Mortar",
+        "section": "war_machines",
+        "profileId": "war_machine",
+        "points": {
+          "type": "fixed",
+          "value": 80
+        },
+        "tags": [
+          "war_machine"
+        ],
+        "options": [
+          {
+            "id": "extra_crew",
+            "type": "quantity",
+            "minimum": 0,
+            "maximum": 2,
+            "cost": {
+              "type": "per_model",
+              "value": 5
+            },
+            "profileId": "state_trooper"
+          }
+        ],
+        "rules": [
+          "Works exactly like a small stone thrower.",
+          "Crewed by three State Troopers."
+        ],
+        "crew": {
+          "baseCount": 3,
+          "profileId": "state_trooper",
+          "name": "State Troopers",
+          "extraCrewOptionId": "extra_crew"
+        }
+      },
+      {
+        "id": "cannon",
+        "name": "Cannon",
+        "section": "war_machines",
+        "profileId": "war_machine",
+        "points": {
+          "type": "fixed",
+          "value": 95
+        },
+        "tags": [
+          "war_machine"
+        ],
+        "options": [
+          {
+            "id": "extra_crew",
+            "type": "quantity",
+            "minimum": 0,
+            "maximum": 2,
+            "cost": {
+              "type": "per_model",
+              "value": 5
+            },
+            "profileId": "state_trooper"
+          }
+        ],
+        "rules": [
+          "Normal cannon.",
+          "Crewed by three State Troopers."
+        ],
+        "crew": {
+          "baseCount": 3,
+          "profileId": "state_trooper",
+          "name": "State Troopers",
+          "extraCrewOptionId": "extra_crew"
+        }
+      },
+      {
+        "id": "great_cannon",
+        "name": "Great Cannon",
+        "section": "war_machines",
+        "profileId": "war_machine",
+        "points": {
+          "type": "fixed",
+          "value": 110
+        },
+        "tags": [
+          "war_machine"
+        ],
+        "options": [
+          {
+            "id": "extra_crew",
+            "type": "quantity",
+            "minimum": 0,
+            "maximum": 2,
+            "cost": {
+              "type": "per_model",
+              "value": 5
+            },
+            "profileId": "state_trooper"
+          }
+        ],
+        "rules": [
+          "Great cannon.",
+          "Crewed by three State Troopers."
+        ],
+        "crew": {
+          "baseCount": 3,
+          "profileId": "state_trooper",
+          "name": "State Troopers",
+          "extraCrewOptionId": "extra_crew"
+        }
+      },
+      {
+        "id": "helblaster",
+        "name": "Helblaster Volley Gun",
+        "section": "war_machines",
+        "profileId": "war_machine",
+        "points": {
+          "type": "fixed",
+          "value": 110
+        },
+        "tags": [
+          "war_machine"
+        ],
+        "options": [
+          {
+            "id": "extra_crew",
+            "type": "quantity",
+            "minimum": 0,
+            "maximum": 2,
+            "cost": {
+              "type": "per_model",
+              "value": 5
+            },
+            "profileId": "state_trooper"
+          }
+        ],
+        "rules": [
+          "Range 24 inches; nine barrels; cannot be reloaded.",
+          "Crewed by three State Troopers."
+        ],
+        "crew": {
+          "baseCount": 3,
+          "profileId": "state_trooper",
+          "name": "State Troopers",
+          "extraCrewOptionId": "extra_crew"
+        }
+      },
+      {
+        "id": "halfling_hot_pot",
+        "name": "Halfling Hot-Pot",
+        "section": "war_machines",
+        "profileId": "war_machine",
+        "points": {
+          "type": "fixed",
+          "value": 50
+        },
+        "selection": {
+          "maximum": 1
+        },
+        "tags": [
+          "war_machine",
+          "auxiliary"
+        ],
+        "requirements": [
+          {
+            "type": "army_contains",
+            "match": {
+              "tag": "halfling_regiment"
+            },
+            "minimum": 1
+          }
+        ],
+        "options": [
+          {
+            "id": "extra_crew",
+            "type": "quantity",
+            "minimum": 0,
+            "maximum": 2,
+            "cost": {
+              "type": "per_model",
+              "value": 5
+            },
+            "profileId": "halfling"
+          }
+        ],
+        "rules": [
+          "Crewed by three Halflings.",
+          "Stone-thrower style weapon; range 36 inches, S5, normal armour save but no regeneration save."
+        ],
+        "crew": {
+          "baseCount": 3,
+          "profileId": "halfling",
+          "name": "Halflings",
+          "extraCrewOptionId": "extra_crew"
+        }
+      },
+      {
+        "id": "steam_tank",
+        "name": "Steam Tank",
+        "section": "war_machines",
+        "profileId": "steam_tank",
+        "points": {
+          "type": "fixed",
+          "value": 230
+        },
+        "selection": {
+          "maximum": 8
+        },
+        "tags": [
+          "war_machine",
+          "chariot"
+        ],
+        "sourceNotes": [
+          "Heading lists 230 pts. Later text states the default Steam Tank with small cannon and repeating-pistol engineer is 250 pts."
+        ],
+        "options": [
+          {
+            "id": "steam_cannon",
+            "cost": {
+              "type": "fixed",
+              "value": 10
+            },
+            "addsEquipment": [
+              "steam_cannon"
+            ]
+          },
+          {
+            "id": "engineer_weapon",
+            "type": "choice_group",
+            "maximum": 1,
+            "cost": {
+              "type": "fixed",
+              "value": 10
+            },
+            "choices": [
+              "repeating_handgun",
+              "hochland_long_rifle"
+            ],
+            "default": "repeating_pistol"
+          },
+          {
+            "id": "remove_small_cannon",
+            "cost": {
+              "type": "fixed",
+              "value": -50
+            },
+            "removesEquipment": [
+              "small_cannon"
+            ]
+          },
+          {
+            "id": "fighting_platform",
+            "type": "replacement",
+            "cost": {
+              "type": "fixed",
+              "value": 50
+            },
+            "removesEquipment": [
+              "small_cannon",
+              "engineer",
+              "steam_cannon_option"
+            ],
+            "addsRules": [
+              "war_wagon_fighting_platform"
+            ]
+          }
+        ],
+        "defaultEquipment": [
+          "small_cannon",
+          "engineer",
+          "repeating_pistol"
+        ],
+        "rules": [
+          "Large chariot; terror; unbreakable.",
+          "Uses Steam Points (0-5) and its own boiler table."
+        ],
+        "crew": {
+          "baseCount": 1,
+          "profileId": "engineer",
+          "name": "Engineer",
+          "conditionalCrew": [
+            {
+              "whenOptionSelected": "fighting_platform",
+              "baseCount": 6,
+              "profileId": "engineer",
+              "name": "Engineers"
+            }
+          ]
+        }
+      }
+    ],
+    "specialCharacters": [
+      {
+        "id": "kurt_helborg",
+        "name": "Reiksmarshall Captain Kurt Helborg",
+        "section": "special_characters",
+        "profileId": "kurt_helborg",
+        "points": {
+          "type": "fixed",
+          "value": 125
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "runefang"
+        ],
+        "fixedEquipment": [
+          "full_plate_armour",
+          "shield"
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 20,
+            "freeOptions": [
+              "barding"
+            ]
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 2,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [],
+        "requirements": [],
+        "mustBeGeneral": false,
+        "rules": []
+      },
+      {
+        "id": "adelbrand_ludenhof",
+        "name": "Adelbrand Ludenhof, Elector Count of Hochland",
+        "section": "special_characters",
+        "profileId": "elector_count",
+        "points": {
+          "type": "fixed",
+          "value": 100
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "runefang"
+        ],
+        "fixedEquipment": [
+          "full_plate_armour",
+          "hawk"
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0,
+            "freeOptions": [
+              "barding"
+            ]
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 0,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [],
+        "requirements": [],
+        "mustBeGeneral": false,
+        "rules": [
+          "Enemies in base contact suffer -1 to hit Adelbrand in melee."
+        ]
+      },
+      {
+        "id": "marius_leitdorf",
+        "name": "Marius Leitdorf, Elector Count of Averland",
+        "section": "special_characters",
+        "profileId": "elector_count",
+        "points": {
+          "type": "fixed",
+          "value": 120
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "runefang"
+        ],
+        "fixedEquipment": [
+          "full_plate_armour",
+          "additional_hand_weapon"
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0,
+            "freeOptions": [
+              "barding"
+            ]
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 0,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [],
+        "requirements": [],
+        "mustBeGeneral": false,
+        "rules": [
+          "Frenzy.",
+          "Makes six attacks with Runefang and one with additional hand weapon."
+        ]
+      },
+      {
+        "id": "boris_todbringer",
+        "name": "Boris Todbringer, Elector Count of Middenland",
+        "section": "special_characters",
+        "profileId": "elector_count",
+        "points": {
+          "type": "fixed",
+          "value": 120
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "runefang",
+          "talisman_ulric"
+        ],
+        "fixedEquipment": [
+          "full_plate_armour",
+          "shield"
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0,
+            "freeOptions": [
+              "barding"
+            ]
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 0,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [],
+        "requirements": [],
+        "mustBeGeneral": false,
+        "rules": []
+      },
+      {
+        "id": "valmir_von_raukov",
+        "name": "Valmir von Raukov, Elector Count of Ostland",
+        "section": "special_characters",
+        "profileId": "elector_count",
+        "points": {
+          "type": "fixed",
+          "value": 120
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "runefang",
+          "dragon_bow"
+        ],
+        "fixedEquipment": [
+          "full_plate_armour",
+          "shield"
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0,
+            "freeOptions": [
+              "barding"
+            ]
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 0,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [],
+        "requirements": [],
+        "mustBeGeneral": false,
+        "rules": []
+      },
+      {
+        "id": "supreme_patriarch",
+        "name": "The Supreme Patriarch of the Colleges of Magic",
+        "section": "special_characters",
+        "profileId": "supreme_patriarch",
+        "points": {
+          "type": "fixed",
+          "value": 300
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "staff_of_volans_special"
+        ],
+        "fixedEquipment": [],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0,
+            "freeOptions": [
+              "barding"
+            ]
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 3,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item",
+            "arcane_item",
+            "familiar"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [],
+        "requirements": [],
+        "mustBeGeneral": false,
+        "rules": [
+          "Wizard Lord using Bright Magic.",
+          "Staff of Volans: once per game cast a spell for free as Total Power."
+        ]
+      },
+      {
+        "id": "grand_theogonist_volkmar",
+        "name": "Grand Theogonist Volkmar",
+        "section": "special_characters",
+        "profileId": "volkmar",
+        "points": {
+          "type": "fixed",
+          "value": 300
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "horn_sigismund_special",
+          "jade_griffon_special",
+          "staff_command_special"
+        ],
+        "fixedEquipment": [
+          "war_altar"
+        ],
+        "mountOptions": [],
+        "magicItems": {
+          "additionalMaximum": 0,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [],
+        "requirements": [],
+        "mustBeGeneral": false,
+        "rules": [
+          "Unbreakable.",
+          "Staff of Command makes Volkmar a level 2 wizard using any College Magic and High Magic."
+        ]
+      },
+      {
+        "id": "karl_franz",
+        "name": "The Emperor Karl Franz",
+        "section": "special_characters",
+        "profileId": "karl_franz",
+        "points": {
+          "type": "fixed",
+          "value": 260
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "imperial_crown",
+          "hammer_sigmar",
+          "silver_seal"
+        ],
+        "fixedEquipment": [
+          "full_plate_armour",
+          "shield"
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 20,
+            "freeOptions": [
+              "barding"
+            ]
+          },
+          {
+            "mountId": "griffon",
+            "cost": 175
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 1,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [
+          "magnus_the_pious"
+        ],
+        "requirements": [],
+        "mustBeGeneral": true,
+        "rules": []
+      },
+      {
+        "id": "magnus_the_pious",
+        "name": "Magnus the Pious",
+        "section": "special_characters",
+        "profileId": "magnus",
+        "points": {
+          "type": "fixed",
+          "value": 240
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [],
+        "fixedEquipment": [
+          "full_plate_armour",
+          "shield"
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 40,
+            "freeOptions": [
+              "barding"
+            ],
+            "addsEquipment": [
+              "lance"
+            ]
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 0,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [
+          "karl_franz"
+        ],
+        "requirements": [],
+        "mustBeGeneral": true,
+        "rules": [
+          "Unbreakable; regiment joined becomes unbreakable.",
+          "Natural dispel 4+.",
+          "May re-roll armour saves.",
+          "May forfeit normal attacks for one S10 hit causing 1D6 wounds."
+        ]
+      },
+      {
+        "id": "ludwig_schwarzhelm",
+        "name": "Ludwig Schwarzhelm",
+        "section": "special_characters",
+        "profileId": "ludwig_schwarzhelm",
+        "points": {
+          "type": "fixed",
+          "value": 140
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "sword_justice"
+        ],
+        "fixedEquipment": [
+          "full_plate_armour"
+        ],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 15,
+            "freeOptions": [
+              "barding"
+            ]
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 1,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item",
+            "magic_banner"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [],
+        "requirements": [],
+        "mustBeGeneral": false,
+        "rules": [
+          "Battle Standard Bearer."
+        ]
+      },
+      {
+        "id": "tzarina_katarin",
+        "name": "Tzarina Katarin, the Ice Queen of Kislev",
+        "section": "special_characters",
+        "profileId": "tzarina_katarin",
+        "points": {
+          "type": "fixed",
+          "value": 200
+        },
+        "selection": {
+          "maximum": 1,
+          "unique": true
+        },
+        "fixedMagicItems": [
+          "fearfrost"
+        ],
+        "fixedEquipment": [],
+        "mountOptions": [
+          {
+            "mountId": "warhorse",
+            "cost": 0
+          }
+        ],
+        "magicItems": {
+          "additionalMaximum": 2,
+          "allowedPools": [
+            "common",
+            "empire"
+          ],
+          "allowedCategories": [
+            "magic_weapon",
+            "magic_armour",
+            "enchanted_item",
+            "arcane_item",
+            "familiar"
+          ],
+          "rules": [
+            "Special characters may only take additional magic items where their entry explicitly permits them.",
+            "Additional items still follow normal category and mundane-counterpart restrictions."
+          ]
+        },
+        "excludes": [],
+        "requirements": [
+          {
+            "type": "army_contains",
+            "match": {
+              "tag": "kislev_regiment"
+            },
+            "minimum": 1
+          }
+        ],
+        "mustBeGeneral": false,
+        "rules": [
+          "Level 3 wizard using the Lore of Ice."
+        ]
+      }
+    ],
+    "specialCharacterOnlyItems": [
+      {
+        "id": "staff_of_volans_special",
+        "name": "Staff of Volans",
+        "owner": "supreme_patriarch",
+        "rules": "Once per game cast a spell for free as Total Power."
+      },
+      {
+        "id": "horn_sigismund_special",
+        "name": "Horn of Sigismund",
+        "owner": "grand_theogonist_volkmar",
+        "rules": "Causes terror."
+      },
+      {
+        "id": "jade_griffon_special",
+        "name": "The Jade Griffon",
+        "owner": "grand_theogonist_volkmar",
+        "rules": "After each phase, Volkmar recovers all lost wounds."
+      },
+      {
+        "id": "staff_command_special",
+        "name": "Staff of Command",
+        "owner": "grand_theogonist_volkmar",
+        "rules": "Bearer becomes a level 2 wizard using any College Magic and High Magic."
+      }
+    ]
+  }
+}

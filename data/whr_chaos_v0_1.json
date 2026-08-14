@@ -1,0 +1,80 @@
+{
+  "meta": {
+    "schemaVersion": "0.1",
+    "game": "Warhammer Renaissance",
+    "source": "WHR Armies 2026-27 final version",
+    "faction": "Chaos",
+    "status": "skeleton",
+    "notes": [
+      "Skeleton data file for WHR Army Builder.",
+      "Populate this file from the uploaded Armies Compendium before marking the faction available."
+    ]
+  },
+  "globalArmyRules": {
+    "minimumRegimentPercentage": 50,
+    "minimumRegimentModelPoints": 50,
+    "minimumUnitSize": {
+      "infantry": 5,
+      "cavalry": 5,
+      "monstrous_regiment": 3
+    },
+    "specialCharactersUnique": true,
+    "magicItemsUnique": true,
+    "general": {
+      "mustBeAmongHighestLeadership": true,
+      "battleStandardBearerEligible": false,
+      "regimentalChampionEligible": false
+    },
+    "command": {
+      "normalRegiment": {
+        "musician": {
+          "default": true,
+          "cost": 0
+        },
+        "standardBearer": {
+          "default": true,
+          "cost": 0
+        }
+      },
+      "fastCavalry": {
+        "musician": {
+          "default": true,
+          "cost": 0
+        },
+        "standardBearer": {
+          "default": false,
+          "cost": 10
+        }
+      },
+      "monstrousRegiment": {
+        "musician": {
+          "default": true,
+          "cost": 0
+        },
+        "standardBearer": {
+          "default": false,
+          "cost": 10
+        }
+      },
+      "skirmisher": {
+        "standardBearerAllowed": false
+      }
+    }
+  },
+  "equipment": [],
+  "profiles": [],
+  "mounts": [],
+  "commonMagicItems": [],
+  "factionMagicItems": [],
+  "faction": {
+    "id": "chaos",
+    "name": "Chaos",
+    "armyWideRules": [],
+    "systems": {},
+    "characters": [],
+    "regiments": [],
+    "warMachines": [],
+    "specialCharacters": [],
+    "specialCharacterOnlyItems": []
+  }
+}
