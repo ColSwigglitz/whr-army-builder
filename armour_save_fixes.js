@@ -64,6 +64,14 @@
     for (const id of unit.fixedEquipment || []) ids.add(id);
     for (const id of unit.unitMount?.equipment || []) ids.add(id);
 
+    // Character mount options can grant equipment such as barding.
+    // Only apply equipment from the currently selected mount option.
+    if (entry.mount) {
+      const selectedMount = (unit.mountOptions || []).find(m => m.mountId === entry.mount);
+      for (const id of selectedMount?.freeOptions || []) ids.add(id);
+      for (const id of selectedMount?.addsEquipment || []) ids.add(id);
+    }
+
     return [...ids];
   };
 
