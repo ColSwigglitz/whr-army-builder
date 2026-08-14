@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "schemaVersion": "0.1",
+    "game": "Warhammer Renaissance",
+    "source": "WHR Armies 2026-27 final version",
+    "scope": "Shared Undead data"
+  },
+  "armyWideRules": [
+    "All undead models are immune to psychology, immune to poison, and cause fear.",
+    "Undead models may only march while within 12 inches of the general, except undead characters and ethereal models as described in the army rules.",
+    "The only charge reaction available to undead models is Hold.",
+    "Undead models are either unstable, subject to the crumble rule, or unbreakable.",
+    "If the general is slain, undead units crumble immediately unless protected by an eligible character-led-unit exception.",
+    "Ethereal models are unstable, skirmish, may always march, move through solid objects and can only be harmed by magical attacks.",
+    "Wights always carry a Wight-Blade unless replaced by another magic weapon; Wraiths always carry a Wraith-Weapon unless replaced by another magic weapon."
+  ],
+  "equipment": [
+    {"id":"shield","name":"Shield","type":"armour"},
+    {"id":"light_armour","name":"Light Armour","type":"armour"},
+    {"id":"heavy_armour","name":"Heavy Armour","type":"armour"},
+    {"id":"barding","name":"Barding","type":"mount_armour"},
+    {"id":"flail","name":"Flail","type":"melee_weapon"},
+    {"id":"additional_hand_weapon","name":"Additional Hand Weapon","type":"melee_weapon"},
+    {"id":"spear","name":"Spear","type":"melee_weapon"},
+    {"id":"halberd","name":"Halberd","type":"melee_weapon"},
+    {"id":"double_handed_weapon","name":"Double Handed Weapon","type":"melee_weapon"},
+    {"id":"lance","name":"Lance","type":"melee_weapon"},
+    {"id":"wight_blade","name":"Wight-Blade","type":"magic_weapon","rules":"Magic hand weapon; each wound causes 1D3 wounds."},
+    {"id":"wraith_weapon","name":"Wraith-Weapon","type":"magic_weapon","rules":"Magic double handed weapon; no armour save allowed."}
+  ],
+  "profiles": [
+    {"id":"necromancer_lord","name":"Necromancer Lord","stats":{"M":4,"WS":3,"BS":3,"S":4,"T":4,"W":4,"I":6,"A":3,"Ld":8}},
+    {"id":"master_necromancer","name":"Master Necromancer","stats":{"M":4,"WS":3,"BS":3,"S":4,"T":4,"W":3,"I":5,"A":2,"Ld":7}},
+    {"id":"necromancer_champion","name":"Necromancer Champion","stats":{"M":4,"WS":3,"BS":3,"S":4,"T":4,"W":2,"I":4,"A":1,"Ld":7}},
+    {"id":"necromancer","name":"Necromancer","stats":{"M":4,"WS":3,"BS":3,"S":3,"T":4,"W":1,"I":4,"A":1,"Ld":7}},
+    {"id":"vampire_lord","name":"Vampire Lord","stats":{"M":6,"WS":8,"BS":6,"S":7,"T":6,"W":4,"I":9,"A":4,"Ld":10}},
+    {"id":"vampire_count","name":"Vampire Count","stats":{"M":6,"WS":7,"BS":5,"S":7,"T":6,"W":3,"I":8,"A":3,"Ld":9}},
+    {"id":"vampire_bsb","name":"Vampire BSB","stats":{"M":6,"WS":6,"BS":4,"S":7,"T":5,"W":3,"I":7,"A":2,"Ld":8}},
+    {"id":"wight_hero","name":"Wight Hero","stats":{"M":4,"WS":5,"BS":0,"S":5,"T":5,"W":2,"I":5,"A":3,"Ld":9}},
+    {"id":"wight_bsb","name":"Wight BSB","stats":{"M":4,"WS":4,"BS":0,"S":5,"T":4,"W":2,"I":4,"A":2,"Ld":8}},
+    {"id":"manticore","name":"Manticore","stats":{"M":6,"WS":6,"BS":0,"S":7,"T":7,"W":5,"I":4,"A":4,"Ld":8}},
+    {"id":"undead_steed","name":"Undead Steed","stats":{"M":8,"WS":2,"BS":0,"S":3,"T":3,"W":1,"I":2,"A":1,"Ld":5}},
+    {"id":"winged_nightmare","name":"Winged Nightmare","stats":{"M":8,"WS":3,"BS":0,"S":5,"T":5,"W":3,"I":2,"A":3,"Ld":5}},
+    {"id":"zombie_dragon","name":"Zombie Dragon","stats":{"M":6,"WS":4,"BS":0,"S":7,"T":7,"W":7,"I":2,"A":7,"Ld":5}}
+  ],
+  "mounts": [
+    {"id":"undead_steed","name":"Undead Steed","profileId":"undead_steed","type":"steed","rules":["Fear"],"displayProfileOnRoster":true},
+    {"id":"winged_nightmare","name":"Winged Nightmare","profileId":"winged_nightmare","type":"small_monster","rules":["Fear","Fly"],"displayProfileOnRoster":true},
+    {"id":"manticore","name":"Manticore","profileId":"manticore","type":"large_monster","rules":["Terror","Fly","Living"],"displayProfileOnRoster":true},
+    {"id":"zombie_dragon","name":"Zombie Dragon","profileId":"zombie_dragon","type":"large_monster","rules":["Terror","Fly","4+ armour save","Enemies in base contact suffer -1 to hit in melee","Breath attack wounds on 4+ with no armour save","Crumbles if rider is slain"],"displayProfileOnRoster":true}
+  ]
+}
