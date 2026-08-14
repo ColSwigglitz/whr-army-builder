@@ -1,0 +1,136 @@
+{
+  "meta": {
+    "schemaVersion": "0.1",
+    "game": "Warhammer Renaissance",
+    "source": "WHR Armies 2026-27 final version",
+    "faction": "Vampire Counts",
+    "status": "in_progress",
+    "sharedDataFile": "whr_undead_shared_v0_1.json"
+  },
+  "globalArmyRules": {
+    "minimumRegimentPercentage": 50,
+    "minimumRegimentModelPoints": 50,
+    "minimumUnitSize": {"infantry":5,"cavalry":5,"monstrous_regiment":3},
+    "specialCharactersUnique": true,
+    "magicItemsUnique": true,
+    "general": {"mustBeAmongHighestLeadership":true,"battleStandardBearerEligible":false,"regimentalChampionEligible":false},
+    "command": {
+      "normalRegiment":{"musician":{"default":true,"cost":0},"standardBearer":{"default":true,"cost":0}},
+      "fastCavalry":{"musician":{"default":true,"cost":0},"standardBearer":{"default":false,"cost":10}},
+      "monstrousRegiment":{"musician":{"default":true,"cost":0},"standardBearer":{"default":false,"cost":10}},
+      "skirmisher":{"standardBearerAllowed":false}
+    }
+  },
+  "equipment": [],
+  "profiles": [],
+  "mounts": [],
+  "commonMagicItems": [],
+  "factionMagicItems": [],
+  "faction": {
+    "id": "vampire_counts",
+    "name": "Vampire Counts",
+    "armyWideRules": [
+      "Uses the shared Undead army-wide rules.",
+      "All Vampires in the army must belong to the same bloodline.",
+      "Each bloodline power is unique within the army, like a magic item, but is not cancelled by effects that cancel magic items.",
+      "The army general does not have to be a Vampire, and a Vampire Counts army may contain no Vampires."
+    ],
+    "systems": {
+      "sharedUndeadData": "whr_undead_shared_v0_1.json",
+      "bloodline": {
+        "requiredWhenVampiresPresent": true,
+        "singleChoiceArmyWide": true,
+        "choices": [
+          {"id":"von_carstein","name":"Von Carstein","exclusiveUnit":"peasant_levy"},
+          {"id":"necrarch","name":"Necrarch","exclusiveUnits":["unridden_zombie_dragon","rat_swarms"]},
+          {"id":"blood_dragon","name":"Blood Dragon","exclusiveUnit":"vampire_knights"},
+          {"id":"lahmian","name":"Lahmian","exclusiveUnit":"swains"},
+          {"id":"strigoi","name":"Strigoi","exclusiveUnit":"ghasts"}
+        ]
+      }
+    },
+    "characters": [
+      {
+        "id":"vampire_lord","name":"Vampire Lord","section":"characters","profileId":"vampire_lord",
+        "points":{"type":"fixed","value":220},
+        "tags":["character","vampire","undead","crumble"],
+        "equipmentOptions":[
+          {"id":"armour","type":"choice_group","maximum":1,"cost":0,"choices":["light_armour","heavy_armour"],"alsoMayTake":["shield"]},
+          {"id":"melee_weapon","type":"choice_group","maximum":1,"cost":0,"choices":["flail","additional_hand_weapon","spear","halberd","double_handed_weapon","lance"]}
+        ],
+        "mountOptions":[
+          {"mountId":"undead_steed","cost":51,"freeOptions":["barding"]},
+          {"mountId":"winged_nightmare","cost":105},
+          {"mountId":"zombie_dragon","cost":345}
+        ],
+        "wizardUpgrade":{"maximumLevels":2,"costPerLevel":60,"lores":["Necromancy","Dark Magic"],"requirements":["not_wearing_armour","no_two_handed_weapon"]},
+        "magicItems":{"maximum":2,"allowedPools":["common","undead"],"allowedCategories":["magic_weapon","magic_armour","enchanted_item"]},
+        "bloodlinePowers":{"maximum":2,"strigoiMaximum":4}
+      },
+      {
+        "id":"vampire_count","name":"Vampire Count","section":"characters","profileId":"vampire_count",
+        "points":{"type":"fixed","value":154},
+        "tags":["character","vampire","undead","crumble"],
+        "equipmentOptions":[
+          {"id":"armour","type":"choice_group","maximum":1,"cost":0,"choices":["light_armour","heavy_armour"],"alsoMayTake":["shield"]},
+          {"id":"melee_weapon","type":"choice_group","maximum":1,"cost":0,"choices":["flail","additional_hand_weapon","spear","halberd","double_handed_weapon","lance"]}
+        ],
+        "mountOptions":[
+          {"mountId":"undead_steed","cost":36,"freeOptions":["barding"]},
+          {"mountId":"winged_nightmare","cost":90},
+          {"mountId":"zombie_dragon","cost":330}
+        ],
+        "wizardUpgrade":{"maximumLevels":1,"costPerLevel":60,"lores":["Necromancy","Dark Magic"],"requirements":["not_wearing_armour","no_two_handed_weapon"]},
+        "combinedMagicAndBloodlineLimit":2
+      },
+      {
+        "id":"wight_hero","name":"Wight Hero","section":"characters","profileId":"wight_hero",
+        "points":{"type":"fixed","value":82},
+        "tags":["character","wight","undead","crumble"],
+        "equipment":["wight_blade"],
+        "equipmentOptions":[
+          {"id":"armour","type":"choice_group","maximum":1,"cost":0,"choices":["light_armour","heavy_armour"],"alsoMayTake":["shield"]},
+          {"id":"melee_weapon","type":"choice_group","maximum":1,"cost":0,"choices":["flail","additional_hand_weapon","spear","halberd","double_handed_weapon","lance"]}
+        ],
+        "mountOptions":[
+          {"mountId":"undead_steed","cost":22,"freeOptions":["barding"]},
+          {"mountId":"winged_nightmare","cost":76},
+          {"mountId":"zombie_dragon","cost":316}
+        ],
+        "magicItems":{"maximum":2,"allowedPools":["common","undead"]}
+      },
+      {
+        "id":"necromancer_lord","name":"Necromancer Lord (Level 4)","section":"characters","profileId":"necromancer_lord",
+        "points":{"type":"fixed","value":240},"tags":["character","living","wizard"],
+        "wizard":{"level":4,"lores":["Necromancy","Dark Magic"]},
+        "mountOptions":[{"mountId":"undead_steed","cost":0,"freeOptions":["barding"]},{"mountId":"manticore","cost":200}],
+        "magicItems":{"maximum":4,"allowedPools":["common","undead"],"allowedCategories":["magic_weapon","enchanted_item","arcane_item","familiar"]}
+      },
+      {
+        "id":"master_necromancer","name":"Master Necromancer (Level 3)","section":"characters","profileId":"master_necromancer",
+        "points":{"type":"fixed","value":170},"tags":["character","living","wizard"],
+        "wizard":{"level":3,"lores":["Necromancy","Dark Magic"]},
+        "mountOptions":[{"mountId":"undead_steed","cost":0,"freeOptions":["barding"]}],
+        "magicItems":{"maximum":3,"allowedPools":["common","undead"],"allowedCategories":["magic_weapon","enchanted_item","arcane_item","familiar"]}
+      },
+      {
+        "id":"necromancer_champion","name":"Necromancer Champion (Level 2)","section":"characters","profileId":"necromancer_champion",
+        "points":{"type":"fixed","value":110},"tags":["character","living","wizard"],
+        "wizard":{"level":2,"lores":["Necromancy","Dark Magic"]},
+        "mountOptions":[{"mountId":"undead_steed","cost":0,"freeOptions":["barding"]}],
+        "magicItems":{"maximum":2,"allowedPools":["common","undead"],"allowedCategories":["magic_weapon","enchanted_item","arcane_item","familiar"]}
+      },
+      {
+        "id":"necromancer","name":"Necromancer (Level 1)","section":"characters","profileId":"necromancer",
+        "points":{"type":"fixed","value":50},"tags":["character","living","wizard"],
+        "wizard":{"level":1,"lores":["Necromancy","Dark Magic"]},
+        "mountOptions":[{"mountId":"undead_steed","cost":0,"freeOptions":["barding"]}],
+        "magicItems":{"maximum":1,"allowedPools":["common","undead"],"allowedCategories":["magic_weapon","enchanted_item","arcane_item","familiar"]}
+      }
+    ],
+    "regiments": [],
+    "warMachines": [],
+    "specialCharacters": [],
+    "specialCharacterOnlyItems": []
+  }
+}
