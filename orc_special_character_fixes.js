@@ -38,7 +38,16 @@
       if (profileId) unit.profileId = profileId;
 
       if (unit.id === "skarsnik") {
-        unit.additionalProfileIds = ["gobbla_special"];
+        unit.additionalProfiles = [
+          { profileId:"gobbla_special", label:"Gobbla", notes:["Companion"] }
+        ];
+      }
+
+      if (unit.id === "grom") {
+        unit.additionalProfiles = [
+          { profileId:"heavy_chariot", label:"Heavy Wolf Chariot", notes:["Heavy chariot", "Scythed wheels"] },
+          { profileId:"giant_wolf", label:"3 Giant Wolves", notes:["Pulling the chariot"] }
+        ];
       }
     }
 
@@ -63,5 +72,42 @@
       console.error("Unable to patch Orcs & Goblins special-character profiles", error);
       return response;
     }
+  };
+
+  function isOrcArmy() {
+    return state.data?.faction?.id === "orcs_goblins";
+  }
+
+  function orcAdditionalProfileRows(unit) {
+    if (!unit?.additionalProfiles?.length) return "";
+
+    return unit.additionalProfiles.map(component => {
+      const profileId = typeof component === "string" ? component : component.profileId;
+      const profile = profileById.get(profileId);
+      if (!profile) return "";
+
+      const label = typeof component === "string"
+        ? (profile.name || humanise(profileId))
+        : (component.label || profile.name || humanise(profileId));
+      const notes = typeof component === "string" ? [] : (component.notes || []);
+
+      return `
+        <tr class="mount-row">
+          <td class="unit-cell mount-name">↳ ${escapeHtml(label)}</td>
+          ${rosterPadProfileCells(profile)}
+          <td class="save">–</td>
+          <td class="notes-cell mount-notes">${rosterPadNotesInline(notes)}</td>
+          <td class="points-cell"></td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  const oldRosterPadRow = rosterPadRow;
+  rosterPadRow = function(entry) {
+    const base = oldRosterPadRow(entry);
+    if (!isOrcArmy()) return base;
+    const unit = getUnit(entry.sectionKey, entry.unitId);
+    return base + orcAdditionalProfileRows(unit);
   };
 })();
