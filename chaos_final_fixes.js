@@ -45,8 +45,9 @@
     return previousRenderRegimentEditor(entry, view);
   };
 
-  // A Small Daemon Prince may carry the battle standard in a single-Power
-  // army. This banner is in addition to the Prince's normal reward allowance.
+  // A Daemon Prince using the Small reward may carry the battle standard.
+  // In a single-Power army it may additionally carry a Chaos Banner without
+  // reducing its normal Daemonic Reward allowance.
   const previousGetAllowedMagicItems = getAllowedMagicItems;
   getAllowedMagicItems = function(unit, context) {
     const result = previousGetAllowedMagicItems(unit, context);
@@ -83,10 +84,10 @@
         window.alert("A Small Daemon Prince carrying the battle standard cannot have wings.");
         return;
       }
-      if (!singlePower()) {
+      const chosenBanner = (state.draft.magicItems || []).some(id => getMagicItem(id)?.chaosBanner);
+      if (!singlePower() && chosenBanner) {
         window.alert("A Daemonic Battle Standard Bearer may carry a Chaos Banner only when the whole army is devoted to one Chaos Power.");
-        const chosenBanner = (state.draft.magicItems || []).some(id => getMagicItem(id)?.chaosBanner);
-        if (chosenBanner) return;
+        return;
       }
     }
     previousSaveEditor();
