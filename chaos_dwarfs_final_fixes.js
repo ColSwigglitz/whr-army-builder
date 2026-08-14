@@ -47,4 +47,32 @@
     patchResolvedEntries();
     return previousCalculateEntry(entry);
   };
+
+  // Resolve external magic pools by the displayed unit identity rather than relying
+  // on faction-internal IDs. This keeps the rule robust if the compact payload uses
+  // different IDs for the greenskin heroes or K'daii unit.
+  const previousGetAllowedMagicItems = getAllowedMagicItems;
+  getAllowedMagicItems = function(unit, context) {
+    let result = previousGetAllowedMagicItems(unit, context);
+    if (!isCD() || !unit) return result;
+    patchResolvedEntries();
+
+    const name = String(unit.name || "");
+    const isGreenskinCharacter = /^(Black Orc|Common Orc|Common Goblin) Hero$/i.test(name);
+    const isGreenskinChampion = context === "champion" && /(Orc|Black Orc|Common Goblin) Slave Warriors/i.test(name);
+    const isKdaaiChampion = context === "champion" && /K['’]?daii Fireborn/i.test(name);
+
+    const additions = [];
+    if (isGreenskinCharacter || isGreenskinChampion) {
+      additions.push(...(state.data.factionMagicItems || []).filter(item => item.chaosDwarfExternalPool === "orcs_goblins"));
+    }
+    if (isKdaaiChampion) {
+      additions.push(...(state.data.factionMagicItems || []).filter(item => item.chaosDwarfExternalPool === "daemon_reward_all"));
+    }
+
+    if (!additions.length) return result;
+    const byId = new Map(result.map(item => [item.id, item]));
+    for (const item of additions) byId.set(item.id, item);
+    return [...byId.values()];
+  };
 })();
