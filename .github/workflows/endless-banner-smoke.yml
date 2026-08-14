@@ -1,0 +1,80 @@
+name: Endless Banner smoke test
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-banner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check syntax
+        run: node --check common_magic_item_effects.js
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Test Endless Banner in browser
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          node - <<'JS'
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            const page = await browser.newPage();
+            const errors = [];
+            page.on('pageerror', e => errors.push(e.message));
+            page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+            await page.goto('http://127.0.0.1:8000/', {waitUntil:'networkidle'});
+            await page.locator('[data-army-id="empire"]').click();
+            await page.waitForTimeout(500);
+
+            const result = await page.evaluate(() => {
+              const unit = state.data.faction.regiments.find(u => {
+                if (!u.magicBanner?.allowed) return false;
+                const e = createEntry('regiments', u);
+                e.size = 40;
+                const ids = getSelectedEquipmentIds(e, u);
+                return !ids.some(id => String(equipmentById.get(id)?.type || '').includes('missile'));
+              });
+              if (!unit) throw new Error('No suitable Empire regiment found for Endless Banner smoke test.');
+
+              const entry = createEntry('regiments', unit);
+              entry.size = 40;
+              entry.command.standardBearer = true;
+              const before = calculateEntry(entry);
+              entry.magicBanner = 'endless_banner';
+
+              state.pointsLimit = 2000;
+              const at2000 = calculateEntry(entry);
+              const expected2000 = before - Math.min(before * 0.20, 50);
+
+              state.pointsLimit = 3000;
+              const at3000 = calculateEntry(entry);
+              const expected3000 = before - Math.min(before * 0.20, 100);
+
+              entry.size = 39;
+              const illegal = calculateEntry(entry);
+              const illegalExpected = (() => {
+                entry.magicBanner = null;
+                const value = calculateEntry(entry);
+                entry.magicBanner = 'endless_banner';
+                return value;
+              })();
+
+              return {unit: unit.name, before, at2000, expected2000, at3000, expected3000, illegal, illegalExpected};
+            });
+
+            console.log(JSON.stringify(result));
+            const close = (a,b) => Math.abs(a-b) < 0.0001;
+            if (!close(result.at2000, result.expected2000)) throw new Error('2000-point Endless Banner discount incorrect');
+            if (!close(result.at3000, result.expected3000)) throw new Error('3000-point Endless Banner discount incorrect');
+            if (!close(result.illegal, result.illegalExpected)) throw new Error('Illegal <40-model banner still receives discount');
+            if (errors.length) throw new Error(errors.join(' | '));
+            await browser.close();
+          })().catch(err => { console.error(err); process.exit(1); });
+          JS
