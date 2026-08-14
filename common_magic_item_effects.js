@@ -28,36 +28,12 @@
   }
 
   // Endless Banner is a regiment-only banner and explicitly cannot be carried by a BSB.
+  // Keep it out of character/champion magic-item selectors, but leave it visible in the
+  // regiment Magic Banner dropdown so a player can select it after increasing the unit size.
   const previousGetAllowedMagicItems = getAllowedMagicItems;
   getAllowedMagicItems = function(unit, context) {
     return previousGetAllowedMagicItems(unit, context)
       .filter(item => item.id !== ENDLESS_BANNER_ID);
-  };
-
-  // Hide Endless Banner from regiments that cannot legally take it. If an old saved
-  // roster contains an illegal selection, leave it visible and show a warning so the
-  // user can correct it rather than silently changing their saved army.
-  const previousRenderMagicBannerEditor = renderMagicBannerEditor;
-  renderMagicBannerEditor = function(entry, unit) {
-    const eligible = endlessBannerEligible(entry, unit);
-    const selected = entry.magicBanner === ENDLESS_BANNER_ID;
-
-    if (eligible || selected) {
-      const html = previousRenderMagicBannerEditor(entry, unit);
-      if (!selected || eligible) return html;
-      return html + `<div class="warning-box">Endless Banner requires at least 40 models and cannot be carried by a regiment with missile weapons.</div>`;
-    }
-
-    const common = state.data.commonMagicItems;
-    const faction = state.data.factionMagicItems;
-    state.data.commonMagicItems = (common || []).filter(item => item.id !== ENDLESS_BANNER_ID);
-    state.data.factionMagicItems = (faction || []).filter(item => item.id !== ENDLESS_BANNER_ID);
-    try {
-      return previousRenderMagicBannerEditor(entry, unit);
-    } finally {
-      state.data.commonMagicItems = common;
-      state.data.factionMagicItems = faction;
-    }
   };
 
   const previousSaveEditor = saveEditor;
