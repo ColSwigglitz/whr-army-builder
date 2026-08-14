@@ -1,1 +1,1 @@
-Temporary runtime validation marker. Remove after diagnosis.
+Temporary runtime validation marker. Trigger after diagnostic PR opened.
