@@ -1,1 +1,14 @@
-__PLACEHOLDER__
+{
+  "meta": {
+    "schemaVersion": "0.2",
+    "game": "Warhammer Renaissance",
+    "source": "WHR Armies 2026-27 final version",
+    "faction": "Dogs of War",
+    "status": "compact",
+    "notes": ["Full Dogs of War data is loaded from the compact payload by dogs_of_war_loader.js."]
+  },
+  "faction": {
+    "id": "dogs_of_war",
+    "name": "Dogs of War"
+  }
+}
