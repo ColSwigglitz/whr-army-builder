@@ -76,9 +76,8 @@ jobs:
                 faction:state.data.faction.name,choices:document.querySelectorAll('.unit-choice-name').length,
                 costs:{foot:calculateEntry(f),fspear:calculateEntry(fspear),knights:calculateEntry(k),kb:calculateEntry(kb),ogres:calculateEntry(o),oh:calculateEntry(oh),sea:calculateEntry(s),sl:calculateEntry(sl),cav:calculateEntry(c),hot:calculateEntry(h),ves:calculateEntry(v),ogl:calculateEntry(g),cursed:calculateEntry(cc),norse:calculateEntry(n),myrdas:calculateEntry(my)},
                 magic:{
-                  humanEmpire:humanItems.some(i=>i.dowSourceFaction==='empire'),humanBretonnia:humanItems.some(i=>i.dowSourceFaction==='bretonnia'),humanKislev:humanItems.some(i=>i.dowSourceFaction==='kislev'),
-                  humanVirtue:humanItems.some(i=>i.isVirtue),humanGeneralOnly:humanItems.some(i=>i.generalOnly||i.lordOnly||i.wizardOnly),
-                  knightVirtue:knightItems.some(i=>i.isVirtue),seaHigh:seaItems.some(i=>i.dowSourceFaction==='high_elves'),
+                  humanEmpire:humanItems.some(i=>i.dowSourceFaction==='empire'),humanKislev:humanItems.some(i=>i.dowSourceFaction==='kislev'),humanVirtue:humanItems.some(i=>i.isVirtue),humanGeneralOnly:humanItems.some(i=>i.generalOnly||i.lordOnly||i.wizardOnly),
+                  knightBretonnia:knightItems.some(i=>i.dowSourceFaction==='bretonnia'),knightVirtue:knightItems.some(i=>i.isVirtue),seaHigh:seaItems.some(i=>i.dowSourceFaction==='high_elves'),
                   norsePool:norseItems.some(i=>i.dowSourceFaction==='norse'&&i.originalId==='dainsleif'),norseRestricted:norseItems.some(i=>['andvares_gift','gandstaff'].includes(i.originalId)),
                   humanBannerKislev:humanBanners.includes('Banner of Ursus'),norseBanner:norseBanners.includes('Raven Banner')
                 },
@@ -93,7 +92,7 @@ jobs:
             const expected={foot:50,fspear:60,knights:100,kb:115,ogres:72,oh:84,sea:50,sl:60,cav:78,hot:60,ves:150,ogl:162,cursed:180,norse:136,myrdas:216};
             for(const [key,value] of Object.entries(expected)) if(result.costs[key]!==value) throw new Error(`${key} expected ${value}, got ${result.costs[key]}`);
             const m=result.magic;
-            if(!m.humanEmpire||!m.humanBretonnia||!m.humanKislev||m.humanVirtue||m.humanGeneralOnly||!m.knightVirtue||!m.seaHigh||!m.norsePool||m.norseRestricted||!m.humanBannerKislev||!m.norseBanner) throw new Error(`Mercenary magic pools failed: ${JSON.stringify(m)}`);
+            if(!m.humanEmpire||!m.humanKislev||m.humanVirtue||m.humanGeneralOnly||!m.knightBretonnia||!m.knightVirtue||!m.seaHigh||!m.norsePool||m.norseRestricted||!m.humanBannerKislev||!m.norseBanner) throw new Error(`Mercenary magic pools failed: ${JSON.stringify(m)}`);
             if(result.asarnilMount!=='high_elf_dragon'||result.asarnilColour!=='red') throw new Error('Asarnil fixed mount/options failed');
             if(!result.lordMounts.includes('barded_warhorse')||result.paymasterMounts.length) throw new Error('Character mount restrictions failed');
             if(!result.dwarfRunes||!result.dwarfRuneEditor) throw new Error('Dwarf mercenary rune access failed');
