@@ -15,7 +15,7 @@ jobs:
           const fs=require('fs'),zlib=require('zlib');
           const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_dark_elves_v0_1.payload','utf8').trim(),'base64')));
           console.log(`DARK_ELVES chars=${d.faction.characters.length} regs=${d.faction.regiments.length} machines=${d.faction.warMachines.length} specials=${d.faction.specialCharacters.length}`);
-          if(d.faction.characters.length!==9 || d.faction.regiments.length!==10 || d.faction.warMachines.length!==5 || d.faction.specialCharacters.length!==8) process.exit(1);
+          if(d.faction.characters.length!==9 || d.faction.regiments.length!==11 || d.faction.warMachines.length!==5 || d.faction.specialCharacters.length!==8) process.exit(1);
           JS
       - name: Install Playwright
         run: |
@@ -48,22 +48,18 @@ jobs:
               const bolt=find('warMachines','repeating_bolt_thrower'); const b=createEntry('warMachines',bolt); b.optionSelections.extra_crew=2; b.optionSelections.crew_light_armour=true;
               const pack=find('regiments','beastmaster_pack'); const p=createEntry('regiments',pack);
               const pChaos=calculateEntry(p); p.optionSelections.hound_type='warhounds'; p.optionSelections.hounds=9; const pWar=calculateEntry(p);
-
               const general=find('characters','first_among_equals'); state.draft=createEntry('characters',general);
               const charItems=getAllowedMagicItems(general,'character');
               const sorc=find('characters','sorcerer_lord'); state.draft=createEntry('characters',sorc);
               const sorcItems=getAllowedMagicItems(sorc,'character');
-
               const darkRiders=find('regiments','dark_riders'); const dr=createEntry('regiments',darkRiders); dr.command.standardBearer=true;
               const riderBannerHtml=renderMagicBannerEditor(dr,darkRiders);
               const warriorsBannerEntry=createEntry('regiments',warrior); warriorsBannerEntry.command.standardBearer=true;
               const warriorsBannerHtml=renderMagicBannerEditor(warriorsBannerEntry,warrior);
-
               state.roster=[];
               const wr=createEntry('regiments',warrior); wr.size=20; state.roster.push(wr);
               const assassin=find('characters','assassin'); const a=createEntry('characters',assassin); a.hiddenInRegimentId=wr.id; state.roster.push(a);
               const regimentPoints=calculateRegimentPoints();
-
               const padBolt=rosterPadRow(b);
               const padPack=rosterPadRow(p);
               const choices=document.querySelectorAll('.unit-choice').length;
