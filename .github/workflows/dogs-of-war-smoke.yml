@@ -1,0 +1,76 @@
+name: Dogs of War smoke test
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  test-dogs-of-war:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and payload
+        run: |
+          node --check dogs_of_war_loader.js
+          node --check dogs_of_war_extensions.js
+          node - <<'JS'
+          const fs=require('fs'),zlib=require('zlib');
+          const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_dogs_of_war_v0_1.payload','utf8').trim(),'base64')));
+          console.log(`DOGS chars=${d.faction.characters.length} regs=${d.faction.regiments.length} machines=${d.faction.warMachines.length} specials=${d.faction.specialCharacters.length}`);
+          console.log('REGS', d.faction.regiments.map(u=>[u.id,(u.options||[]).map(o=>o.id)]));
+          if(d.faction.characters.length!==8 || d.faction.regiments.length!==13 || d.faction.warMachines.length!==6 || d.faction.specialCharacters.length!==7) process.exit(1);
+          JS
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Browser regression
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage();
+            const errors=[],dialogs=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+            page.on('dialog',async d=>{dialogs.push(d.message());await d.dismiss()});
+            await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            await page.locator('[data-army-id="dogs_of_war"]').click();
+            await page.waitForTimeout(900);
+            const result=await page.evaluate(()=>{
+              const find=(s,id)=>state.data.faction[s].find(u=>u.id===id);
+              const foot=find('regiments','human_foot_soldiers'), f=createEntry('regiments',foot);f.size=10;
+              const knights=find('regiments','human_knights'), k=createEntry('regiments',knights);k.size=5;
+              const ogres=find('regiments','ogre_mercenaries'), o=createEntry('regiments',ogres);o.size=3;
+              const sea=find('regiments','sea_elf_mercenaries'), s=createEntry('regiments',sea);s.size=5;
+              const cav=find('regiments','human_cavalry_retainers'), c=createEntry('regiments',cav);c.size=6;
+              const hot=find('warMachines','halfling_hot_pot'), h=createEntry('warMachines',hot);h.optionSelections.extra_crew=2;
+              const ves=find('regiments','vesperos_vendetta'), v=createEntry('regiments',ves);v.optionSelections.extra_models=2;
+              const ogl=find('regiments','oglah_khans_wolfboyz'), g=createEntry('regiments',ogl);g.optionSelections.extra_models=1;
+              const cursed=find('regiments','cursed_company'), cc=createEntry('regiments',cursed);cc.optionSelections.extra_models=5;
+              const humanChampItems=getAllowedMagicItems(foot,'champion').map(i=>({id:i.id,name:i.name,src:i.dowSourceFaction,virtue:!!i.isVirtue}));
+              const knightItems=getAllowedMagicItems(knights,'champion').map(i=>({id:i.id,name:i.name,src:i.dowSourceFaction,virtue:!!i.isVirtue}));
+              const seaItems=getAllowedMagicItems(sea,'champion').map(i=>({id:i.id,name:i.name,src:i.dowSourceFaction}));
+              const asarnil=find('specialCharacters','asarnil'), a=createEntry('specialCharacters',asarnil);
+              const choices=[...document.querySelectorAll('.unit-choice-name')].map(x=>x.textContent.trim());
+              return {
+                faction:state.data.faction.name,choices:choices.length,
+                optionIds:{foot:(foot.options||[]).map(x=>x.id),knights:(knights.options||[]).map(x=>x.id),ogres:(ogres.options||[]).map(x=>x.id),sea:(sea.options||[]).map(x=>x.id),cav:(cav.options||[]).map(x=>x.id),hot:(hot.options||[]).map(x=>x.id)},
+                costs:{foot:calculateEntry(f),knights:calculateEntry(k),ogres:calculateEntry(o),sea:calculateEntry(s),hot:calculateEntry(h),ves:calculateEntry(v),ogl:calculateEntry(g),cursed:calculateEntry(cc)},
+                humanEmpire:humanChampItems.some(i=>i.src==='empire'),humanBretonnia:humanChampItems.some(i=>i.src==='bretonnia'),humanVirtue:humanChampItems.some(i=>i.virtue),knightVirtue:knightItems.some(i=>i.virtue),seaHigh:seaItems.some(i=>i.src==='high_elves'),
+                asarnilMount:a.mount, asarnilColour:a.optionSelections.dragon_colour,
+                padV:rosterPadRow(v).includes('Vespero'),padC:rosterPadRow(cc).includes('Richter Kreugar'),errors
+              };
+            });
+            console.log(JSON.stringify(result));
+            if(result.faction!=='Dogs of War'||result.choices<25) throw new Error('Dogs of War did not load');
+            if(result.costs.foot!==50||result.costs.knights!==100||result.costs.ogres!==72||result.costs.sea!==50||result.costs.hot!==60||result.costs.ves!==150||result.costs.ogl!==162||result.costs.cursed!==180) throw new Error('Representative pricing failed');
+            if(!result.humanEmpire||!result.humanBretonnia||result.humanVirtue||!result.knightVirtue||!result.seaHigh) throw new Error('Mercenary magic pools failed');
+            if(result.asarnilMount!=='dragon'||result.asarnilColour!=='red') throw new Error('Asarnil fixed mount/options failed');
+            if(!result.padV||!result.padC) throw new Error('RoR Roster Pad profiles failed');
+            if(errors.length) throw new Error(errors.join(' | '));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
