@@ -14,74 +14,21 @@
       <h1>Army Builder</h1>
       <p class="selection-intro">Choose an army to begin building your roster.</p>
     </div>
-
     <div class="selection-content">
-      <div class="selection-heading">
-        <div><p class="eyebrow">Choose Your Force</p><h2>Army Books</h2></div>
-        <p>More armies will be added as their data is completed.</p>
-      </div>
+      <div class="selection-heading"><div><p class="eyebrow">Choose Your Force</p><h2>Army Books</h2></div><p>More armies will be added as their data is completed.</p></div>
       <div id="armyCards" class="army-card-grid"><div class="army-card-loading">Loading army books…</div></div>
     </div>
   </section>
-
   <div id="builderScreen" class="builder-screen" hidden>
-    <header class="app-header">
-      <div class="brand">
-        <button id="backToArmiesBtn" class="back-armies-button" type="button" aria-label="Back to army selection">←</button>
-        <div class="brand-mark">WHR</div>
-        <div><h1>Army Builder</h1><p id="factionName">Loading faction…</p></div>
-      </div>
-      <div class="army-summary">
-        <label class="roster-name-field"><span>Roster name</span><input id="rosterName" type="text" value="My Empire Army" maxlength="80"></label>
-        <label class="points-limit"><span>Army size</span><input id="pointsLimit" type="number" min="1" step="50" value="2000"><span>pts</span></label>
-        <div class="points-total"><span>Total</span><strong id="armyTotal">0</strong><span>pts</span></div>
-        <div class="header-actions">
-          <button id="newRosterBtn" class="header-button" type="button">New</button>
-          <button id="saveRosterBtn" class="header-button header-button-primary" type="button">Save</button>
-          <button id="savedRostersBtn" class="header-button" type="button">Saved Rosters</button>
-          <button id="printRosterBtn" class="header-button" type="button">Roster Pad</button>
-        </div>
-      </div>
+    <header class="app-header"><div class="brand"><button id="backToArmiesBtn" class="back-armies-button" type="button" aria-label="Back to army selection">←</button><div class="brand-mark">WHR</div><div><h1>Army Builder</h1><p id="factionName">Loading faction…</p></div></div>
+      <div class="army-summary"><label class="roster-name-field"><span>Roster name</span><input id="rosterName" type="text" value="My Empire Army" maxlength="80"></label><label class="points-limit"><span>Army size</span><input id="pointsLimit" type="number" min="1" step="50" value="2000"><span>pts</span></label><div class="points-total"><span>Total</span><strong id="armyTotal">0</strong><span>pts</span></div><div class="header-actions"><button id="newRosterBtn" class="header-button" type="button">New</button><button id="saveRosterBtn" class="header-button header-button-primary" type="button">Save</button><button id="savedRostersBtn" class="header-button" type="button">Saved Rosters</button><button id="printRosterBtn" class="header-button" type="button">Roster Pad</button></div></div>
     </header>
-
-    <main class="builder-layout">
-      <aside class="unit-browser panel">
-        <div class="panel-header"><div><p class="eyebrow">Army Book</p><h2>Add to Army</h2></div></div>
-        <div class="browser-controls"><input id="unitSearch" type="search" placeholder="Search army choices…" autocomplete="off"></div>
-        <div id="unitBrowser" class="unit-sections"><div class="loading">Loading army data…</div></div>
-      </aside>
-
-      <section class="roster-panel panel">
-        <div class="panel-header roster-heading">
-          <div><p class="eyebrow">Your List</p><h2 id="armyTitle">Army</h2></div>
-          <button id="clearArmyBtn" class="button button-secondary" type="button">Clear Army</button>
-        </div>
-        <div id="armyStatus" class="army-status"></div>
-        <div id="roster" class="roster"></div>
-      </section>
-    </main>
-
-    <dialog id="editDialog" class="unit-dialog">
-      <form id="editForm" class="dialog-card">
-        <div class="dialog-header"><div><p id="dialogSection" class="eyebrow"></p><h2 id="dialogUnitName"></h2></div><button id="dialogCloseBtn" class="icon-button" type="button" aria-label="Close">×</button></div>
-        <div id="dialogContent" class="dialog-content"></div>
-        <div class="dialog-footer">
-          <div class="dialog-total"><span>Unit total</span><strong id="dialogTotal">0 pts</strong></div>
-          <div class="dialog-actions"><button id="dialogCancelBtn" class="button button-secondary" type="button">Cancel</button><button class="button button-primary" type="submit">Save Changes</button></div>
-        </div>
-      </form>
-    </dialog>
-
-    <dialog id="savedRostersDialog" class="saved-dialog">
-      <div class="saved-dialog-card">
-        <div class="dialog-header"><div><p class="eyebrow">Local Rosters</p><h2>Saved Rosters</h2></div><button id="savedRostersCloseBtn" class="icon-button" type="button" aria-label="Close">×</button></div>
-        <div id="savedRostersList" class="saved-rosters-list"></div>
-      </div>
-    </dialog>
-
+    <main class="builder-layout"><aside class="unit-browser panel"><div class="panel-header"><div><p class="eyebrow">Army Book</p><h2>Add to Army</h2></div></div><div class="browser-controls"><input id="unitSearch" type="search" placeholder="Search army choices…" autocomplete="off"></div><div id="unitBrowser" class="unit-sections"><div class="loading">Loading army data…</div></div></aside>
+      <section class="roster-panel panel"><div class="panel-header roster-heading"><div><p class="eyebrow">Your List</p><h2 id="armyTitle">Army</h2></div><button id="clearArmyBtn" class="button button-secondary" type="button">Clear Army</button></div><div id="armyStatus" class="army-status"></div><div id="roster" class="roster"></div></section></main>
+    <dialog id="editDialog" class="unit-dialog"><form id="editForm" class="dialog-card"><div class="dialog-header"><div><p id="dialogSection" class="eyebrow"></p><h2 id="dialogUnitName"></h2></div><button id="dialogCloseBtn" class="icon-button" type="button" aria-label="Close">×</button></div><div id="dialogContent" class="dialog-content"></div><div class="dialog-footer"><div class="dialog-total"><span>Unit total</span><strong id="dialogTotal">0 pts</strong></div><div class="dialog-actions"><button id="dialogCancelBtn" class="button button-secondary" type="button">Cancel</button><button class="button button-primary" type="submit">Save Changes</button></div></div></form></dialog>
+    <dialog id="savedRostersDialog" class="saved-dialog"><div class="saved-dialog-card"><div class="dialog-header"><div><p class="eyebrow">Local Rosters</p><h2>Saved Rosters</h2></div><button id="savedRostersCloseBtn" class="icon-button" type="button" aria-label="Close">×</button></div><div id="savedRostersList" class="saved-rosters-list"></div></div></dialog>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
-
   <script src="bootstrap.js?v=2"></script>
   <script src="chaos_dwarfs_payload_loader.js?v=1"></script>
   <script src="app.js"></script>
@@ -104,5 +51,7 @@
   <script src="chaos_abomination_mount_guard.js?v=1"></script>
   <script src="chaos_dwarfs_extensions.js?v=1"></script>
   <script src="chaos_dwarfs_final_fixes.js?v=1"></script>
+  <script src="halflings_loader.js?v=1"></script>
+  <script src="halflings_extensions.js?v=1"></script>
 </body>
 </html>
