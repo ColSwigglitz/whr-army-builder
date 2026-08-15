@@ -11,6 +11,7 @@ jobs:
         run: |
           node --check halflings_loader.js
           node --check halflings_extensions.js
+          node --check halflings_final_fixes.js
           node - <<'JS'
           const fs=require('fs'),zlib=require('zlib');
           const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_halflings_moot_v0_1.payload','utf8').trim(),'base64')));
@@ -33,7 +34,7 @@ jobs:
           await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});await page.locator('[data-army-id="halflings_moot"]').click();await page.waitForTimeout(1000);
           const r=await page.evaluate(()=>{
             const find=(section,id)=>state.data.faction[section].find(u=>u.id===id);
-            const militia=find('regiments','halfling_militia'), bow=find('regiments','halfling_bowmen'), hot=find('warMachines','halfling_hot_pot'), rider=find('regiments','halfling_riders');
+            const militia=find('regiments','halfling_militia'), hot=find('warMachines','halfling_hot_pot'), rider=find('regiments','halfling_riders');
             const m=createEntry('regiments',militia);m.size=20;
             const h=createEntry('warMachines',hot);h.optionSelections.extra_crew=2;
             const rr=createEntry('regiments',rider);rr.size=5;rr.optionSelections.flying_livestock=true;
@@ -43,11 +44,18 @@ jobs:
             const wood=state.data.faction.regiments.filter(u=>(u.tags||[]).includes('allied_wood_elf')).length;
             const general=find('characters','moot_general');state.draft=createEntry('characters',general);
             const magic=getAllowedMagicItems(general,'character');
-            return {faction:state.data.faction.name,militia:calculateEntry(m),hot:calculateEntry(h),flying:calculateEntry(rr),empire,wood,lib,runes,legalForeign:magic.filter(i=>i.halflingForeignItem).length,hasTreeman:!!find('warMachines','treeman'),pad:rosterPadRow(h).includes('Halfling Crew')};
+            const wizard=state.data.faction.characters.find(u=>(u.tags||[]).includes('human_wizard') && /Level 4/i.test(u.name||''));
+            if(!wizard) throw new Error('Travelling Human Wizard not found');
+            state.draft=createEntry('characters',wizard);
+            const wizardMagic=getAllowedMagicItems(wizard,'character');
+            const wizardCommonArcane=wizardMagic.some(i=>!i.halflingForeignItem && (i.category==='arcane_item'||i.category==='familiar'));
+            const wizardForeignArcane=wizardMagic.some(i=>i.halflingForeignItem && (i.category==='arcane_item'||i.category==='familiar'));
+            const wizardForeignLegal=wizardMagic.some(i=>i.halflingForeignItem && ['enchanted_item','magic_weapon','magic_armour'].includes(i.category));
+            return {faction:state.data.faction.name,militia:calculateEntry(m),hot:calculateEntry(h),flying:calculateEntry(rr),empire,wood,lib,runes,legalForeign:magic.filter(i=>i.halflingForeignItem).length,hasTreeman:!!find('warMachines','treeman'),pad:rosterPadRow(h).includes('Halfling Crew'),wizardCommonArcane,wizardForeignArcane,wizardForeignLegal};
           });
           console.log(JSON.stringify(r));
           if(r.faction!=='Halflings of the Moot'||r.militia!==50||r.hot!==60||r.flying!==120||r.empire<5||r.wood!==4||r.lib<20||r.runes<10||r.legalForeign<5||!r.hasTreeman||!r.pad)throw new Error('Halfling regression assertion failed');
-          // Validate ally unlock through public functions.
+          if(!r.wizardCommonArcane||r.wizardForeignArcane||!r.wizardForeignLegal)throw new Error('Travelling Wizard Liberated Magic filtering failed');
           await page.evaluate(()=>{addUnit('regiments','halfling_militia');addUnit('regiments','halfling_bowmen');const e=state.data.faction.regiments.find(u=>(u.tags||[]).includes('allied_empire'));addUnit('regiments',e.id)});
           await page.waitForTimeout(200);
           const counts=await page.evaluate(()=>({native:state.roster.filter(e=>(getUnit(e.sectionKey,e.unitId).tags||[]).includes('halfling_regiment')).length,emp:state.roster.filter(e=>(getUnit(e.sectionKey,e.unitId).tags||[]).includes('allied_empire')).length}));
