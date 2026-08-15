@@ -52,12 +52,29 @@
     ];
     for (const [id, name, file] of sources) {
       const source = await fetchArmy(file);
-      if (source) addItems(borrowed, source.factionMagicItems, id, name);
+      if (!source) continue;
+      addItems(borrowed, source.factionMagicItems, id, name);
+      if (id === "dwarfs" && source.faction?.systems?.runes) data.faction.systems.dwarfRunes = clone(source.faction.systems.runes);
     }
 
-    // Human champions are allowed Empire, Kislev and Bretonnia items. Kislev is
-    // automatically added later once that army has a populated dataset.
-    data.factionMagicItems = borrowed;
+    // If Kislev, Norse or the Ogre Mercenary book is populated later, import it
+    // automatically without needing a Dogs of War data rewrite.
+    try {
+      const manifestResponse = await previousFetch("./data/armies.json", {cache:"no-store"});
+      if (manifestResponse.ok) {
+        const manifest = await manifestResponse.json();
+        for (const id of ["kislev", "norse", "ogre_mercenaries"]) {
+          const army = (manifest.armies || []).find(a => a.id === id && a.available);
+          if (!army) continue;
+          const source = await fetchArmy(army.dataFile);
+          if (source) addItems(borrowed, source.factionMagicItems, id, army.name);
+        }
+      }
+    } catch (error) {
+      console.warn("Dogs of War future borrowed pools skipped", error);
+    }
+
+    data.factionMagicItems = [...new Map(borrowed.map(item => [item.id, item])).values()];
     data.faction.systems.borrowedItemPools = {
       human:["empire","bretonnia","kislev"],
       high_elves:["high_elves"],
