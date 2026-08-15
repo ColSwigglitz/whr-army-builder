@@ -1,0 +1,56 @@
+name: Halflings smoke test
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  test-halflings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and payload
+        run: |
+          node --check halflings_loader.js
+          node --check halflings_extensions.js
+          node - <<'JS'
+          const fs=require('fs'),zlib=require('zlib');
+          const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_halflings_moot_v0_1.payload','utf8').trim(),'base64')));
+          console.log(`HALFLINGS chars=${d.faction.characters.length} regs=${d.faction.regiments.length} machines=${d.faction.warMachines.length}`);
+          if(d.faction.characters.length!==8 || d.faction.regiments.length!==10 || d.faction.warMachines.length!==5) process.exit(1);
+          JS
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Browser regression
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{const browser=await chromium.launch({headless:true}),page=await browser.newPage(),errors=[],dialogs=[];
+          page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});page.on('dialog',async d=>{dialogs.push(d.message());await d.dismiss()});
+          await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});await page.locator('[data-army-id="halflings_moot"]').click();await page.waitForTimeout(1000);
+          const r=await page.evaluate(()=>{
+            const find=(section,id)=>state.data.faction[section].find(u=>u.id===id);
+            const militia=find('regiments','halfling_militia'), bow=find('regiments','halfling_bowmen'), hot=find('warMachines','halfling_hot_pot'), rider=find('regiments','halfling_riders');
+            const m=createEntry('regiments',militia);m.size=20;
+            const h=createEntry('warMachines',hot);h.optionSelections.extra_crew=2;
+            const rr=createEntry('regiments',rider);rr.size=5;rr.optionSelections.flying_livestock=true;
+            const empire=state.data.faction.regiments.filter(u=>(u.tags||[]).includes('allied_empire')).length;
+            const lib=state.data.factionMagicItems.filter(i=>i.halflingForeignItem).length;
+            const runes=Object.values(state.data.faction.systems.dwarfRunes?.categories||{}).flat().length;
+            const wood=state.data.faction.regiments.filter(u=>(u.tags||[]).includes('allied_wood_elf')).length;
+            const general=find('characters','moot_general');state.draft=createEntry('characters',general);
+            const magic=getAllowedMagicItems(general,'character');
+            return {faction:state.data.faction.name,militia:calculateEntry(m),hot:calculateEntry(h),flying:calculateEntry(rr),empire,wood,lib,runes,legalForeign:magic.filter(i=>i.halflingForeignItem).length,hasTreeman:!!find('warMachines','treeman'),pad:rosterPadRow(h).includes('Halfling Crew')};
+          });
+          console.log(JSON.stringify(r));
+          if(r.faction!=='Halflings of the Moot'||r.militia!==50||r.hot!==60||r.flying!==120||r.empire<5||r.wood!==4||r.lib<20||r.runes<10||r.legalForeign<5||!r.hasTreeman||!r.pad)throw new Error('Halfling regression assertion failed');
+          // Validate ally unlock through public functions.
+          await page.evaluate(()=>{addUnit('regiments','halfling_militia');addUnit('regiments','halfling_bowmen');const e=state.data.faction.regiments.find(u=>(u.tags||[]).includes('allied_empire'));addUnit('regiments',e.id)});
+          await page.waitForTimeout(200);
+          const counts=await page.evaluate(()=>({native:state.roster.filter(e=>(getUnit(e.sectionKey,e.unitId).tags||[]).includes('halfling_regiment')).length,emp:state.roster.filter(e=>(getUnit(e.sectionKey,e.unitId).tags||[]).includes('allied_empire')).length}));
+          if(counts.native!==2||counts.emp!==1)throw new Error('Ally ratio path failed');
+          if(errors.length)throw new Error(errors.join(' | '));await browser.close();})().catch(e=>{console.error(e);process.exit(1)});
+          JS
