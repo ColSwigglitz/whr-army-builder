@@ -23,9 +23,35 @@
     // The first ordinary Dark Elf Assassin contributes its full cost to Regiments.
     const assassin = data.faction?.characters?.find(unit => unit.id === "assassin");
     if (assassin) {
-      assassin.composition = {
-        rules: [{when:{instanceNumber:1}, category:"regiments"}]
-      };
+      assassin.composition = { rules: [{when:{instanceNumber:1}, category:"regiments"}] };
+    }
+
+    // WHR allows Dark Elf characters (including Sorcerers) to ride a Cold One Chariot
+    // for the normal 66-point chariot price. Represent it as a character mount so it
+    // participates in normal character pricing and Roster Pad output.
+    if (!(data.profiles || []).some(p => p.id === "cold_one_chariot_mount_profile")) {
+      data.profiles.push({
+        id:"cold_one_chariot_mount_profile",
+        name:"Cold One Chariot",
+        stats:{M:null,WS:null,BS:null,S:5,T:5,W:4,I:null,A:null,Ld:null}
+      });
+    }
+    if (!(data.mounts || []).some(m => m.id === "cold_one_chariot_mount")) {
+      data.mounts.push({
+        id:"cold_one_chariot_mount",
+        name:"Cold One Chariot",
+        profileId:"cold_one_chariot_mount_profile",
+        type:"chariot",
+        displayProfileOnRoster:true,
+        rules:["Heavy Chariot pulled by two Cold Ones and normally crewed by two Elven Warriors.","Armour save 4+.","Stupidity because of the Cold Ones."]
+      });
+    }
+    for (const unit of data.faction?.characters || []) {
+      if (unit.id === "assassin") continue;
+      const allowed = ["first_among_equals","elven_hero","witch_elf_hero","elven_bsb","sorcerer_lord","master_sorcerer","sorcerer_champion","sorcerer"].includes(unit.id);
+      if (allowed && !(unit.mountOptions || []).some(m => m.mountId === "cold_one_chariot_mount")) {
+        unit.mountOptions = [...(unit.mountOptions || []), {mountId:"cold_one_chariot_mount",cost:66}];
+      }
     }
 
     // Fixed ridden special characters should print their mounts as actual profiles.
