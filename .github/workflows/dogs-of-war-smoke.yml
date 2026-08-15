@@ -13,6 +13,7 @@ jobs:
           node --check dogs_of_war_extensions.js
           node --check dogs_of_war_dwarf_runes.js
           node --check dogs_of_war_final_fixes.js
+          node --check dogs_of_war_magic_guard.js
           node - <<'JS'
           const fs=require('fs'),zlib=require('zlib');
           const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_dogs_of_war_v0_1.payload','utf8').trim(),'base64')));
@@ -33,10 +34,10 @@ jobs:
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage();
-            const errors=[],dialogs=[];
+            const errors=[];
             page.on('pageerror',e=>errors.push(e.message));
             page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
-            page.on('dialog',async d=>{dialogs.push(d.message());await d.dismiss()});
+            page.on('dialog',async d=>{await d.dismiss()});
             await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
             await page.locator('[data-army-id="dogs_of_war"]').click();
             await page.waitForTimeout(900);
@@ -58,19 +59,29 @@ jobs:
               const cursed=find('regiments','cursed_company'), cc=createEntry('regiments',cursed);cc.optionSelections.extra_skeletons=5;
               const norse=find('regiments','norse_huscarls'), n=createEntry('regiments',norse);n.size=10;n.dowExtraChampions=2;
               const myrdas=find('specialCharacters','myrdas'), my=createEntry('specialCharacters',myrdas);my.optionSelections.extra_bodyguards=2;
-              const humanChampItems=getAllowedMagicItems(foot,'champion').map(i=>({src:i.dowSourceFaction,virtue:!!i.isVirtue}));
-              const knightItems=getAllowedMagicItems(knights,'champion').map(i=>({src:i.dowSourceFaction,virtue:!!i.isVirtue}));
-              const seaItems=getAllowedMagicItems(sea,'champion').map(i=>({src:i.dowSourceFaction}));
+              const humanItems=getAllowedMagicItems(foot,'champion');
+              const knightItems=getAllowedMagicItems(knights,'champion');
+              const seaItems=getAllowedMagicItems(sea,'champion');
+              const norseItems=getAllowedMagicItems(norse,'champion');
+              const fb=createEntry('regiments',foot);fb.command.standardBearer=true;
+              const nb=createEntry('regiments',norse);nb.command.standardBearer=true;
+              const humanBanners=renderMagicBannerEditor(fb,foot);
+              const norseBanners=renderMagicBannerEditor(nb,norse);
               const asarnil=find('specialCharacters','asarnil'), a=createEntry('specialCharacters',asarnil);
               const lord=find('characters','human_mercenary_lord');
               const paymaster=find('characters','human_paymaster');
               const dwarf=find('regiments','dwarf_mercenary_warriors'), de=createEntry('regiments',dwarf);de.champion.selected=true;de.command.standardBearer=true;
               const dwarfEditor=renderRegimentEditor(de,dwarf);
-              const choices=[...document.querySelectorAll('.unit-choice-name')].map(x=>x.textContent.trim());
               return {
-                faction:state.data.faction.name,choices:choices.length,
+                faction:state.data.faction.name,choices:document.querySelectorAll('.unit-choice-name').length,
                 costs:{foot:calculateEntry(f),fspear:calculateEntry(fspear),knights:calculateEntry(k),kb:calculateEntry(kb),ogres:calculateEntry(o),oh:calculateEntry(oh),sea:calculateEntry(s),sl:calculateEntry(sl),cav:calculateEntry(c),hot:calculateEntry(h),ves:calculateEntry(v),ogl:calculateEntry(g),cursed:calculateEntry(cc),norse:calculateEntry(n),myrdas:calculateEntry(my)},
-                magic:{humanEmpire:humanChampItems.some(i=>i.src==='empire'),humanBretonnia:humanChampItems.some(i=>i.src==='bretonnia'),humanVirtue:humanChampItems.some(i=>i.virtue),knightVirtue:knightItems.some(i=>i.virtue),seaHigh:seaItems.some(i=>i.src==='high_elves')},
+                magic:{
+                  humanEmpire:humanItems.some(i=>i.dowSourceFaction==='empire'),humanBretonnia:humanItems.some(i=>i.dowSourceFaction==='bretonnia'),humanKislev:humanItems.some(i=>i.dowSourceFaction==='kislev'),
+                  humanVirtue:humanItems.some(i=>i.isVirtue),humanGeneralOnly:humanItems.some(i=>i.generalOnly||i.lordOnly||i.wizardOnly),
+                  knightVirtue:knightItems.some(i=>i.isVirtue),seaHigh:seaItems.some(i=>i.dowSourceFaction==='high_elves'),
+                  norsePool:norseItems.some(i=>i.dowSourceFaction==='norse'&&i.originalId==='dainsleif'),norseRestricted:norseItems.some(i=>['andvares_gift','gandstaff'].includes(i.originalId)),
+                  humanBannerKislev:humanBanners.includes('Banner of Ursus'),norseBanner:norseBanners.includes('Raven Banner')
+                },
                 asarnilMount:a.mount,asarnilColour:a.optionSelections.dragon_colour,
                 lordMounts:(lord.mountOptions||[]).map(m=>m.mountId),paymasterMounts:(paymaster.mountOptions||[]).map(m=>m.mountId),
                 dwarfRunes:!!state.data.faction.systems.dwarfRunes,dwarfRuneEditor:dwarfEditor.includes('Champion Runic Weapon')&&dwarfEditor.includes('Runic Standard'),
@@ -81,7 +92,8 @@ jobs:
             if(result.faction!=='Dogs of War'||result.choices<25) throw new Error('Dogs of War did not load');
             const expected={foot:50,fspear:60,knights:100,kb:115,ogres:72,oh:84,sea:50,sl:60,cav:78,hot:60,ves:150,ogl:162,cursed:180,norse:136,myrdas:216};
             for(const [key,value] of Object.entries(expected)) if(result.costs[key]!==value) throw new Error(`${key} expected ${value}, got ${result.costs[key]}`);
-            if(!result.magic.humanEmpire||!result.magic.humanBretonnia||result.magic.humanVirtue||!result.magic.knightVirtue||!result.magic.seaHigh) throw new Error(`Mercenary magic pools failed: ${JSON.stringify(result.magic)}`);
+            const m=result.magic;
+            if(!m.humanEmpire||!m.humanBretonnia||!m.humanKislev||m.humanVirtue||m.humanGeneralOnly||!m.knightVirtue||!m.seaHigh||!m.norsePool||m.norseRestricted||!m.humanBannerKislev||!m.norseBanner) throw new Error(`Mercenary magic pools failed: ${JSON.stringify(m)}`);
             if(result.asarnilMount!=='high_elf_dragon'||result.asarnilColour!=='red') throw new Error('Asarnil fixed mount/options failed');
             if(!result.lordMounts.includes('barded_warhorse')||result.paymasterMounts.length) throw new Error('Character mount restrictions failed');
             if(!result.dwarfRunes||!result.dwarfRuneEditor) throw new Error('Dwarf mercenary rune access failed');
