@@ -22,12 +22,22 @@
     if (combinedBloodline) unit.combinedMagicAndBloodlineLimit = Number(maximum);
   }
 
+  function markVonCarsteinVampire(unit) {
+    if (!unit) return;
+    unit.tags = [...new Set([...(unit.tags || []), "vampire", "von_carstein_only"])];
+    unit.bloodlineOnly = "von_carstein";
+  }
+
   function patchSpecialCharacterAllowances() {
     const army = state.selectedArmyId;
 
     if (army === "vampire_counts") {
-      // WHR p.78. Vlad has one extra item AND one extra bloodline power.
       const vlad = specialById("vlad_isabella");
+      const mannfred = specialById("mannfred_von_carstein");
+      const konrad = specialById("konrad_von_carstein");
+      [vlad, mannfred, konrad].forEach(markVonCarsteinVampire);
+
+      // WHR p.78. Vlad has one extra item AND one extra bloodline power.
       if (vlad) {
         giveMagicItems("vlad_isabella", 1, { wizard: true });
         vlad.bloodlinePowers = { ...(vlad.bloodlinePowers || {}), maximum: 1 };
