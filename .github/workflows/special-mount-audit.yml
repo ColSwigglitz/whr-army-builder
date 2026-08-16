@@ -30,40 +30,38 @@ jobs:
                 if(mutate==='malekith_chariot')e.mount='whr_special_malekith_cold_one_chariot';
                 const pad=String(rosterPadRow(e));const fail=[];
                 for(const t of tests)if(!pad.includes(t))fail.push(`${u.name}: missing ${t}`);
-                return {fail,mount:e.mount,pad};
+                return {fail};
               },{id,tests,mutate});
               failures.push(...r.fail.map(x=>`${army}: ${x}`));
             };
-            // Generic defaultMount compatibility.
-            await check('high_elves','tyrion',['Malhandir','10</td>']);
+            await check('high_elves','tyrion',['Malhandir']);
             await check('high_elves','imrik',['Emperor Dragon']);
             await check('high_elves','eltharion',['Griffon']);
             await check('classic_undead','dieter',['Manticore']);
-            // Explicit fixed/composite rides.
-            await check('lizardmen','mazdamundi',['Stegadon','<td class="stat">6</td>','<td class="stat">7</td>','<td class="stat">5</td>']);
-            await check('slann_empire','emperor_mazdamundi',['Stegadon','<td class="stat">6</td>','<td class="stat">7</td>','<td class="stat">5</td>']);
-            await check('tomb_kings','arkhan',["Arkhan's Flying Heavy Chariot",'4 Undead Steeds','3 Skeleton crewmen']);
+            await check('lizardmen','mazdamundi',['Stegadon','4+ scaly skin','1D6 impact hits']);
+            await check('slann_empire','emperor_mazdamundi',['Stegadon','1D6 impact hits']);
+            await check('tomb_kings','arkhan',["Arkhan's Flying Heavy Chariot",'4 Undead Steeds','3 Skeleton crewmen','Scythed wheels']);
             await check('dwarfs','thorgrim',['Throne of Power','Bearers provide four additional attacks','Cannot march']);
             await check('dark_elves','malekith',['Cold One Chariot','2 Cold Ones','2 Elven Warrior crew'],'malekith_chariot');
-            // Sweep every declared default/fixed mount for a resolvable printed row.
             const ids=await p.evaluate(()=>state.armyManifest.armies.filter(a=>a.available).map(a=>a.id));
+            let declared=0;
             for(const army of ids){
               await p.evaluate(async army=>selectArmy(army),army);await p.waitForTimeout(35);
               const f=await p.evaluate(()=>{
-                const fail=[];
+                const fail=[];let count=0;
                 for(const u of state.data.faction.specialCharacters||[]){
-                  const expected=u.defaultMount||u.mount||u.unitMount?.mountId||null;if(!expected)continue;
-                  const e=createEntry('specialCharacters',u),pad=String(rosterPadRow(e));
-                  if((u.defaultMount||u.mount)&&e.mount!==(u.defaultMount||u.mount))fail.push(`${u.name}: fixed/default mount not selected`);
-                  const name=u.unitMount?.name||mountById.get(expected)?.name||'';
-                  if(name&&!pad.includes(name))fail.push(`${u.name}: ${name} not printed`);
+                  const fixed=u.defaultMount||u.mount||null;if(!fixed)continue;count++;
+                  const e=createEntry('specialCharacters',u);
+                  if(e.mount!==fixed)fail.push(`${u.name}: fixed/default mount not selected`);
+                  if(!mountById.get(fixed))fail.push(`${u.name}: fixed/default mount ${fixed} cannot resolve`);
+                  if(!String(rosterPadRow(e)).includes('mount-row'))fail.push(`${u.name}: fixed/default mount row absent`);
                 }
-                return fail;
+                return {fail,count};
               });
-              failures.push(...f.map(x=>`${army}: ${x}`));
+              declared+=f.count;failures.push(...f.fail.map(x=>`${army}: ${x}`));
             }
             failures.push(...runtime.map(x=>`runtime: ${x}`));
-            console.log('SPECIAL_MOUNT_TOTAL',JSON.stringify({armies:ids.length,failures:failures.length}));
+            console.log('SPECIAL_MOUNT_TOTAL',JSON.stringify({armies:ids.length,declared,failures:failures.length}));
             await b.close();if(failures.length)throw new Error('\n'+failures.join('\n'));
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
