@@ -38,9 +38,10 @@ jobs:
               await p.evaluate(async id=>selectArmy(id),id);await p.waitForTimeout(80);
               const r=await p.evaluate((want)=>{
                 const fail=[];let fixed=0;const list=state.data.faction.specialCharacters||[];
+                const textOf=html=>{const d=document.createElement('div');d.innerHTML=html;return d.textContent||'';};
                 for(const u of list){
                   const e=createEntry('specialCharacters',u);state.draft=e;
-                  const html=String(renderCharacterEditor(e,u));
+                  const html=String(renderCharacterEditor(e,u)),editorText=textOf(html);
                   state.draft=null;
                   for(const itemId of u.fixedMagicItems||[]){
                     fixed++;
@@ -48,7 +49,7 @@ jobs:
                     if(!item) fail.push(`${u.name}: fixed item ${itemId} cannot be resolved`);
                     else {
                       if(!String(item.rules||'').trim()) fail.push(`${u.name}: ${item.name} has no rules text`);
-                      if(!html.includes(item.name)||!html.includes(String(item.rules||''))) fail.push(`${u.name}: included item ${item.name} rules absent from editor`);
+                      if(!editorText.includes(item.name)||!editorText.includes(String(item.rules||''))) fail.push(`${u.name}: included item ${item.name} rules absent from editor`);
                       const notes=String(rosterPadNotes(e,u));
                       if(!notes.includes(item.name)||!notes.includes(String(item.rules||''))) fail.push(`${u.name}: included item ${item.name} rules absent from Roster Pad`);
                     }
@@ -70,7 +71,6 @@ jobs:
               },expected[id]||{});
               fixedChecked+=r.fixed;specials+=r.specials;if(r.fail.length)failures.push(...r.fail.map(x=>`${r.name}: ${x}`));console.log('SPECIAL_CHECK',r.name,r.specials,'specials',r.fixed,'fixed items',r.fail.length?'FAIL':'PASS');
             }
-            // Vampire combined-pool behaviour under the Von Carstein bloodline.
             await p.evaluate(async()=>{await selectArmy('vampire_counts');state.armyOptions.bloodline='von_carstein';renderArmy();});
             const vampire=await p.evaluate(()=>{
               const fail=[];const list=state.data.faction.specialCharacters;
