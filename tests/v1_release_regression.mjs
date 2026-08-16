@@ -15,16 +15,33 @@ function loadArmyData(dataFile) {
   const stubPath = path.join(root, 'data', dataFile);
   const stub = JSON.parse(fs.readFileSync(stubPath, 'utf8'));
   let data = stub;
-  if (stub.meta?.payloadFile) {
-    const encoded = fs.readFileSync(path.join(root, 'data', stub.meta.payloadFile), 'utf8').trim();
+
+  const fallbackPayload = dataFile.replace(/\.json$/i, '.payload');
+  const payloadFile = stub.meta?.payloadFile || (fs.existsSync(path.join(root, 'data', fallbackPayload)) ? fallbackPayload : null);
+  if (payloadFile) {
+    const encoded = fs.readFileSync(path.join(root, 'data', payloadFile), 'utf8').trim();
     data = JSON.parse(zlib.gunzipSync(Buffer.from(encoded, 'base64')).toString('utf8'));
   }
+
   if (data.meta?.sharedDataFile) {
     const shared = readJson(path.join('data', data.meta.sharedDataFile));
     data.equipment = [...(shared.equipment || []), ...(data.equipment || [])];
     data.profiles = [...(shared.profiles || []), ...(data.profiles || [])];
     data.mounts = [...(shared.mounts || []), ...(data.mounts || [])];
   }
+
+  // Runtime global_consistency_fixes.js injects this profile/mount for Empire.
+  if (data.faction?.id === 'empire') {
+    data.profiles = data.profiles || [];
+    data.mounts = data.mounts || [];
+    if (!data.profiles.some(p => p.id === 'warrior_priest_chariot_profile')) {
+      data.profiles.push({id:'warrior_priest_chariot_profile'});
+    }
+    if (!data.mounts.some(m => m.id === 'warrior_priest_chariot')) {
+      data.mounts.push({id:'warrior_priest_chariot',profileId:'warrior_priest_chariot_profile'});
+    }
+  }
+
   return data;
 }
 
@@ -64,8 +81,9 @@ function auditArmyData() {
 
       if (unit.sectionKey === 'regiments' && unit.points?.type === 'per_model' && Number(unit.points.value) > 0) {
         const sourceMin = Math.max(1, Number(unit.size?.minimum || 1));
-        const required = Math.max(sourceMin, Math.ceil(Number(data.globalArmyRules?.minimumRegimentModelPoints || 50) / Number(unit.points.value)));
-        assert(required * Number(unit.points.value) >= Number(data.globalArmyRules?.minimumRegimentModelPoints || 50), `${army.name}: ${unit.name} cannot satisfy 50-point regiment minimum`);
+        const minimumPoints = Number(data.globalArmyRules?.minimumRegimentModelPoints || 50);
+        const required = Math.max(sourceMin, Math.ceil(minimumPoints / Number(unit.points.value)));
+        assert(required * Number(unit.points.value) >= minimumPoints, `${army.name}: ${unit.name} cannot satisfy 50-point regiment minimum`);
       }
     }
 
