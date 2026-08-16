@@ -1,1 +1,0 @@
-Temporary release note: General-system edge cases such as High Elf Forenrond’s Sword require forced-General override handling.
