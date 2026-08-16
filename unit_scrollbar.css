@@ -1,0 +1,28 @@
+/* Keep the army-book unit list visibly scrollable on ChromeOS and desktop browsers. */
+.unit-sections {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: #9a7840 #eee5d6;
+}
+
+.unit-sections::-webkit-scrollbar {
+  width: 12px;
+}
+
+.unit-sections::-webkit-scrollbar-track {
+  background: #eee5d6;
+  border-left: 1px solid #d8cfbf;
+}
+
+.unit-sections::-webkit-scrollbar-thumb {
+  min-height: 44px;
+  background: #9a7840;
+  border: 3px solid #eee5d6;
+  border-radius: 999px;
+}
+
+.unit-sections::-webkit-scrollbar-thumb:hover {
+  background: #7b5e2f;
+}
