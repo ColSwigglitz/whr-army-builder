@@ -28,8 +28,8 @@ jobs:
                 const u=(state.data.faction.specialCharacters||[]).find(x=>x.id===id);if(!u)return {fail:[`missing ${id}`]};
                 const e=createEntry('specialCharacters',u);
                 if(mutate==='malekith_chariot')e.mount='whr_special_malekith_cold_one_chariot';
-                const pad=String(rosterPadRow(e));const fail=[];
-                for(const t of tests)if(!pad.includes(t))fail.push(`${u.name}: missing ${t}`);
+                const raw=String(rosterPadRow(e));const d=document.createElement('div');d.innerHTML=raw;const pad=(d.textContent||'').toLowerCase();const fail=[];
+                for(const t of tests)if(!pad.includes(String(t).toLowerCase()))fail.push(`${u.name}: missing ${t}`);
                 return {fail};
               },{id,tests,mutate});
               failures.push(...r.fail.map(x=>`${army}: ${x}`));
