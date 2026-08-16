@@ -6,6 +6,7 @@
   const has=(u,t)=>tags(u).includes(t);
   const tribe=()=>state.armyOptions?.ogreAllyTribe||"";
   const isAlly=u=>has(u,"ogre_ally");
+  const isNativeOgreRegiment=u=>has(u,"ogre")&&!isAlly(u);
 
   function visibleForTribe(unit){ return !isAlly(unit) || unit.ogreAllyTribe===tribe(); }
   function withFilteredFaction(fn){
@@ -15,12 +16,24 @@
     try{return fn();}finally{Object.assign(f,saved);}
   }
 
+  // WHR core command rules: monstrous regiments receive a musician for free,
+  // may buy a standard bearer for 10 pts, and a regiment with a standard may
+  // carry a magic banner unless its army-book entry specifically forbids it.
+  function patchNativeOgreCommand(){
+    for(const unit of state.data?.faction?.regiments||[]){
+      if(!isNativeOgreRegiment(unit))continue;
+      unit.command={...(unit.command||{}),useGlobalDefaults:true};
+      unit.magicBanner={...(unit.magicBanner||{}),allowed:true};
+    }
+  }
+
   const oldSelectArmy=selectArmy;
   selectArmy=async function(armyId){
     await oldSelectArmy(armyId);
     if(!isOgre())return;
     state.armyOptions=state.armyOptions||{};
     state.armyOptions.ogreAllyTribe=state.armyOptions.ogreAllyTribe||"";
+    patchNativeOgreCommand();
     renderUnitBrowser();renderArmy();
   };
 
@@ -52,18 +65,26 @@
   calculateEntry=function(entry){
     let total=oldCalculateEntry(entry);if(!isOgre())return total;
     const unit=getUnit(entry.sectionKey,entry.unitId);if(!unit)return total;
-    if(unit.id==="ogre_beastmaster_pack") return Math.max(0,Number(entry.optionSelections?.beastmasters||0))*30 + Math.max(0,Number(entry.optionSelections?.sabretooths||0))*20;
+    if(unit.id==="ogre_beastmaster_pack"){
+      const models=Math.max(0,Number(entry.optionSelections?.beastmasters||0))*30 + Math.max(0,Number(entry.optionSelections?.sabretooths||0))*20;
+      // oldCalculateEntry contributes command and magic-banner costs; the pack's
+      // own model cost is maintained by the mixed-pack controls above.
+      return models+total;
+    }
     return total;
   };
 
   const oldRenderRegimentEditor=renderRegimentEditor;
   renderRegimentEditor=function(entry,unit){
     if(!isOgre()||unit.id!=="ogre_beastmaster_pack")return oldRenderRegimentEditor(entry,unit);
-    return `<section class="editor-section"><h3 class="editor-section-title">Beastmaster Pack</h3>
+    let html=`<section class="editor-section"><h3 class="editor-section-title">Beastmaster Pack</h3>
       <div class="field-hint">0–1 pack. Ogre Beastmasters cost 30 pts each; Sabretooth Tigers cost 20 pts each.</div>
       <div class="dialog-field"><label>Ogre Beastmasters</label><input type="number" min="1" step="1" value="${Number(entry.optionSelections?.beastmasters||1)}" data-ogre-beastmasters></div>
       <div class="dialog-field"><label>Sabretooth Tigers</label><input type="number" min="1" step="1" value="${Number(entry.optionSelections?.sabretooths||1)}" data-ogre-sabretooths></div>
-      <div class="dialog-note">Sabretooth Tigers cause fear and manoeuvre as though they have a musician.</div></section>`;
+      <div class="dialog-note">Sabretooth Tigers cause fear and may take manoeuvres as though they have a musician.</div></section>`;
+    html+=renderCommandEditor(entry,unit);
+    if(entry.command?.standardBearer&&unit.magicBanner?.allowed)html+=renderMagicBannerEditor(entry,unit);
+    return html;
   };
 
   const oldWire=wireEditorControls;
@@ -91,9 +112,15 @@
 
   const oldBanner=renderMagicBannerEditor;
   renderMagicBannerEditor=function(entry,unit){
-    if(!isOgre()||!isAlly(unit))return oldBanner(entry,unit);
+    if(!isOgre())return oldBanner(entry,unit);
     const common=state.data.commonMagicItems, faction=state.data.factionMagicItems;
-    state.data.factionMagicItems=faction.filter(item=>item.ogreAllySource===unit.ogreAllySource);
+    if(isAlly(unit)){
+      state.data.factionMagicItems=faction.filter(item=>item.ogreAllySource===unit.ogreAllySource);
+    }else{
+      // Native Ogres have no Ogre-specific magic-banner section. Keep the
+      // common banner pool, but do not leak imported allied-race banners.
+      state.data.factionMagicItems=faction.filter(item=>!item.ogreAllySource);
+    }
     try{return oldBanner(entry,unit);}finally{state.data.commonMagicItems=common;state.data.factionMagicItems=faction;}
   };
 
