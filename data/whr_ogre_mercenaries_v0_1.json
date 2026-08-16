@@ -4,77 +4,9 @@
     "game": "Warhammer Renaissance",
     "source": "WHR Armies 2026-27 final version",
     "faction": "Ogre Mercenaries",
-    "status": "skeleton",
-    "notes": [
-      "Skeleton data file for WHR Army Builder.",
-      "Populate this file from the uploaded Armies Compendium before marking the faction available."
-    ]
+    "status": "populated-payload",
+    "payloadFile": "whr_ogre_mercenaries_v0_1.payload",
+    "notes": ["Populated from the WHR Ogre Mercenaries section. Allied tribes are attached at load time from existing army datasets."]
   },
-  "globalArmyRules": {
-    "minimumRegimentPercentage": 50,
-    "minimumRegimentModelPoints": 50,
-    "minimumUnitSize": {
-      "infantry": 5,
-      "cavalry": 5,
-      "monstrous_regiment": 3
-    },
-    "specialCharactersUnique": true,
-    "magicItemsUnique": true,
-    "general": {
-      "mustBeAmongHighestLeadership": true,
-      "battleStandardBearerEligible": false,
-      "regimentalChampionEligible": false
-    },
-    "command": {
-      "normalRegiment": {
-        "musician": {
-          "default": true,
-          "cost": 0
-        },
-        "standardBearer": {
-          "default": true,
-          "cost": 0
-        }
-      },
-      "fastCavalry": {
-        "musician": {
-          "default": true,
-          "cost": 0
-        },
-        "standardBearer": {
-          "default": false,
-          "cost": 10
-        }
-      },
-      "monstrousRegiment": {
-        "musician": {
-          "default": true,
-          "cost": 0
-        },
-        "standardBearer": {
-          "default": false,
-          "cost": 10
-        }
-      },
-      "skirmisher": {
-        "standardBearerAllowed": false
-      }
-    }
-  },
-  "equipment": [],
-  "profiles": [],
-  "mounts": [],
-  "commonMagicItems": [],
-  "factionMagicItems": [],
-  "faction": {
-    "id": "ogre_mercenaries",
-    "name": "Ogre Mercenaries",
-    "armyWideRules": [],
-    "systems": {},
-    "characters": [],
-    "regiments": [],
-    "warMachines": [],
-    "specialCharacters": [],
-    "specialCharacterOnlyItems": []
-  }
+  "faction": {"id":"ogre_mercenaries","name":"Ogre Mercenaries"}
 }
