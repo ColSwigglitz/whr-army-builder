@@ -32,19 +32,32 @@
     return oldAddUnit(sectionKey, unitId);
   };
 
-  // Imported allied units have namespaced item IDs. The generic magic resolver
-  // cannot infer those original army-book pools, so explicitly add the legal
-  // source-book items while retaining the bearer's normal category limits.
+  function sourceBearerAllows(item, unit) {
+    if (unit.ogreAllySource !== "orcs_goblins") return true;
+    const text = `${item.name || ""} ${item.rules || ""}`.toLowerCase();
+    const tribe = unit.ogreAllyTribe;
+    if (text.includes("common goblin") && tribe !== "common_goblins") return false;
+    if (text.includes("forest goblin") && tribe !== "forest_goblins") return false;
+    if (text.includes("night goblin") && tribe !== "night_goblins") return false;
+    if (text.includes("common orc") || text.includes("black orc") || text.includes("orc only")) return false;
+    if (text.includes("shaman only") || text.includes("shamans only")) return false;
+    return true;
+  }
+
+  // Imported allied units have namespaced item IDs. The older O&G character data
+  // uses magicItemLimit rather than a magicItems object, so support both schemas.
   const oldAllowedMagic = getAllowedMagicItems;
   getAllowedMagicItems = function(unit, context) {
     const base = oldAllowedMagic(unit, context);
     if (!isOgre() || !isAlly(unit)) return base;
 
-    const settings = context === "champion" ? unit.champion?.magicItems : unit.magicItems;
+    let settings = context === "champion" ? unit.champion?.magicItems : unit.magicItems;
+    if (!settings && context === "character" && Number(unit.magicItemLimit || 0) > 0) settings = {allowedCategories:["magic_weapon","magic_armour","enchanted_item","arcane_item","familiar"]};
     if (!settings) return base;
+
     const categories = new Set(settings.allowedCategories || ["magic_weapon","magic_armour","enchanted_item","arcane_item","familiar"]);
     const sourceItems = (state.data.factionMagicItems || []).filter(item =>
-      item.ogreAllySource === unit.ogreAllySource && categories.has(item.category)
+      item.ogreAllySource === unit.ogreAllySource && categories.has(item.category) && sourceBearerAllows(item, unit)
     );
 
     const byId = new Map(base.map(item => [item.id,item]));
