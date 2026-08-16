@@ -11,7 +11,17 @@
     const profileId = `${id}_profile`;
     profileById.set(profileId, { id: profileId, name, stats: { ...stats } });
     mountById.set(id, { id, name, profileId, rules: [...notes] });
-    return id;
+    return { id, profileId, name, notes: [...notes] };
+  }
+
+  function asUnitMount(installed) {
+    return {
+      mountId: installed.id,
+      profileId: installed.profileId,
+      name: installed.name,
+      rules: [...installed.notes],
+      equipment: []
+    };
   }
 
   function profileRow(name, stats, notes = [], className = "mount-row") {
@@ -42,30 +52,30 @@
     if (army === "lizardmen") {
       const maz = specialById("mazdamundi");
       if (maz) {
-        const id = installMount(`${MOUNT_PREFIX}lizardmen_stegadon`, "Stegadon",
+        const mount = installMount(`${MOUNT_PREFIX}lizardmen_stegadon`, "Stegadon",
           { M: 6, WS: 2, BS: 0, S: 7, T: 6, W: 6, I: 2, A: 5, Ld: 6 },
           ["4+ scaly skin", "Terror", "1D6 impact hits like a chariot"]);
-        maz.unitMount = { mountId: id, name: "Stegadon", equipment: [] };
+        maz.unitMount = asUnitMount(mount);
       }
     }
 
     if (army === "slann_empire") {
       const maz = specialById("emperor_mazdamundi");
       if (maz) {
-        const id = installMount(`${MOUNT_PREFIX}slann_stegadon`, "Stegadon",
+        const mount = installMount(`${MOUNT_PREFIX}slann_stegadon`, "Stegadon",
           { M: 6, WS: 2, BS: 0, S: 7, T: 6, W: 6, I: 2, A: 5, Ld: 6 },
           ["Terror", "1D6 impact hits like a chariot"]);
-        maz.unitMount = { mountId: id, name: "Stegadon", equipment: [] };
+        maz.unitMount = asUnitMount(mount);
       }
     }
 
     if (army === "tomb_kings") {
       const arkhan = specialById("arkhan");
       if (arkhan) {
-        const id = installMount(`${MOUNT_PREFIX}arkhan_chariot`, "Arkhan's Flying Heavy Chariot",
+        const mount = installMount(`${MOUNT_PREFIX}arkhan_chariot`, "Arkhan's Flying Heavy Chariot",
           { M: "–", WS: "–", BS: "–", S: 5, T: 5, W: 4, I: "–", A: "–", Ld: "–" },
           ["Heavy Chariot", "Flying", "Scythed wheels"]);
-        arkhan.unitMount = { mountId: id, name: "Arkhan's Flying Heavy Chariot", equipment: [] };
+        arkhan.unitMount = asUnitMount(mount);
         arkhan.specialMountComponents = [
           { name: "4 Undead Steeds", stats: { M: 8, WS: 2, BS: 0, S: 3, T: 3, W: 1, I: 2, A: 1, Ld: 5 }, notes: ["Pulling the chariot"] },
           { name: "3 Skeleton crewmen", stats: { M: 4, WS: 2, BS: 2, S: 3, T: 3, W: 1, I: 2, A: 1, Ld: 5 }, notes: ["Chariot crew"] }
@@ -76,26 +86,26 @@
     if (army === "dwarfs") {
       const thorgrim = specialById("thorgrim");
       if (thorgrim) {
-        const id = installMount(`${MOUNT_PREFIX}throne_power`, "Throne of Power",
+        const mount = installMount(`${MOUNT_PREFIX}throne_power`, "Throne of Power",
           { M: "–", WS: "–", BS: "–", S: "–", T: "–", W: "–", I: "–", A: 4, Ld: "–" },
           ["Bearers provide four additional attacks", "Cannot march", "Ignore the first two wounds suffered"]);
-        thorgrim.unitMount = { mountId: id, name: "Throne of Power", equipment: [] };
+        thorgrim.unitMount = asUnitMount(mount);
       }
     }
 
     if (army === "dark_elves") {
       const malekith = specialById("malekith");
       if (malekith) {
-        const id = installMount(`${MOUNT_PREFIX}malekith_cold_one_chariot`, "Cold One Chariot",
+        const mount = installMount(`${MOUNT_PREFIX}malekith_cold_one_chariot`, "Cold One Chariot",
           { M: "–", WS: "–", BS: "–", S: 5, T: 5, W: 4, I: "–", A: "–", Ld: "–" },
           ["Heavy Chariot", "Scythed wheels", "Stupidity"]);
         malekith.mountOptions = malekith.mountOptions || [];
-        if (!malekith.mountOptions.some(option => option.mountId === id)) {
-          malekith.mountOptions.unshift({ mountId: id, cost: 0 });
+        if (!malekith.mountOptions.some(option => option.mountId === mount.id)) {
+          malekith.mountOptions.unshift({ mountId: mount.id, cost: 0 });
         }
         malekith.specialMountComponents = [
-          { whenMount: id, name: "2 Cold Ones", stats: { M: 8, WS: 3, BS: 0, S: 4, T: 4, W: 1, I: 1, A: 2, Ld: 3 }, notes: ["Pulling the chariot", "Stupidity"] },
-          { whenMount: id, name: "2 Elven Warrior crew", stats: { M: 5, WS: 4, BS: 4, S: 3, T: 3, W: 1, I: 6, A: 1, Ld: 8 }, notes: ["Light armour", "Spears", "Shields", "Repeating crossbows"] }
+          { whenMount: mount.id, name: "2 Cold Ones", stats: { M: 8, WS: 3, BS: 0, S: 4, T: 4, W: 1, I: 1, A: 2, Ld: 3 }, notes: ["Pulling the chariot", "Stupidity"] },
+          { whenMount: mount.id, name: "2 Elven Warrior crew", stats: { M: 5, WS: 4, BS: 4, S: 3, T: 3, W: 1, I: 6, A: 1, Ld: 8 }, notes: ["Light armour", "Spears", "Shields", "Repeating crossbows"] }
         ];
       }
     }
