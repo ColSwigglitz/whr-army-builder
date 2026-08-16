@@ -1,0 +1,61 @@
+name: Army loading feedback smoke
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Verify loading feedback and heavy army loads
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:1440,height:900}});
+            const errors=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            page.on('console',m=>{if(m.type()==='error') errors.push(m.text())});
+
+            // Simulate the slower network path users can see with payload-based armies.
+            await page.route('**/data/**', async route => {
+              if (!route.request().url().endsWith('/data/armies.json')) await new Promise(r=>setTimeout(r,350));
+              await route.continue();
+            });
+
+            await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            const tile=page.locator('[data-army-id="slann_empire"]');
+            if(await tile.count()!==1) throw new Error('Slann Empire tile missing');
+
+            await tile.click({noWaitAfter:true});
+            await page.waitForTimeout(80);
+
+            const overlay=page.locator('.army-loading-overlay');
+            if(!(await overlay.isVisible())) throw new Error('Loading overlay was not visible during delayed army load');
+            const title=(await page.locator('#armyLoadingTitle').textContent()) || '';
+            if(!/Slann Empire/i.test(title)) throw new Error('Loading overlay did not name selected army: '+title);
+            if(!(await page.locator('.army-loading-spinner').isVisible())) throw new Error('Loading spinner missing');
+
+            await page.waitForFunction(()=>!document.querySelector('.army-loading-overlay') || document.querySelector('.army-loading-overlay').hidden,{timeout:10000});
+            if(await page.locator('#builderScreen').isHidden()) throw new Error('Builder did not open after loading');
+            if(!/Slann/i.test((await page.locator('#factionName').textContent())||'')) throw new Error('Wrong army loaded');
+
+            // Return to selection and ensure another payload-heavy army can load cleanly.
+            await page.click('#backToArmiesBtn');
+            const start=Date.now();
+            await page.click('[data-army-id="dark_elves"]',{noWaitAfter:true});
+            await page.waitForFunction(()=>!document.querySelector('.army-loading-overlay') || document.querySelector('.army-loading-overlay').hidden,{timeout:10000});
+            const elapsed=Date.now()-start;
+            console.log('HEAVY_ARMY_DELAYED_LOAD_MS',elapsed);
+
+            if(errors.length) throw new Error(errors.join('\n'));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
