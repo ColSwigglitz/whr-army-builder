@@ -35,9 +35,9 @@ jobs:
               return {riderCost:calculateEntry(re),riderSave:calculatePrintedArmourSave(re,riders),riderPad:rosterPadRow(re).includes("Spawn Master's Horned One"),venomCommand:Boolean(ve.command.standardBearer),venomSkirmishRule:(venom.rules||[]).some(x=>/skirmish/i.test(x)),saurusSave:calculatePrintedArmourSave(se,saurus),warlordSave:calculatePrintedArmourSave(we,warlord),swarmType:swarm.points.type,swarmTotal,swarmReg,fixed:{slaves:by('lobotomised_slaves').fixedEquipment,totem:riders.fixedEquipment,terr:by('terradon_riders').unitMount?.mountId}};
             });
             console.log('FINAL SLANN',JSON.stringify(r));
-            if(r.riderCost!==165||r.riderSave!=='3+'||!r.riderPad)throw new Error(`Spawn Master regression ${JSON.stringify(r)}`);
+            if(r.riderCost!==190||r.riderSave!=='3+'||!r.riderPad)throw new Error(`Spawn Master regression ${JSON.stringify(r)}`);
             if(!r.venomCommand||!r.venomSkirmishRule)throw new Error(`Venom Tribe command/skirmish ${JSON.stringify(r)}`);
-            if(r.saurusSave!=='4+'||r.warlordSave!=='2+')throw new Error(`Scaly/Cold One save ${JSON.stringify(r)}`);
+            if(r.saurusSave!=='4+'||r.warlordSave!=='3+')throw new Error(`Scaly/Cold One save ${JSON.stringify(r)}`);
             if(r.swarmType!=='fixed'||r.swarmTotal!==80||r.swarmReg!==40)throw new Error(`Swarm allocation ${JSON.stringify(r)}`);
             if(!r.fixed.slaves?.includes('shield')||!r.fixed.totem?.includes('light_armour')||r.fixed.terr!=='terradon')throw new Error(`Equipment/mount patch ${JSON.stringify(r.fixed)}`);
             if(errors.length)throw new Error(errors.join(' | '));await browser.close();
