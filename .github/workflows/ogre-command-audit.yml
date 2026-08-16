@@ -21,10 +21,16 @@ jobs:
             const b=await chromium.launch({headless:true}),p=await b.newPage();
             await p.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
             await p.evaluate(async()=>selectArmy('ogre_mercenaries')); await p.waitForTimeout(150);
-            const out=await p.evaluate(()=>({
-              global: state.data.globalArmyRules?.command,
-              regiments: (state.data.faction.regiments||[]).map(u=>({id:u.id,name:u.name,unitType:u.unitType,tags:u.tags,command:u.command,points:u.points}))
-            }));
+            const out=await p.evaluate(()=>{
+              const bsb=(state.data.faction.characters||[]).find(u=>(u.tags||[]).includes('bsb')||/standard bearer/i.test(u.name));
+              return {
+                global: state.data.globalArmyRules?.command,
+                regiments: (state.data.faction.regiments||[]).filter(u=>(u.tags||[]).includes('ogre')&&!((u.tags||[]).includes('ogre_ally'))).map(u=>({id:u.id,name:u.name,unitType:u.unitType,tags:u.tags,command:u.command,magicBanner:u.magicBanner,entry:createEntry('regiments',u),commandDefs:{musician:getCommandDefinition(u,'musician'),standard:getCommandDefinition(u,'standardBearer')}})),
+                bsb: bsb?{id:bsb.id,name:bsb.name,tags:bsb.tags,magicItems:bsb.magicItems,allowed:getAllowedMagicItems(bsb,'character').map(i=>({id:i.id,name:i.name,category:i.category,cost:i.cost}))}:null,
+                commonBanners:(state.data.commonMagicItems||[]).filter(i=>i.category==='magic_banner').map(i=>({id:i.id,name:i.name,cost:i.cost})),
+                factionBanners:(state.data.factionMagicItems||[]).filter(i=>i.category==='magic_banner').map(i=>({id:i.id,name:i.name,cost:i.cost}))
+              };
+            });
             console.log('OGRE_COMMAND_AUDIT',JSON.stringify(out,null,2));
             await b.close();
           })().catch(e=>{console.error(e);process.exit(1)});
