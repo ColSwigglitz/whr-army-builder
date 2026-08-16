@@ -1,0 +1,79 @@
+/* Full-screen loading feedback while an army book is being prepared. */
+.army-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(36, 25, 19, .56);
+  backdrop-filter: blur(2px);
+}
+
+.army-loading-overlay[hidden] {
+  display: none;
+}
+
+.army-loading-card {
+  width: min(430px, calc(100vw - 36px));
+  padding: 28px 28px 25px;
+  text-align: center;
+  color: #35281c;
+  background: #fffaf0;
+  border: 1px solid #cdbd9e;
+  border-radius: 12px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .28);
+}
+
+.army-loading-mark {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  color: #fff8e7;
+  background: #6d1d18;
+  border: 2px solid #b8954c;
+  box-shadow: inset 0 0 0 3px #6d1d18, inset 0 0 0 4px rgba(255,255,255,.35);
+  font: 800 16px Georgia, "Times New Roman", serif;
+}
+
+.army-loading-spinner {
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 14px;
+  border: 4px solid #ded2bf;
+  border-top-color: #7b211b;
+  border-radius: 50%;
+  animation: whr-army-loading-spin .8s linear infinite;
+}
+
+.army-loading-card h2 {
+  margin: 0;
+  color: #421b17;
+  font: 700 23px/1.2 Georgia, "Times New Roman", serif;
+}
+
+.army-loading-card p {
+  margin: 9px 0 0;
+  color: #766958;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.army-loading-card .army-loading-detail {
+  margin-top: 5px;
+  font-size: 11px;
+}
+
+body.army-is-loading {
+  cursor: wait;
+}
+
+@keyframes whr-army-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .army-loading-spinner { animation-duration: 1.8s; }
+}
