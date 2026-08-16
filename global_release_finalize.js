@@ -33,8 +33,15 @@
 
   // General selection is deliberately loaded last so it evaluates the final,
   // army-specific character data and wraps the completed roster/status UI.
+  // Edge-case overrides then layer forced/prohibited General rules on top.
   const generalScript = document.createElement("script");
-  generalScript.src = "general_system.js?v=1";
+  generalScript.src = "general_system.js?v=2";
   generalScript.async = false;
+  generalScript.onload = () => {
+    const overrideScript = document.createElement("script");
+    overrideScript.src = "general_overrides.js?v=1";
+    overrideScript.async = false;
+    document.body.appendChild(overrideScript);
+  };
   document.body.appendChild(generalScript);
 })();
