@@ -11,7 +11,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 >/dev/null 2>&1
           npx playwright install chromium >/dev/null
-      - name: Inspect Ogre allied pools
+      - name: Verify Ogre allied tribe options
         run: |
           python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
           PID=$!; trap 'kill $PID || true' EXIT
@@ -19,18 +19,92 @@ jobs:
           const {chromium}=require('playwright');
           (async()=>{
             const b=await chromium.launch({headless:true}),p=await b.newPage();
+            const runtime=[];p.on('pageerror',e=>runtime.push(e.message));p.on('console',m=>{if(m.type()==='error')runtime.push(m.text())});
             await p.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
-            await p.evaluate(async()=>selectArmy('ogre_mercenaries'));await p.waitForTimeout(200);
-            const out=await p.evaluate(()=>{
-              const f=state.data.faction;
-              return {
-                commonCharacters:f.characters.filter(u=>u.ogreAllyTribe==='common_goblins').map(u=>({id:u.id,name:u.name,mountOptions:u.mountOptions,profileId:u.profileId})),
-                commonMachines:f.warMachines.filter(u=>u.ogreAllyTribe==='common_goblins'),
-                mounts:state.data.mounts.filter(m=>String(m.id).includes('ogally_orcs_goblins')),
-                profiles:state.data.profiles.filter(x=>String(x.id).includes('ogally_orcs_goblins')).map(x=>({id:x.id,name:x.name,stats:x.stats}))
+            await p.evaluate(async()=>selectArmy('ogre_mercenaries'));await p.waitForTimeout(250);
+            const failures=await p.evaluate(()=>{
+              const fail=[],f=state.data.faction;
+              const chars=t=>f.characters.filter(u=>u.ogreAllyTribe===t), machines=t=>f.warMachines.filter(u=>u.ogreAllyTribe===t);
+              const expect=(ok,msg)=>{if(!ok)fail.push(msg)};
+
+              // All three Goblin tribes get Warlord, Hero and four Shaman levels.
+              for(const tr of ['common_goblins','forest_goblins','night_goblins']){
+                const c=chars(tr);expect(c.length===6,`${tr}: expected 6 characters, got ${c.length}`);
+                expect(c.filter(u=>(u.tags||[]).includes('shaman')).length===4,`${tr}: missing Shaman ladder`);
+              }
+              const costs={
+                common_goblins:[170,120,75,30],forest_goblins:[170,120,75,30],night_goblins:[180,130,85,40]
               };
+              for(const [tr,vals] of Object.entries(costs)){
+                const sham=chars(tr).filter(u=>(u.tags||[]).includes('shaman')).sort((a,b)=>(b.wizard?.level||0)-(a.wizard?.level||0));
+                expect(JSON.stringify(sham.map(u=>u.points.value))===JSON.stringify(vals),`${tr}: Shaman costs wrong`);
+                expect(JSON.stringify(sham.map(u=>u.magicItems?.maximum))===JSON.stringify([4,3,2,1]),`${tr}: Shaman magic limits wrong`);
+              }
+
+              const commonShaman=chars('common_goblins').find(u=>u.wizard?.level===1);
+              const forestShaman=chars('forest_goblins').find(u=>u.wizard?.level===1);
+              const nightShaman=chars('night_goblins').find(u=>u.wizard?.level===1);
+              expect(commonShaman.mountOptions.some(m=>m.mountId==='ogally_orcs_goblins_giant_wolf'&&m.cost===0),'Common Shaman missing free Giant Wolf');
+              expect(commonShaman.mountOptions.some(m=>m.mountId==='ogally_orcs_goblins_goblin_wolf_chariot_character'&&m.cost===44),'Common Shaman missing Wolf Chariot');
+              expect(forestShaman.mountOptions.some(m=>m.mountId==='ogally_orcs_goblins_giant_spider'&&m.cost===0),'Forest Shaman missing free Giant Spider');
+              expect(nightShaman.mountOptions.some(m=>m.mountId==='ogally_orcs_goblins_monstrous_spider'&&m.cost===32),'Night Shaman missing Monstrous Spider');
+
+              // Common Goblin war-machine/chariot pool.
+              const cm=machines('common_goblins');
+              const wanted={
+                'Goblin Wolf Chariot — Allied':44,
+                'Spear Chukka, Goblins — Allied':42.5,
+                'Small Rock Lobber, Goblins — Allied':72.5,
+                'Large Rock Lobber, Goblins — Allied':87.5,
+                'Goblin Doom Diver — Allied':67.5
+              };
+              for(const [name,cost] of Object.entries(wanted)){
+                const u=cm.find(x=>x.name===name);expect(Boolean(u),`Missing ${name}`);if(u)expect(u.points.value===cost,`${name}: expected ${cost}, got ${u.points.value}`);
+              }
+              expect(cm.length===5,`Common Goblins: expected 5 limited choices, got ${cm.length}`);
+              expect(machines('hobgoblins').some(u=>/bolt thrower/i.test(u.name)),'Hobgoblins missing Bolt Thrower');
+              expect(machines('halflings').some(u=>/hot-pot/i.test(u.name)),'Halflings missing Hot-Pot');
+              expect(!chars('halflings').some(u=>/wizard/i.test(u.name)||(u.tags||[]).includes('wizard')),'Halfling allied Wizard incorrectly available');
+              expect(machines('forest_goblins').length===0,'Forest Goblins should not get war machines');
+              expect(machines('night_goblins').length===0,'Night Goblins should not get war machines');
+
+              // Existing Common Warlord/Hero also regain the source-book Wolf Chariot mount.
+              for(const u of chars('common_goblins').filter(u=>/warlord|hero/i.test(u.name))){
+                expect(u.mountOptions.some(m=>m.mountId==='ogally_orcs_goblins_goblin_wolf_chariot_character'&&m.cost===44),`${u.name}: Wolf Chariot missing`);
+              }
+
+              // Racial magic stays racial.
+              const commonItems=getAllowedMagicItems(commonShaman,'character');
+              const nightItems=getAllowedMagicItems(nightShaman,'character');
+              expect(commonItems.some(i=>/Wollopa/i.test(i.name)),'Common Goblin Shaman missing Common Goblin magic item');
+              expect(!commonItems.some(i=>/Skarsnik/i.test(i.name)),'Common Goblin Shaman sees Night Goblin-only item');
+              expect(nightItems.some(i=>/Skarsnik/i.test(i.name)),'Night Goblin Shaman missing Night Goblin Shaman item');
+              expect(!nightItems.some(i=>/Axe of Grom/i.test(i.name)),'Night Goblin Shaman sees Common Goblin-only item');
+
+              // Home-book subtype prerequisite: no allied Goblin character/machine before its regiment.
+              state.roster=[];state.armyOptions.ogreAllyTribe='common_goblins';let alertText='';const oldAlert=window.alert;window.alert=x=>alertText=String(x);
+              addUnit('characters',commonShaman.id);expect(!state.roster.length&&/regiment/i.test(alertText),'Common Goblin Shaman did not require Common Goblin regiment');
+              const commonReg=f.regiments.find(u=>u.ogreAllyTribe==='common_goblins');addUnit('regiments',commonReg.id);alertText='';
+              const spear=cm.find(u=>/Spear Chukka/i.test(u.name));addUnit('warMachines',spear.id);expect(state.roster.some(e=>e.unitId===spear.id),'Spear Chukka blocked despite Common Goblin regiment');window.alert=oldAlert;
+
+              // Roster Pad: artillery crew and character chariot components are visible.
+              const spearPad=rosterPadRow(createEntry('warMachines',spear));expect(/Common Goblin/i.test(spearPad),'Spear Chukka crew missing from Roster Pad');
+              const warlord=chars('common_goblins').find(u=>/Warlord/i.test(u.name)),chariotEntry=createEntry('characters',warlord);chariotEntry.mount='ogally_orcs_goblins_goblin_wolf_chariot_character';
+              const chariotPad=rosterPadRow(chariotEntry);expect(/Goblin Wolf Chariot/i.test(chariotPad)&&/2 Giant Wolves/i.test(chariotPad)&&/2 Common Goblin crew/i.test(chariotPad),'Common Goblin character chariot profiles incomplete');
+
+              // One limited Common Goblin chariot/war-machine per full 1,000 native Ogre points.
+              state.roster=[];state.armyOptions.ogreAllyTribe='common_goblins';
+              const ogres=f.regiments.find(u=>u.id==='ogres'),native=createEntry('regiments',ogres);native.size=42;state.roster.push(native); // 1008 native pts
+              const cReg=createEntry('regiments',commonReg);state.roster.push(cReg);
+              const mEntry=createEntry('warMachines',spear);state.roster.push(mEntry);
+              chariotEntry.id=makeId();state.roster.push(chariotEntry);renderArmy();
+              expect(/Only 1 Common Goblins war machine\/chariot/i.test(els.armyStatus.textContent),'Common Goblin chariot mount not counted in 1-per-1000 allowance');
+
+              return fail;
             });
-            console.log('OGRE_ALLIES_DETAIL',JSON.stringify(out,null,2));
+            failures.push(...runtime.map(x=>`runtime: ${x}`));
+            console.log('OGRE_ALLIES_TOTAL',JSON.stringify({failures:failures.length}));
+            if(failures.length)throw new Error('\n'+failures.join('\n'));
             await b.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
