@@ -1,0 +1,65 @@
+name: Slann Empire smoke test
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  test-slann-empire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and payload
+        run: |
+          node --check slann_empire_loader.js
+          node --check slann_empire_extensions.js
+          node - <<'JS'
+          const fs=require('fs'),zlib=require('zlib');
+          const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_slann_empire_v0_1.payload','utf8').trim(),'base64')));
+          console.log('SLANN COUNTS',d.faction.characters.length,d.faction.regiments.length,d.faction.warMachines.length,d.faction.specialCharacters.length,d.factionMagicItems.length,d.faction.systems.heirlooms.length);
+          if(JSON.stringify([d.faction.characters.length,d.faction.regiments.length,d.faction.warMachines.length,d.faction.specialCharacters.length,d.factionMagicItems.length,d.faction.systems.heirlooms.length])!=='[12,14,4,3,14,5]')process.exit(1);
+          JS
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Browser regression
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage();const errors=[];
+            page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});page.on('dialog',async d=>d.dismiss());
+            await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            await page.locator('[data-army-id="slann_empire"]').click();await page.waitForTimeout(900);
+            const result=await page.evaluate(()=>{
+              const f=state.data.faction,find=(s,n)=>f[s].find(u=>u.name===n),make=(s,n,size)=>{const u=find(s,n);if(!u)throw new Error(`Missing ${s}: ${n}`);const e=createEntry(s,u);if(size!=null)e.size=size;return[u,e]};
+              const costs={};
+              for(const [n,k] of [['Slann Mage Priest Lord (Level 4)','l4'],['Master Slann Mage Priest (Level 3)','l3'],['Slann Mage Priest Champion (Level 2)','l2'],['Slann Mage Priest (Level 1)','l1'],['War Altar','altar'],['Slann Warlord','warlord'],['Slann Hero','hero'],['Slann Warrior Priest','priest'],['Slann Battle Standard Bearer','bsb'],['Lizardman Saurus Hero','saurusHero'],['Lizardman Skink Hero','skinkHero'],['Lizardman Skink Shaman (Level 1)','shaman']]){const[,e]=make('characters',n);costs[k]=calculateEntry(e)}
+              const mount=(n,m)=>{const[,e]=make('characters',n);e.mount=m;return calculateEntry(e)};
+              costs.warlordCold=mount('Slann Warlord','cold_one');costs.warlordHorn=mount('Slann Warlord','horned_one');costs.warlordTerr=mount('Slann Warlord','terradon');costs.saurusCarn=mount('Lizardman Saurus Hero','carnosaur');costs.shamanCold=mount('Lizardman Skink Shaman (Level 1)','cold_one');
+              for(const [n,size] of [['Lobotomised Human Slaves',13],['Slann Warriors',7],['Slann Venom Tribes',7],['Slann Totem Warriors',5],['Slann Totem Warrior Cold One Riders',5],['Kroxigors',3],['Saurus Temple Guard',5],['Saurus Warriors',5],['0–1 Terradon Riders',5],['0–1 Native Halflings',5],['0–1 Ghoulish Cannibal Tribes',5],['0–1 Amazon Warriors',5],['0–1 Chameleon Skinks',5]]){const[,e]=make('regiments',n,size);costs[n]=calculateEntry(e)}
+              const [handlers,he]=make('regiments','0–1 Slann Animal Handlers');costs.handlers=calculateEntry(he);const hw=createEntry('regiments',handlers);hw.optionSelections={beastmasters:2,hounds:6};costs.handlersMixed=calculateEntry(hw);
+              for(const n of ['Monstrous Spider / Scorpion','Stegadon','Salamander']){const[,e]=make('warMachines',n);costs[n]=calculateEntry(e)}
+              const [swarm,se]=make('warMachines','Jungle Swarm');se.size=1;costs.swarm=calculateEntry(se);
+              const [,toad]=make('specialCharacters','Toad Master Drulndribl'),[,kroak]=make('specialCharacters','Venerable Lord Kroak'),[,maz]=make('specialCharacters','Emperor Mazdamundi');costs.toad=calculateEntry(toad);costs.kroak=calculateEntry(kroak);costs.maz=calculateEntry(maz);
+              const warlord=find('characters','Slann Warlord'),skink=find('characters','Lizardman Skink Hero'),altar=find('characters','War Altar');state.draft=createEntry('characters',warlord);const wi=getAllowedMagicItems(warlord,'character');state.draft=createEntry('characters',skink);const si=getAllowedMagicItems(skink,'character');state.draft=createEntry('characters',altar);const ai=getAllowedMagicItems(altar,'character');state.draft=null;
+              const heir=createEntry('characters',warlord);heir.slannHeirlooms=['blaster','protective_field'];const heirCost=calculateEntry(heir);
+              const slaves=find('regiments','Lobotomised Human Slaves'),saurus=find('regiments','Saurus Warriors');const sb=renderMagicBannerEditor(createEntry('regiments',slaves),slaves),ss=renderMagicBannerEditor(createEntry('regiments',saurus),saurus);
+              state.roster=[se];const swarmReg=calculateRegimentPoints();state.roster=[];
+              return {name:f.name,counts:[f.characters.length,f.regiments.length,f.warMachines.length,f.specialCharacters.length,state.data.factionMagicItems.length,f.systems.heirlooms.length],costs,heirCost,magic:{warlordDagger:wi.some(i=>i.id==='dagger_sotek'),skinkDagger:si.some(i=>i.id==='dagger_sotek'),altarWeapon:ai.some(i=>i.category==='magic_weapon'),altarArcane:ai.some(i=>i.id==='amulet_itza'),slaveShackle:sb.includes('Shackle Standard'),saurusShackle:ss.includes('Shackle Standard')},swarmReg,pad:{handlers:rosterPadRow(hw).includes('Lizard Hounds'),steg:rosterPadRow(make('warMachines','Stegadon')[1]).includes('Skink Crew'),terr:rosterPadRow(make('regiments','0–1 Terradon Riders',5)[1]).includes('Terradons')},ids:{native1:find('regiments','0–1 Native Halflings').id,native2:find('regiments','0–1 Amazon Warriors').id,handlers:handlers.id,terradon:find('regiments','0–1 Terradon Riders').id,bsb:find('characters','Slann Battle Standard Bearer').id}};
+            });
+            console.log('SLANN',JSON.stringify(result));
+            if(result.name!=='The Slann Empire'||JSON.stringify(result.counts)!=='[12,14,4,3,14,5]')throw new Error(`Load/count ${JSON.stringify(result.counts)}`);
+            const ex={l4:314,l3:236,l2:172,l1:108,altar:134,warlord:124,hero:74,priest:94,bsb:88,saurusHero:118,skinkHero:53,shaman:46,warlordCold:154,warlordHorn:164,warlordTerr:175,saurusCarn:306,shamanCold:46,'Lobotomised Human Slaves':52,'Slann Warriors':56,'Slann Venom Tribes':56,'Slann Totem Warriors':50,'Slann Totem Warrior Cold One Riders':125,Kroxigors:150,'Saurus Temple Guard':90,'Saurus Warriors':75,'0–1 Terradon Riders':210,'0–1 Native Halflings':55,'0–1 Ghoulish Cannibal Tribes':65,'0–1 Amazon Warriors':75,'0–1 Chameleon Skinks':85,handlers:54,handlersMixed:76,'Monstrous Spider / Scorpion':40,Stegadon:200,Salamander:80,swarm:40,toad:250,kroak:375,maz:600};
+            for(const[k,v]of Object.entries(ex))if(result.costs[k]!==v)throw new Error(`${k}: expected ${v}, got ${result.costs[k]}`);
+            if(result.heirCost!==174)throw new Error(`Heirloom cost ${result.heirCost}`);
+            if(result.magic.warlordDagger||!result.magic.skinkDagger||result.magic.altarWeapon||!result.magic.altarArcane||!result.magic.slaveShackle||result.magic.saurusShackle)throw new Error(`Magic ${JSON.stringify(result.magic)}`);
+            if(result.swarmReg!==40||!result.pad.handlers||!result.pad.steg||!result.pad.terr)throw new Error(`Composition/pad ${result.swarmReg} ${JSON.stringify(result.pad)}`);
+            const construction=await page.evaluate(ids=>{const count=id=>state.roster.filter(e=>e.unitId===id).length;const out={};state.roster=[];addUnit('regiments',ids.native1);addUnit('regiments',ids.native2);out.nativeOne=state.roster.length===1;state.roster=[];addUnit('regiments',ids.handlers);addUnit('regiments',ids.handlers);out.handlersOne=count(ids.handlers)===1;state.roster=[];addUnit('regiments',ids.terradon);addUnit('regiments',ids.terradon);out.terradonOne=count(ids.terradon)===1;state.roster=[];addUnit('characters',ids.bsb);addUnit('characters',ids.bsb);out.bsbOne=count(ids.bsb)===1;return out},result.ids);
+            console.log('CONSTRUCTION',JSON.stringify(construction));if(Object.values(construction).some(v=>!v))throw new Error(`Construction ${JSON.stringify(construction)}`);
+            if(errors.length)throw new Error(errors.join(' | '));await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
