@@ -11,41 +11,36 @@
     "goblin_hewer"
   ]);
 
-  const restrictedNames = new Set([
-    "longbeards",
-    "long beards",
-    "hammerers",
-    "ironbreakers",
-    "rangers",
-    "miners",
-    "dwarf miners",
-    "goblin hewer",
-    "goblin hewer war machine"
-  ]);
-
-  function normaliseName(value) {
+  function normalise(value) {
     return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   }
 
-  function isRestricted(unit) {
-    if (!isDwarfArmy() || !unit) return false;
-    return restrictedIds.has(String(unit.id || "").toLowerCase()) || restrictedNames.has(normaliseName(unit.name));
+  function restrictedKey(unit) {
+    const id = normalise(unit?.id);
+    const name = normalise(unit?.name);
+    const combined = `${id} ${name}`;
+
+    if (restrictedIds.has(String(unit?.id || "").toLowerCase())) return String(unit.id).toLowerCase();
+    if (/\blong\s*beards?\b/.test(combined) || /\blongbeards?\b/.test(combined)) return "longbeards";
+    if (/\bhammerers?\b/.test(combined)) return "hammerers";
+    if (/\biron\s*breakers?\b/.test(combined) || /\bironbreakers?\b/.test(combined)) return "ironbreakers";
+    if (/\brangers?\b/.test(combined)) return "rangers";
+    if (/\bminers?\b/.test(combined)) return "miners";
+    if (/\bgoblin\s+hewer\b/.test(combined)) return "goblin_hewer";
+    return null;
   }
 
-  function sameRestrictedChoice(a, b) {
-    if (!a || !b) return false;
-    const aId = String(a.id || "").toLowerCase();
-    const bId = String(b.id || "").toLowerCase();
-    if (aId && bId) return aId === bId;
-    return normaliseName(a.name) === normaliseName(b.name);
+  function isRestricted(unit) {
+    return isDwarfArmy() && Boolean(restrictedKey(unit));
   }
 
   function existingCopy(unit, ignoreEntryId = null) {
-    if (!isRestricted(unit)) return null;
+    const key = restrictedKey(unit);
+    if (!key) return null;
     return state.roster.find(entry => {
       if (entry.id === ignoreEntryId) return false;
       const existing = getUnit(entry.sectionKey, entry.unitId);
-      return existing && isRestricted(existing) && sameRestrictedChoice(existing, unit);
+      return restrictedKey(existing) === key;
     }) || null;
   }
 
