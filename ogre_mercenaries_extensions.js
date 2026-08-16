@@ -7,6 +7,7 @@
   const tribe=()=>state.armyOptions?.ogreAllyTribe||"";
   const isAlly=u=>has(u,"ogre_ally");
   const isNativeOgreRegiment=u=>has(u,"ogre")&&!isAlly(u);
+  const goblinTribes=new Set(["common_goblins","forest_goblins","night_goblins"]);
 
   function visibleForTribe(unit){ return !isAlly(unit) || unit.ogreAllyTribe===tribe(); }
   function withFilteredFaction(fn){
@@ -52,12 +53,23 @@
   };
 
   function zeroOne(unit){return Number(unit?.selection?.maximum||0)===1||has(unit,"zero_one");}
+  function hasTribeRegiment(which){return state.roster.some(e=>e.sectionKey==="regiments"&&getUnit(e.sectionKey,e.unitId)?.ogreAllyTribe===which);}
+  function requiresTribeRegiment(unit){
+    if(!isAlly(unit))return false;
+    if(goblinTribes.has(unit.ogreAllyTribe))return true;
+    if(unit.ogreAllyTribe==="hobgoblins"&&(unit.ogreAllyRequiresRegiment||has(unit,"requires_hobgoblin_regiment")))return true;
+    return Boolean(unit.ogreAllyRequiresRegiment);
+  }
+
   const oldAddUnit=addUnit;
   addUnit=function(sectionKey,unitId){
     if(!isOgre())return oldAddUnit(sectionKey,unitId);
     const unit=getUnit(sectionKey,unitId);if(!unit)return;
     if(zeroOne(unit)&&state.roster.some(e=>e.unitId===unitId)){alert(`${unit.name} may only be included once.`);return;}
     if(isAlly(unit)&&unit.ogreAllyTribe!==tribe()){alert("Choose that allied tribe before adding this unit.");return;}
+    if(isAlly(unit)&&requiresTribeRegiment(unit)&&sectionKey!=="regiments"&&!hasTribeRegiment(unit.ogreAllyTribe)){
+      alert(`Add a ${unit.ogreAllyTribe.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase())} regiment before this character, chariot or war machine.`);return;
+    }
     return oldAddUnit(sectionKey,unitId);
   };
 
@@ -100,12 +112,26 @@
     return oldSave();
   };
 
+  function ogItemAllowedForTribe(item,unit){
+    if(unit?.ogreAllySource!=="orcs_goblins"||item?.ogreAllySource!=="orcs_goblins")return true;
+    const text=String(item.rules||"").toLowerCase();
+    const tr=unit.ogreAllyTribe;
+    if(text.includes("common orc")||text.includes("black orc")||text.includes("savage orc")||text.includes("orc infantry"))return false;
+    if(text.includes("common goblin"))return tr==="common_goblins";
+    if(text.includes("forest goblin"))return tr==="forest_goblins";
+    if(text.includes("night goblin"))return tr==="night_goblins";
+    return true;
+  }
+
   const oldMagic=getAllowedMagicItems;
   getAllowedMagicItems=function(unit,context){
     let items=oldMagic(unit,context);if(!isOgre())return items;
     if(isAlly(unit)){
       const source=unit.ogreAllySource;
-      return items.filter(item=>!item.ogreAllySource || item.ogreAllySource===source).filter(item=>!["iron_boot","iron_fist","smuckle_buckle"].includes(item.id));
+      return items
+        .filter(item=>!item.ogreAllySource || item.ogreAllySource===source)
+        .filter(item=>!["iron_boot","iron_fist","smuckle_buckle"].includes(item.id))
+        .filter(item=>ogItemAllowedForTribe(item,unit));
     }
     return items.filter(item=>!item.ogreAllySource);
   };
@@ -115,7 +141,7 @@
     if(!isOgre())return oldBanner(entry,unit);
     const common=state.data.commonMagicItems, faction=state.data.factionMagicItems;
     if(isAlly(unit)){
-      state.data.factionMagicItems=faction.filter(item=>item.ogreAllySource===unit.ogreAllySource);
+      state.data.factionMagicItems=faction.filter(item=>item.ogreAllySource===unit.ogreAllySource&&ogItemAllowedForTribe(item,unit));
     }else{
       // Native Ogres have no Ogre-specific magic-banner section. Keep the
       // common banner pool, but do not leak imported allied-race banners.
@@ -125,8 +151,16 @@
   };
 
   function nativeOgrePoints(){return state.roster.reduce((sum,e)=>{const u=getUnit(e.sectionKey,e.unitId);return sum+(!isAlly(u)?calculateEntry(e):0);},0);}
-  function alliedMachineCount(){return state.roster.filter(e=>{const u=getUnit(e.sectionKey,e.unitId);return e.sectionKey==="warMachines"&&isAlly(u);}).length;}
+  function limitedChoiceCount(which){
+    return state.roster.reduce((count,e)=>{
+      const u=getUnit(e.sectionKey,e.unitId);if(!u||u.ogreAllyTribe!==which)return count;
+      if(e.sectionKey==="warMachines"&&["common_goblins","hobgoblins","halflings"].includes(which))return count+1;
+      if(which==="common_goblins"&&e.mount==="ogally_orcs_goblins_goblin_wolf_chariot_character")return count+1;
+      return count;
+    },0);
+  }
   function invalidAllyEntries(){return state.roster.filter(e=>{const u=getUnit(e.sectionKey,e.unitId);return isAlly(u)&&u.ogreAllyTribe!==tribe();});}
+  function missingRegimentEntries(){return state.roster.filter(e=>{const u=getUnit(e.sectionKey,e.unitId);return u&&isAlly(u)&&requiresTribeRegiment(u)&&e.sectionKey!=="regiments"&&!hasTribeRegiment(u.ogreAllyTribe);});}
 
   const oldStatus=renderArmyStatus;
   renderArmyStatus=function(total){
@@ -135,9 +169,11 @@
     const warnings=[];
     if(!state.roster.some(e=>e.sectionKey==="regiments"&&has(getUnit(e.sectionKey,e.unitId),"ogre_core")))warnings.push("The army must include at least one native regiment of Ogres, Ogre Maneaters or Ogre Lead-belchers.");
     if(!state.roster.some(e=>e.sectionKey==="characters"&&has(getUnit(e.sectionKey,e.unitId),"ogre")&&!has(getUnit(e.sectionKey,e.unitId),"bsb")))warnings.push("The army General must be an Ogre character.");
-    const allowance=Math.floor(nativeOgrePoints()/1000), machines=alliedMachineCount();if(machines>allowance)warnings.push(`Only ${allowance} allied war machine/chariot${allowance===1?"":"s"} may be included at the current native Ogre points total; ${machines} selected.`);
+    const allowance=Math.floor(nativeOgrePoints()/1000), selectedTribe=tribe(), limited=["common_goblins","hobgoblins","halflings"].includes(selectedTribe)?limitedChoiceCount(selectedTribe):0;
+    if(limited>allowance)warnings.push(`Only ${allowance} ${labels[selectedTribe]||"allied"} war machine/chariot${allowance===1?"":"s"} may be included at the current native Ogre points total; ${limited} selected.`);
+    if(missingRegimentEntries().length)warnings.push("An allied Goblin/Hobgoblin character, chariot or war machine is present without the required regiment of its own type.");
     if(invalidAllyEntries().length)warnings.push("The roster contains units from an allied tribe other than the currently selected tribe.");
-    els.armyStatus.insertAdjacentHTML("beforeend",`<div class="warning-box" style="margin-top:10px"><strong>Allied Tribe</strong><div class="dialog-field" style="margin-top:6px"><select data-ogre-ally-tribe>${Object.entries(labels).map(([v,l])=>`<option value="${v}" ${tribe()===v?"selected":""}>${l}</option>`).join("")}</select></div><div class="field-hint">Choose at most one tribe. Allied characters use their own army-book magic items, never Ogre items.</div>${warnings.length?`<div style="margin-top:8px">${warnings.map(escapeHtml).join("<br>")}</div>`:""}</div>`);
+    els.armyStatus.insertAdjacentHTML("beforeend",`<div class="warning-box" style="margin-top:10px"><strong>Allied Tribe</strong><div class="dialog-field" style="margin-top:6px"><select data-ogre-ally-tribe>${Object.entries(labels).map(([v,l])=>`<option value="${v}" ${tribe()===v?"selected":""}>${l}</option>`).join("")}</select></div><div class="field-hint">Choose at most one tribe. Goblin tribes include their Shamans. Common Goblins, Hobgoblins and Halflings may also take their specified chariot/war-machine choices at one per full 1,000 native Ogre points. Allied characters use their own army-book magic items, never Ogre items.</div>${warnings.length?`<div style="margin-top:8px">${warnings.map(escapeHtml).join("<br>")}</div>`:""}</div>`);
     els.armyStatus.querySelector("[data-ogre-ally-tribe]")?.addEventListener("change",e=>{state.armyOptions.ogreAllyTribe=e.target.value;renderUnitBrowser();renderArmy();});
   };
 
@@ -149,6 +185,10 @@
     let html=oldPad(entry);if(!isOgre())return html;const u=getUnit(entry.sectionKey,entry.unitId);const rows=[];
     if(u?.id==="ogre_beastmaster_pack")rows.push(extraRow(`${entry.optionSelections?.sabretooths||0} Sabretooth Tiger${Number(entry.optionSelections?.sabretooths||0)===1?"":"s"}`,"sabretooth_tiger","Fear; beastmaster pack"));
     if(u?.id==="rhino_rider")rows.push(extraRow("Rhino","rhino","Fear; heavy-chariot style mount"));
+    if(entry.mount==="ogally_orcs_goblins_goblin_wolf_chariot_character"){
+      rows.push(extraRow("2 Giant Wolves","ogally_orcs_goblins_giant_wolf","Pull the Wolf Chariot"));
+      rows.push(extraRow("2 Common Goblin crew","ogally_orcs_goblins_common_goblin","Wolf Chariot crew"));
+    }
     return rows.length?html.replace("</tr>",`</tr>${rows.join("")}`):html;
   };
 })();
