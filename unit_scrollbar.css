@@ -1,6 +1,14 @@
 /* Always-visible custom scrollbar for the Add to Army unit list.
    ChromeOS may hide/overlay native scrollbars regardless of CSS, so the
    visible track/thumb below is independent of the operating-system scrollbar. */
+
+@media (min-width: 901px) {
+  .unit-browser {
+    height: calc(100vh - 126px);
+    max-height: calc(100vh - 126px);
+  }
+}
+
 .unit-scroll-shell {
   position: relative;
   flex: 1 1 auto;
@@ -64,4 +72,23 @@
 .unit-custom-scrollbar-thumb.is-dragging {
   cursor: grabbing;
   background: #6b4d25;
+}
+
+/* On the stacked mobile layout the whole army book flows naturally down the
+   page, so no inner scrollbar is needed. */
+@media (max-width: 900px) {
+  .unit-scroll-shell {
+    flex: none;
+    overflow: visible;
+  }
+
+  .unit-scroll-shell .unit-sections {
+    height: auto;
+    overflow: visible;
+    padding-right: 10px;
+  }
+
+  .unit-custom-scrollbar {
+    display: none !important;
+  }
 }
