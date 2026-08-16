@@ -1,6 +1,7 @@
 // Small Lizardmen integration fixes that depend on the core/extensions already being loaded.
 (() => {
   const isLiz = () => state.data?.faction?.id === "lizardmen" && state.selectedArmyId === "lizardmen";
+  const tags = unit => unit?.tags || [];
 
   function patchUnitMounts() {
     if (!isLiz()) return;
@@ -27,6 +28,31 @@
     const entry = oldCreateEntry(sectionKey, unit);
     if (isLiz() && unit?.mount) entry.mount = unit.mount;
     return entry;
+  };
+
+  const oldRenderCharacterEditor = renderCharacterEditor;
+  renderCharacterEditor = function(entry, unit) {
+    let html = oldRenderCharacterEditor(entry, unit);
+    if (!isLiz() || !tags(unit).includes("slann") || !(unit.options || []).some(option => option.id === "battle_standard")) return html;
+    html += `<section class="editor-section"><h3 class="editor-section-title">Battle Standard</h3>
+      <label class="check-row"><input type="checkbox" data-liz-slann-bsb ${entry.optionSelections?.battle_standard ? "checked" : ""}>
+        <span class="check-row-content"><span class="check-row-title"><span>Carry the Battle Standard</span><span>+75 pts</span></span>
+        <span class="check-row-sub">Only one Battle Standard Bearer may be included. If selected, one of this Mage Priest's normal magic-item slots may contain a magic banner.</span></span>
+      </label></section>`;
+    return html;
+  };
+
+  const oldWireEditorControls = wireEditorControls;
+  wireEditorControls = function() {
+    oldWireEditorControls();
+    if (!isLiz() || !state.draft) return;
+    els.dialogContent.querySelector("[data-liz-slann-bsb]")?.addEventListener("change", event => {
+      state.draft.optionSelections.battle_standard = event.target.checked;
+      if (!event.target.checked) {
+        state.draft.magicItems = (state.draft.magicItems || []).filter(id => getMagicItem(id)?.category !== "magic_banner");
+      }
+      renderEditor();
+    });
   };
 
   const oldPrintedSave = calculatePrintedArmourSave;
