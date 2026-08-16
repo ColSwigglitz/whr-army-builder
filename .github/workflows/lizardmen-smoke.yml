@@ -47,12 +47,12 @@ jobs:
               const [saurusHero,sh]=mk('characters','saurus_hero'), shCold=createEntry('characters',saurusHero), shCarno=createEntry('characters',saurusHero);shCold.mount='cold_one';shCarno.mount='carnosaur';
               const [skinkHero,skh]=mk('characters','skink_hero'),skMiss=createEntry('characters',skinkHero),skTerr=createEntry('characters',skinkHero);skMiss.equipmentSelections.missile_weapon='poisoned_javelins';skTerr.mount='terradon';
               const [shaman,sha]=mk('characters','skink_shaman');sha.mount='cold_one';
-              const [skinks,sk10]=mk('regiments','skink_warriors',10),skBlow=createEntry('regiments',skinks),skPoison=createEntry('regiments',skinks),skKrox=createEntry('regiments',skinks);skBlow.size=10;skBlow.optionSelections.weapon_swap='blowpipes';skPoison.size=10;skPoison.optionSelections.poison_missiles=true;skKrox.size=16;skKrox.optionSelections.kroxigors=2;
-              const [guard,tg]=mk('regiments','saurus_temple_guard',5);tg.optionSelections.light_armour=true;tg.optionSelections.shields=true;
+              const [skinks,sk10]=mk('regiments','skink_warriors',10),skBlow=createEntry('regiments',skinks),skPoison=createEntry('regiments',skinks),skKrox=createEntry('regiments',skinks);skBlow.size=10;skBlow.optionSelections.missile_loadout='blowpipes';skPoison.size=10;skPoison.optionSelections.poison_missiles=true;skKrox.size=16;skKrox.optionSelections.kroxigors=2;
+              const [guard,tg]=mk('regiments','saurus_temple_guard',5);tg.optionSelections.light_armour=true;tg.optionSelections.shield=true;
               const [saurus,sw]=mk('regiments','saurus_warriors',5),swSpear=createEntry('regiments',saurus);swSpear.size=5;swSpear.optionSelections.spears=true;
               const [cold,cr]=mk('regiments','saurus_cold_one_riders',5),crChamp=createEntry('regiments',cold);crChamp.size=5;crChamp.champion.selected=true;crChamp.lizardChampionHornedOne=true;
               const [krox,kr]=mk('regiments','kroxigors',3),[cham,ch]=mk('regiments','chameleon_skinks',5),[great,gc]=mk('regiments','great_crested_cold_one_riders',5),[terr,tr]=mk('regiments','terradon_riders',3);
-              const [steg,st]=mk('warMachines','stegadon'),stUp=createEntry('warMachines',steg);stUp.optionSelections.bolt_thrower=true;stUp.optionSelections.extra_five_crew=true;
+              const [steg,st]=mk('warMachines','stegadon'),stUp=createEntry('warMachines',steg);stUp.optionSelections.small_bolt_thrower=true;stUp.optionSelections.extra_five_crew=true;
               const [salamander,sa]=mk('warMachines','salamander'),[swarm,j1]=mk('warMachines','jungle_swarm'),j2=createEntry('warMachines',swarm);
               const ox=find('specialCharacters','oxayotl'),oxE=createEntry('specialCharacters',ox),maz=find('specialCharacters','mazdamundi'),mazE=createEntry('specialCharacters',maz);
               const oldDraft=state.draft;
