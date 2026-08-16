@@ -1,0 +1,68 @@
+name: Ogre Mercenaries smoke test
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  test-ogres:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and payload
+        run: |
+          node --check ogre_mercenaries_loader.js
+          node --check ogre_mercenaries_extensions.js
+          node - <<'JS'
+          const fs=require('fs'),zlib=require('zlib');
+          const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_ogre_mercenaries_v0_1.payload','utf8').trim(),'base64')));
+          console.log(`OGRE native chars=${d.faction.characters.length} regs=${d.faction.regiments.length} monsters=${d.faction.warMachines.length} specials=${d.faction.specialCharacters.length} items=${d.factionMagicItems.length}`);
+          console.log('CHAR_IDS',d.faction.characters.map(x=>x.id));
+          console.log('REG_IDS',d.faction.regiments.map(x=>x.id));
+          console.log('MONSTER_IDS',d.faction.warMachines.map(x=>x.id));
+          console.log('OPTIONS',d.faction.regiments.map(x=>[x.id,x.options,x.equipmentOptions]));
+          if(d.faction.characters.length!==5 || d.faction.regiments.length!==4 || d.faction.warMachines.length!==2 || d.faction.specialCharacters.length!==0 || d.factionMagicItems.length!==3) process.exit(1);
+          JS
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Browser regression
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+            page.on('dialog',async d=>{await d.dismiss()});
+            await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            await page.locator('[data-army-id="ogre_mercenaries"]').click();
+            await page.waitForTimeout(1200);
+            const result=await page.evaluate(()=>{
+              const f=state.data.faction;
+              const native=u=>!(u.tags||[]).includes('ogre_ally');
+              const tribes={};
+              for(const t of ['common_goblins','forest_goblins','night_goblins','hobgoblins','halflings']) tribes[t]={
+                chars:f.characters.filter(u=>u.ogreAllyTribe===t).map(u=>[u.id,u.name]),
+                regs:f.regiments.filter(u=>u.ogreAllyTribe===t).map(u=>[u.id,u.name,(u.options||[]).map(o=>o.id)]),
+                machines:f.warMachines.filter(u=>u.ogreAllyTribe===t).map(u=>[u.id,u.name])
+              };
+              const ids={chars:f.characters.filter(native).map(u=>u.id),regs:f.regiments.filter(native).map(u=>u.id),machines:f.warMachines.filter(native).map(u=>u.id)};
+              return {name:f.name,ids,tribes,items:state.data.factionMagicItems.map(i=>[i.id,i.name,i.ogreAllySource||'ogre']),errors:[]};
+            });
+            console.log('BROWSER',JSON.stringify(result));
+            if(result.name!=='Ogre Mercenaries') throw new Error('Ogre army failed to load');
+            if(result.ids.chars.length!==5||result.ids.regs.length!==4||result.ids.machines.length!==2) throw new Error(`Native counts wrong ${JSON.stringify(result.ids)}`);
+            for(const t of ['common_goblins','forest_goblins','night_goblins','hobgoblins','halflings']) if(!result.tribes[t].chars.length&&!result.tribes[t].regs.length) throw new Error(`No allied choices imported for ${t}`);
+            const forestText=JSON.stringify(result.tribes.forest_goblins).toLowerCase();
+            if(forestText.includes('gargantuan spider')||forestText.includes('poison')) throw new Error(`Illegal Forest Goblin option imported: ${forestText}`);
+            const halfText=JSON.stringify(result.tribes.halflings).toLowerCase();
+            if(halfText.includes('wizard')||halfText.includes('wood elf')||halfText.includes('treeman')) throw new Error(`Illegal Halfling ally imported: ${halfText}`);
+            if(errors.length) throw new Error(errors.join(' | '));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
