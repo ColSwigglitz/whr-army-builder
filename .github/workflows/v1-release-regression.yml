@@ -1,0 +1,17 @@
+name: V1 Release Regression
+
+on:
+  pull_request:
+  push:
+    branches: [main, release/v1-hardening]
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run WHR v1 release regression
+        run: node tests/v1_release_regression.mjs
