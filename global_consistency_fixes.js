@@ -65,6 +65,7 @@
 
   function unitHasStandardBearer(unit) {
     if (!unit || unit.unitType === "skirmisher" || (unit.tags || []).includes("skirmisher")) return false;
+    if (unit.magicBanner?.allowed) return true;
     const command = unit.command || {};
     const definition = getCommandDefinition(unit, "standardBearer") || {};
     if (definition.allowed === false) return false;
@@ -85,6 +86,65 @@
     return html;
   };
 
-  // Expose the invariant helper for the all-army regression workflow.
+  function patchRosterProfileGaps() {
+    if (!state.data?.faction) return false;
+    let changed = false;
+
+    // WHR Empire p.22: one Warrior Priest may ride a large chariot drawn by
+    // two barded warhorses. The option existed in the original dataset but
+    // the corresponding mount/profile did not, so Roster Pad could not show it.
+    if (state.data.faction.id === "empire") {
+      state.data.profiles = state.data.profiles || [];
+      state.data.mounts = state.data.mounts || [];
+      if (!state.data.profiles.some(p => p.id === "warrior_priest_chariot_profile")) {
+        state.data.profiles.push({
+          id: "warrior_priest_chariot_profile",
+          name: "Large Chariot",
+          stats: { M:"–", WS:"–", BS:"–", S:5, T:5, W:4, I:"–", A:"–", Ld:"–" }
+        });
+        changed = true;
+      }
+      if (!state.data.mounts.some(m => m.id === "warrior_priest_chariot")) {
+        state.data.mounts.push({
+          id: "warrior_priest_chariot",
+          name: "Large Chariot (2 Barded Warhorses)",
+          profileId: "warrior_priest_chariot_profile",
+          rules: ["heavy_chariot", "two_barded_warhorses"]
+        });
+        changed = true;
+      }
+    }
+
+    // Modern Chaos Dwarf Magma Cannons inherit the Dwarf Flame Cannon rules.
+    // Some payload versions referenced a crew profile id that was not present;
+    // alias that id to the existing Chaos Dwarf Warrior/Crewman statline.
+    if (state.data.faction.id === "chaos_dwarfs") {
+      const magma = (state.data.faction.warMachines || []).find(u => /magma cannon/i.test(u.name || ""));
+      if (magma) {
+        const entry = createEntry("warMachines", magma);
+        const crew = resolveWarMachineCrew(entry, magma);
+        if (crew?.profileId && !profileById.get(crew.profileId)) {
+          const source = (state.data.profiles || []).find(p => /chaos dwarf (warrior|crew)/i.test(p.name || ""));
+          if (source) {
+            state.data.profiles.push({...clone(source), id:crew.profileId, name:"Chaos Dwarf Crewman"});
+            changed = true;
+          }
+        }
+      }
+    }
+
+    return changed;
+  }
+
+  const previousSelectArmy = selectArmy;
+  selectArmy = async function(armyId) {
+    await previousSelectArmy(armyId);
+    if (!state.data) return;
+    if (patchRosterProfileGaps()) buildIndexes();
+    renderUnitBrowser();
+    renderArmy();
+  };
+
+  // Expose invariant helpers for the all-army regression workflow.
   window.whrUnitHasStandardBearer = unitHasStandardBearer;
 })();
