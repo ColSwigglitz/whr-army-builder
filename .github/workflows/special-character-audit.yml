@@ -19,16 +19,74 @@ jobs:
           const {chromium}=require('playwright');
           (async()=>{
             const b=await chromium.launch({headless:true}),p=await b.newPage();
+            const runtime=[];p.on('pageerror',e=>runtime.push(e.message));p.on('console',m=>{if(m.type()==='error')runtime.push(m.text())});p.on('dialog',async d=>d.dismiss());
             await p.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
             const ids=await p.evaluate(()=>state.armyManifest.armies.filter(a=>a.available).map(a=>a.id));
+            const failures=[];let fixedChecked=0,specials=0;
+            const expected={
+              vampire_counts:{vlad_isabella:1,mannfred_von_carstein:4,konrad_von_carstein:2},
+              tomb_kings:{khalida:3,arkhan:4},
+              classic_undead:{krell:1,dieter:3,heinrich:3},
+              lizardmen:{lord_kroak:5,mazdamundi:4},
+              empire:{kurt_helborg:2,supreme_patriarch:3,karl_franz:1,ludwig_schwarzhelm:1,tzarina_katarin:2},
+              high_elves:{belannaer:1},
+              dark_elves:{morathi:4,hellebron:1},
+              wood_elves:{scarloc:2,sceolan:1,gruarth:1},
+              norse:{regnar_lodbrog:1,palnatoke:2}
+            };
             for(const id of ids){
               await p.evaluate(async id=>selectArmy(id),id);await p.waitForTimeout(80);
-              const rows=await p.evaluate(()=>(state.data.faction.specialCharacters||[]).map(u=>({
-                army:state.selectedArmyId,name:u.name,id:u.id,magicItems:u.magicItems||null,magicItemLimit:u.magicItemLimit??null,
-                fixedMagicItems:u.fixedMagicItems||[],fixedEquipment:u.fixedEquipment||[],rules:u.rules||[],description:u.description||'',sourceNotes:u.sourceNotes||''
-              })));
-              for(const r of rows) console.log('SPECIAL',JSON.stringify(r));
+              const r=await p.evaluate((want)=>{
+                const fail=[];let fixed=0;const list=state.data.faction.specialCharacters||[];
+                for(const u of list){
+                  const e=createEntry('specialCharacters',u);state.draft=e;
+                  const html=String(renderCharacterEditor(e,u));
+                  state.draft=null;
+                  for(const itemId of u.fixedMagicItems||[]){
+                    fixed++;
+                    const item=window.whrResolveFixedSpecialMagicItem(itemId);
+                    if(!item) fail.push(`${u.name}: fixed item ${itemId} cannot be resolved`);
+                    else {
+                      if(!String(item.rules||'').trim()) fail.push(`${u.name}: ${item.name} has no rules text`);
+                      if(!html.includes(item.name)||!html.includes(String(item.rules||''))) fail.push(`${u.name}: included item ${item.name} rules absent from editor`);
+                      const notes=String(rosterPadNotes(e,u));
+                      if(!notes.includes(item.name)||!notes.includes(String(item.rules||''))) fail.push(`${u.name}: included item ${item.name} rules absent from Roster Pad`);
+                    }
+                  }
+                }
+                for(const [unitId,max] of Object.entries(want||{})){
+                  const u=list.find(x=>x.id===unitId);if(!u){fail.push(`expected special ${unitId} missing`);continue;}
+                  const e=createEntry('specialCharacters',u);state.draft=e;
+                  const got=getMagicMaximum(u,'character');state.draft=null;
+                  if(got!==max)fail.push(`${u.name}: expected ${max} additional magic item slots, got ${got}`);
+                  const html=String(renderCharacterEditor(e,u));
+                  if(!html.includes('Magic Items'))fail.push(`${u.name}: magic item editor missing`);
+                }
+                if(state.selectedArmyId==='lizardmen'){
+                  const u=list.find(x=>x.id==='mazdamundi');
+                  if(!u?.magicItems?.allowedCategories?.includes('magic_banner'))fail.push('Mazdamundi: magic banner category missing');
+                }
+                return {name:state.data.faction.name,fail,fixed,specials:list.length};
+              },expected[id]||{});
+              fixedChecked+=r.fixed;specials+=r.specials;if(r.fail.length)failures.push(...r.fail.map(x=>`${r.name}: ${x}`));console.log('SPECIAL_CHECK',r.name,r.specials,'specials',r.fixed,'fixed items',r.fail.length?'FAIL':'PASS');
             }
-            await b.close();
+            // Vampire combined-pool behaviour under the Von Carstein bloodline.
+            await p.evaluate(async()=>{await selectArmy('vampire_counts');state.armyOptions.bloodline='von_carstein';renderArmy();});
+            const vampire=await p.evaluate(()=>{
+              const fail=[];const list=state.data.faction.specialCharacters;
+              for(const [id,max] of [['mannfred_von_carstein',4],['konrad_von_carstein',2]]){
+                const u=list.find(x=>x.id===id),e=createEntry('specialCharacters',u);e.bloodlinePowers=['dummy'];state.draft=e;
+                const got=getMagicMaximum(u,'character');state.draft=null;
+                if(got!==max-1)fail.push(`${u.name}: combined pool did not reduce after a bloodline power (${got})`);
+              }
+              const v=list.find(x=>x.id==='vlad_isabella'),e=createEntry('specialCharacters',v);state.draft=e;
+              const itemMax=getMagicMaximum(v,'character');state.draft=null;
+              if(itemMax!==1)fail.push(`Vlad: expected one independent magic item slot, got ${itemMax}`);
+              return fail;
+            });
+            failures.push(...vampire.map(x=>`Vampire Counts: ${x}`));
+            if(runtime.length)failures.push(...runtime.map(x=>`runtime: ${x}`));
+            console.log('TOTAL',JSON.stringify({armies:ids.length,specials,fixedChecked,failures:failures.length}));
+            await b.close();if(failures.length)throw new Error('\n'+failures.join('\n'));
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
