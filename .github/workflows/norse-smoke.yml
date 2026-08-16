@@ -1,0 +1,79 @@
+name: Norse smoke test
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  test-norse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and payload
+        run: |
+          node --check norse_loader.js
+          node --check norse_extensions.js
+          node --check norse_final_fixes.js
+          node --check norse_guard.js
+          node - <<'JS'
+          const fs=require('fs'),zlib=require('zlib');
+          const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_norse_v0_1.payload','utf8').trim(),'base64')));
+          console.log('NORSE COUNTS',d.faction.characters.length,d.faction.regiments.length,d.faction.warMachines.length,d.faction.specialCharacters.length,d.factionMagicItems.length);
+          if(JSON.stringify([d.faction.characters.length,d.faction.regiments.length,d.faction.warMachines.length,d.faction.specialCharacters.length,d.factionMagicItems.length])!=='[8,10,3,2,17]')process.exit(1);
+          JS
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Browser regression
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage();
+            const errors=[]; page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});page.on('dialog',async d=>d.dismiss());
+            await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            await page.locator('[data-army-id="norse"]').click();await page.waitForTimeout(800);
+            const result=await page.evaluate(()=>{
+              const f=state.data.faction, find=(s,n)=>f[s].find(u=>u.name===n), make=(s,n,size)=>{const u=find(s,n);if(!u)throw new Error(`Missing ${s}: ${n}`);const e=createEntry(s,u);if(size!=null)e.size=size;return[u,e]};
+              const mount=(n,m)=>{const[,e]=make('characters',n);e.mount=m;return calculateEntry(e)};const costs={};
+              for(const [n,k] of [['Norse King','king'],['Norse Jarl','jarl'],['Norse Battle Standard Bearer','bsb'],['Shape Changer','shape']]){const[,e]=make('characters',n);costs[k]=calculateEntry(e)}
+              costs.kingHorse=mount('Norse King','warhorse');costs.jarlHorse=mount('Norse Jarl','warhorse');costs.bsbHorse=mount('Norse Battle Standard Bearer','warhorse');
+              const wiz=['Vølve/Gode Lord (Level 4)','Master Vølve/Gode (Level 3)','Vølve/Gode Champion (Level 2)','Vølve/Gode (Level 1)'].map(n=>make('characters',n));costs.wizards=wiz.map(([,e])=>calculateEntry(e));const we=createEntry('characters',wiz[0][0]);we.mount='warhorse';costs.wizardHorse=calculateEntry(we);
+              for(const [n,size] of [['Norse Huscarls',10],['Berserkers',5],['Norse Warriors',10],['Norse Thralls',10],['Norse Hunters',5],['Mounted Norse Warriors',5],['Norse Dwarf Troll Slayers',5],['Norse Dwarf Warriors',10],['Stone Trolls',3]]){const[,e]=make('regiments',n,size);costs[n]=calculateEntry(e)}
+              const [pack,pe]=make('regiments','Norse Beasts and Beastmasters');costs.pack=calculateEntry(pe);const pw=createEntry('regiments',pack);pw.optionSelections={beastmasters:2,beastType:'wolves',beasts:4};costs.packWolves=calculateEntry(pw);
+              const [giant,ge]=make('warMachines','Giant'),[eagle,ee]=make('warMachines','Great Eagle'),[mammoth,me]=make('warMachines','Mammoth');costs.giant=calculateEntry(ge);costs.eagle=calculateEntry(ee);costs.mammoth=calculateEntry(me);
+              const [,regnar]=make('specialCharacters','Regnar Lodbrog'),[,palnatoke]=make('specialCharacters','Palnatoke');costs.regnar=calculateEntry(regnar);costs.palnatoke=calculateEntry(palnatoke);
+              const [warriors,hero]=make('regiments','Norse Warriors',10);hero.norseHeroics={champions:[null,null],shieldmaidens:[null],ulfhednar:1};costs.heroics=calculateEntry(hero);state.roster=[hero];const heroicReg=calculateRegimentPoints();state.roster=[];
+              const [bsb]=make('characters','Norse Battle Standard Bearer');const bitems=getAllowedMagicItems(bsb,'character');
+              const king=find('characters','Norse King'),wizard=wiz[0][0];state.draft=createEntry('characters',king);const kingItems=getAllowedMagicItems(king,'character');state.draft.mount='warhorse';const mountedKingItems=getAllowedMagicItems(king,'character');state.draft=createEntry('characters',wizard);const wizardItems=getAllowedMagicItems(wizard,'character');state.draft=null;
+              const dwarf=find('regiments','Norse Dwarf Warriors'),de=createEntry('regiments',dwarf);de.champion.selected=true;const dwarfHtml=renderRegimentEditor(de,dwarf);
+              return {name:f.name,counts:[f.characters.length,f.regiments.length,f.warMachines.length,f.specialCharacters.length,state.data.factionMagicItems.length],costs,heroicReg,
+                magic:{bsbRaven:bitems.some(i=>i.id==='raven_banner'),bsbOdin:bitems.some(i=>i.id==='banner_odin'),kingGift:kingItems.some(i=>i.id==='andvares_gift'),mountedGift:mountedKingItems.some(i=>i.id==='andvares_gift'),wizardGand:wizardItems.some(i=>i.id==='gandstaff')},
+                runes:Boolean(state.data.faction.systems.dwarfRunes)&&/Rune/.test(dwarfHtml),
+                sea:{mammothVisible:els.unitBrowser.textContent.includes('Mammoth'),ambush:/Sea Raider Ambush/.test(renderRegimentEditor(createEntry('regiments',warriors),warriors))},
+                pad:{pack:/Bear|Giant Wolf/.test(rosterPadRow(pe))&&rosterPadRow(pe).includes('Beastmaster'),mammoth:rosterPadRow(me).includes('Norse Hunters')},save:calculatePrintedArmourSave(me,mammoth),ids:{warriors:warriors.id,mounted:find('regiments','Mounted Norse Warriors').id,slayers:find('regiments','Norse Dwarf Troll Slayers').id,trolls:find('regiments','Stone Trolls').id,giant:giant.id,eagle:eagle.id,mammoth:mammoth.id}};
+            });
+            console.log('NORSE',JSON.stringify(result));
+            if(result.name!=='Norse'||JSON.stringify(result.counts)!=='[8,10,3,2,17]')throw new Error(`Load/count ${JSON.stringify(result.counts)}`);
+            const ex={king:112,kingHorse:135,jarl:67,jarlHorse:84,bsb:84,bsbHorse:95,shape:80,'Norse Huscarls':80,Berserkers:55,'Norse Warriors':60,'Norse Thralls':40,'Norse Hunters':70,'Mounted Norse Warriors':55,'Norse Dwarf Troll Slayers':65,'Norse Dwarf Warriors':80,'Stone Trolls':120,pack:58,packWolves:66,giant:200,eagle:60,mammoth:200,regnar:150,palnatoke:80,heroics:194};
+            for(const[k,v]of Object.entries(ex))if(result.costs[k]!==v)throw new Error(`${k}: expected ${v}, got ${result.costs[k]}`);
+            if(JSON.stringify(result.costs.wizards)!=='[252,178,116,54]'||result.costs.wizardHorse!==252)throw new Error('Wizard costs');
+            if(result.heroicReg!==60)throw new Error(`Heroics leaked into Regiments: ${result.heroicReg}`);
+            if(!result.magic.bsbRaven||!result.magic.bsbOdin||!result.magic.kingGift||result.magic.mountedGift||!result.magic.wizardGand)throw new Error(`Magic ${JSON.stringify(result.magic)}`);
+            if(!result.runes)throw new Error('Dwarf runes missing');if(result.sea.mammothVisible||!result.sea.ambush)throw new Error(`Sea mode ${JSON.stringify(result.sea)}`);if(!result.pad.pack||!result.pad.mammoth||result.save!=='4+')throw new Error(`Pad/save ${JSON.stringify(result.pad)} ${result.save}`);
+            const construction=await page.evaluate(ids=>{
+              const count=id=>state.roster.filter(e=>e.unitId===id).length;const out={};
+              state.roster=[];addUnit('warMachines',ids.eagle);addUnit('warMachines',ids.eagle);out.twoEagles=count(ids.eagle)===2;
+              state.roster=[];addUnit('regiments',ids.mounted);out.mountedBlocked=count(ids.mounted)===0;addUnit('regiments',ids.warriors);addUnit('regiments',ids.mounted);addUnit('regiments',ids.mounted);out.mountedRatio=count(ids.mounted)===1;
+              state.roster=[];addUnit('regiments',ids.slayers);addUnit('regiments',ids.trolls);out.trollConflict=count(ids.trolls)===0;
+              state.roster=[];const s=createEntry('regiments',getUnit('regiments',ids.slayers));s.norseGiantSlayers=[{magic:null,runes:[]}];state.roster=[s];addUnit('warMachines',ids.giant);out.giantConflict=count(ids.giant)===0;
+              state.armyOptions.norseRaidMode='land';renderUnitBrowser();renderArmy();out.landMammothVisible=els.unitBrowser.textContent.includes('Mammoth');state.roster=[];addUnit('warMachines',ids.mammoth);addUnit('warMachines',ids.mammoth);out.mammothReg=calculateRegimentPoints()===200&&calculateArmyTotal()===400;
+              return out;
+            },result.ids);
+            console.log('CONSTRUCTION',JSON.stringify(construction));if(Object.values(construction).some(v=>!v))throw new Error(`Construction ${JSON.stringify(construction)}`);
+            if(errors.length)throw new Error(errors.join(' | '));await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
