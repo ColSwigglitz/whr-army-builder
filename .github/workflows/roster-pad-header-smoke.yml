@@ -25,7 +25,11 @@ jobs:
               page.on('pageerror',e=>errors.push(e.message));
               page.on('console',m=>{if(m.type()==='error') errors.push(m.text())});
               await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
-              await page.evaluate(async()=>selectArmy('empire'));
+              await page.evaluate(async()=>{
+                await selectArmy('empire');
+                const first=state.data.faction.regiments[0];
+                addUnit('regiments', first.id);
+              });
               await page.fill('#rosterName','The Extremely Long Imperial Army Name Used To Test Header Layout');
               const popupPromise=page.waitForEvent('popup');
               await page.click('#printRosterBtn');
