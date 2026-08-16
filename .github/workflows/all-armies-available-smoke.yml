@@ -1,0 +1,44 @@
+name: All armies available smoke
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Verify all army cards are available
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser = await chromium.launch({headless:true});
+            const page = await browser.newPage({viewport:{width:1440,height:1000}});
+            const errors=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+            await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            const result=await page.evaluate(()=>({
+              armies: state.armyManifest.armies.map(a=>({id:a.id,available:a.available,badge:a.badge,description:a.description})),
+              cardText: document.querySelector('#armyCards')?.innerText || ''
+            }));
+            const failures=[];
+            if(result.armies.length!==24) failures.push(`expected 24 armies, got ${result.armies.length}`);
+            for(const army of result.armies){
+              if(army.available!==true) failures.push(`${army.id} not available`);
+              if(army.badge!=='Available') failures.push(`${army.id} badge is ${army.badge}`);
+              if(/^Test\b/i.test(army.description||'')) failures.push(`${army.id} description still says Test`);
+            }
+            if(/Testing/i.test(result.cardText)) failures.push('army selection still displays Testing');
+            failures.push(...errors.map(e=>'runtime: '+e));
+            console.log('ALL_ARMIES_AVAILABLE',JSON.stringify({armies:result.armies.length,failures}));
+            if(failures.length) throw new Error(failures.join('\n'));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
