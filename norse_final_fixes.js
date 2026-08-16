@@ -3,6 +3,8 @@
   const isNorse=()=>state.selectedArmyId==="norse"&&state.data?.faction?.id==="norse";
   function applyDataFixes(){
     if(!isNorse()||state.data.__norseFinalPatched)return;state.data.__norseFinalPatched=true;
+    const eagle=state.data.faction.warMachines.find(x=>x.id==="great_eagle");
+    if(eagle){eagle.selection={};eagle.tags=(eagle.tags||[]).filter(tag=>tag!=="zero_one");}
     for(const id of ["norse_king","norse_jarl"]){
       const u=state.data.faction.characters.find(x=>x.id===id);if(!u)continue;
       u.equipmentOptions=[
