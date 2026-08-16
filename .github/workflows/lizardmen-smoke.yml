@@ -16,10 +16,6 @@ jobs:
           const fs=require('fs'),zlib=require('zlib');
           const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_lizardmen_v0_1.payload','utf8').trim(),'base64')));
           console.log(`LIZ chars=${d.faction.characters.length} regs=${d.faction.regiments.length} monsters=${d.faction.warMachines.length} specials=${d.faction.specialCharacters.length}`);
-          console.log('CHAR_IDS', d.faction.characters.map(x=>x.id));
-          console.log('REG_IDS', d.faction.regiments.map(x=>x.id));
-          console.log('MONSTER_IDS', d.faction.warMachines.map(x=>x.id));
-          console.log('SPECIAL_IDS', d.faction.specialCharacters.map(x=>x.id));
           if(d.faction.characters.length!==9 || d.faction.regiments.length!==8 || d.faction.warMachines.length!==4 || d.faction.specialCharacters.length!==8) process.exit(1);
           JS
       - name: Install Playwright
@@ -43,80 +39,40 @@ jobs:
             await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
             await page.locator('[data-army-id="lizardmen"]').click();
             await page.waitForTimeout(900);
-
             const result=await page.evaluate(()=>{
               const find=(s,id)=>state.data.faction[s].find(u=>u.id===id);
-              const mk=(s,id,size)=>{const u=find(s,id),e=createEntry(s,u); if(size)e.size=size; return [u,e]};
-              const [slann,se]=mk('characters','slann_mage_priest_lord');
-              const sb=createEntry('characters',slann);sb.optionSelections.battle_standard=true;
-              const [mummy,me]=mk('characters','mummified_slann_mage_priest_lord');
-              const [saurusHero,sh]=mk('characters','saurus_hero'); const shCold=createEntry('characters',saurusHero);shCold.mount='cold_one'; const shCarno=createEntry('characters',saurusHero);shCarno.mount='carnosaur';
-              const [skinkHero,skh]=mk('characters','skink_hero'); const skMiss=createEntry('characters',skinkHero);skMiss.equipmentSelections.missile_weapon='poisoned_javelins'; const skTerr=createEntry('characters',skinkHero);skTerr.mount='terradon';
+              const mk=(s,id,size)=>{const u=find(s,id);if(!u)throw new Error(`Missing ${s}/${id}`);const e=createEntry(s,u);if(size)e.size=size;return[u,e]};
+              const [slann,se]=mk('characters','slann_lord'), sb=createEntry('characters',slann);sb.optionSelections.battle_standard=true;
+              const [mummy,me]=mk('characters','mummified_slann');
+              const [saurusHero,sh]=mk('characters','saurus_hero'), shCold=createEntry('characters',saurusHero), shCarno=createEntry('characters',saurusHero);shCold.mount='cold_one';shCarno.mount='carnosaur';
+              const [skinkHero,skh]=mk('characters','skink_hero'),skMiss=createEntry('characters',skinkHero),skTerr=createEntry('characters',skinkHero);skMiss.equipmentSelections.missile_weapon='poisoned_javelins';skTerr.mount='terradon';
               const [shaman,sha]=mk('characters','skink_shaman');sha.mount='cold_one';
-              const [skinks,sk10]=mk('regiments','skink_warriors',10); const skBlow=createEntry('regiments',skinks);skBlow.size=10;skBlow.optionSelections.weapon_swap='blowpipes'; const skPoison=createEntry('regiments',skinks);skPoison.size=10;skPoison.optionSelections.poison_missiles=true; const skKrox=createEntry('regiments',skinks);skKrox.size=16;skKrox.optionSelections.kroxigors=2;
+              const [skinks,sk10]=mk('regiments','skink_warriors',10),skBlow=createEntry('regiments',skinks),skPoison=createEntry('regiments',skinks),skKrox=createEntry('regiments',skinks);skBlow.size=10;skBlow.optionSelections.weapon_swap='blowpipes';skPoison.size=10;skPoison.optionSelections.poison_missiles=true;skKrox.size=16;skKrox.optionSelections.kroxigors=2;
               const [guard,tg]=mk('regiments','saurus_temple_guard',5);tg.optionSelections.light_armour=true;tg.optionSelections.shields=true;
-              const [saurus,sw]=mk('regiments','saurus_warriors',5);const swSpear=createEntry('regiments',saurus);swSpear.size=5;swSpear.optionSelections.spears=true;
-              const [cold,cr]=mk('regiments','saurus_cold_one_riders',5);const crChamp=createEntry('regiments',cold);crChamp.size=5;crChamp.champion.selected=true;crChamp.lizardChampionHornedOne=true;
-              const [krox,kr]=mk('regiments','kroxigors',3);
-              const [cham,ch]=mk('regiments','chameleon_skinks',5);
-              const [great,gc]=mk('regiments','great_crested_cold_one_riders',5);
-              const [terr,tr]=mk('regiments','terradon_riders',3);
-              const [steg,st]=mk('warMachines','stegadon');const stUp=createEntry('warMachines',steg);stUp.optionSelections.bolt_thrower=true;stUp.optionSelections.extra_five_crew=true;
-              const [salamander,sa]=mk('warMachines','salamander');
-              const [swarm,j1]=mk('warMachines','jungle_swarm'); const j2=createEntry('warMachines',swarm);
-              const ox=find('specialCharacters','oxayotl'), oxE=createEntry('specialCharacters',ox);
-              const maz=find('specialCharacters','mazdamundi'), mazE=createEntry('specialCharacters',maz);
-
+              const [saurus,sw]=mk('regiments','saurus_warriors',5),swSpear=createEntry('regiments',saurus);swSpear.size=5;swSpear.optionSelections.spears=true;
+              const [cold,cr]=mk('regiments','saurus_cold_one_riders',5),crChamp=createEntry('regiments',cold);crChamp.size=5;crChamp.champion.selected=true;crChamp.lizardChampionHornedOne=true;
+              const [krox,kr]=mk('regiments','kroxigors',3),[cham,ch]=mk('regiments','chameleon_skinks',5),[great,gc]=mk('regiments','great_crested_cold_one_riders',5),[terr,tr]=mk('regiments','terradon_riders',3);
+              const [steg,st]=mk('warMachines','stegadon'),stUp=createEntry('warMachines',steg);stUp.optionSelections.bolt_thrower=true;stUp.optionSelections.extra_five_crew=true;
+              const [salamander,sa]=mk('warMachines','salamander'),[swarm,j1]=mk('warMachines','jungle_swarm'),j2=createEntry('warMachines',swarm);
+              const ox=find('specialCharacters','oxayotl'),oxE=createEntry('specialCharacters',ox),maz=find('specialCharacters','mazdamundi'),mazE=createEntry('specialCharacters',maz);
               const oldDraft=state.draft;
-              state.draft=skh; const skinkItems=getAllowedMagicItems(skinkHero,'character');
-              state.draft=skTerr; const mountedSkinkItems=getAllowedMagicItems(skinkHero,'character');
-              state.draft=sh; const saurusItems=getAllowedMagicItems(saurusHero,'character');
-              state.draft=se; const slannItems=getAllowedMagicItems(slann,'character');
-              state.draft=me; const mummyItems=getAllowedMagicItems(mummy,'character');
-              const slannEditor=renderCharacterEditor(sb,slann);
-              state.draft=oldDraft;
-
-              const skBanner=createEntry('regiments',skinks);skBanner.command.standardBearer=true;
-              const saurusBanner=createEntry('regiments',saurus);saurusBanner.command.standardBearer=true;
-              const skBannerHtml=renderMagicBannerEditor(skBanner,skinks);
-              const saurusBannerHtml=renderMagicBannerEditor(saurusBanner,saurus);
-
-              state.roster=[j1,j2];
-              const jungleRegimentPoints=calculateRegimentPoints();
-              state.roster=[];
-
-              return {
-                faction:state.data.faction.name, choices:document.querySelectorAll('.unit-choice-name').length,
-                counts:{characters:state.data.faction.characters.length,regiments:state.data.faction.regiments.length,monsters:state.data.faction.warMachines.length,specials:state.data.faction.specialCharacters.length},
+              state.draft=skh;const skinkItems=getAllowedMagicItems(skinkHero,'character');state.draft=skTerr;const mountedSkinkItems=getAllowedMagicItems(skinkHero,'character');state.draft=sh;const saurusItems=getAllowedMagicItems(saurusHero,'character');state.draft=se;const slannItems=getAllowedMagicItems(slann,'character');state.draft=me;const mummyItems=getAllowedMagicItems(mummy,'character');const slannEditor=renderCharacterEditor(sb,slann);state.draft=oldDraft;
+              const skBanner=createEntry('regiments',skinks),saurusBanner=createEntry('regiments',saurus);skBanner.command.standardBearer=true;saurusBanner.command.standardBearer=true;const skBannerHtml=renderMagicBannerEditor(skBanner,skinks),saurusBannerHtml=renderMagicBannerEditor(saurusBanner,saurus);
+              state.roster=[j1,j2];const jungleRegimentPoints=calculateRegimentPoints();state.roster=[];
+              return {faction:state.data.faction.name,counts:[state.data.faction.characters.length,state.data.faction.regiments.length,state.data.faction.warMachines.length,state.data.faction.specialCharacters.length],
                 costs:{slann:calculateEntry(se),slannBsb:calculateEntry(sb),mummy:calculateEntry(me),saurusHero:calculateEntry(sh),saurusCold:calculateEntry(shCold),saurusCarno:calculateEntry(shCarno),skinkHero:calculateEntry(skh),skinkMissile:calculateEntry(skMiss),skinkTerradon:calculateEntry(skTerr),shamanCold:calculateEntry(sha),skinks10:calculateEntry(sk10),skinksBlow:calculateEntry(skBlow),skinksPoison:calculateEntry(skPoison),skinksKrox:calculateEntry(skKrox),temple:calculateEntry(tg),saurus:calculateEntry(sw),saurusSpear:calculateEntry(swSpear),coldRiders:calculateEntry(cr),coldChampion:calculateEntry(crChamp),krox:calculateEntry(kr),chameleon:calculateEntry(ch),greatCrested:calculateEntry(gc),terradons:calculateEntry(tr),stegadon:calculateEntry(st),stegadonUp:calculateEntry(stUp),salamander:calculateEntry(sa),swarm:calculateEntry(j1)},
-                magic:{skinkDagger:skinkItems.some(i=>i.id==='dagger_sotek'),skinkCloak:skinkItems.some(i=>i.id==='cloak_feathers'),mountedCloak:mountedSkinkItems.some(i=>i.id==='cloak_feathers'),saurusDagger:saurusItems.some(i=>i.id==='dagger_sotek'),saurusSlann:saurusItems.some(i=>i.id==='shield_old_ones'||i.id==='plaque_xoloc'),slannOldOnes:slannItems.some(i=>i.id==='shield_old_ones')&&slannItems.some(i=>i.id==='plaque_xoloc'),mummyWeapon:mummyItems.some(i=>i.category==='magic_weapon'),mummyArmour:mummyItems.some(i=>i.category==='magic_armour')},
-                banners:{skinkSkavenpelt:skBannerHtml.includes('Skavenpelt Banner'),saurusSkavenpelt:saurusBannerHtml.includes('Skavenpelt Banner'),saurusJaguar:saurusBannerHtml.includes('Jaguar Standard')},
-                bsbControl:slannEditor.includes('data-liz-slann-bsb'),
-                saves:{saurus:calculatePrintedArmourSave(sw,saurus),temple:calculatePrintedArmourSave(tg,guard),cold:calculatePrintedArmourSave(cr,cold),great:calculatePrintedArmourSave(gc,great),krox:calculatePrintedArmourSave(kr,krox),ox:calculatePrintedArmourSave(oxE,ox),maz:calculatePrintedArmourSave(mazE,maz)},
-                jungleRegimentPoints,
-                pad:{steg:rosterPadRow(stUp).includes('Skink Crew'),salamander:rosterPadRow(sa).includes('Skink Handlers'),krox:rosterPadRow(skKrox).includes('Kroxigor'),cold:rosterPadRow(cr).includes('Cold Ones'),terradon:rosterPadRow(tr).includes('Terradons'),horned:rosterPadRow(crChamp).includes('Horned One')}
-              };
+                magic:{skinkDagger:skinkItems.some(i=>i.id==='dagger_sotek'),skinkCloak:skinkItems.some(i=>i.id==='cloak_feathers'),mountedCloak:mountedSkinkItems.some(i=>i.id==='cloak_feathers'),saurusRestricted:saurusItems.some(i=>['dagger_sotek','shield_old_ones','plaque_xoloc'].includes(i.id)),slannOldOnes:slannItems.some(i=>i.id==='shield_old_ones')&&slannItems.some(i=>i.id==='plaque_xoloc'),mummyWeapon:mummyItems.some(i=>i.category==='magic_weapon'),mummyArmour:mummyItems.some(i=>i.category==='magic_armour')},
+                banners:{skinkSkavenpelt:skBannerHtml.includes('Skavenpelt Banner'),saurusSkavenpelt:saurusBannerHtml.includes('Skavenpelt Banner'),saurusJaguar:saurusBannerHtml.includes('Jaguar Standard')},bsbControl:slannEditor.includes('data-liz-slann-bsb'),
+                saves:{saurus:calculatePrintedArmourSave(sw,saurus),temple:calculatePrintedArmourSave(tg,guard),cold:calculatePrintedArmourSave(cr,cold),great:calculatePrintedArmourSave(gc,great),krox:calculatePrintedArmourSave(kr,krox),ox:calculatePrintedArmourSave(oxE,ox),maz:calculatePrintedArmourSave(mazE,maz)},jungleRegimentPoints,
+                pad:{steg:rosterPadRow(stUp).includes('Skink Crew'),salamander:rosterPadRow(sa).includes('Skink Handlers'),krox:rosterPadRow(skKrox).includes('Kroxigor'),cold:rosterPadRow(cr).includes('Cold Ones'),terradon:rosterPadRow(tr).includes('Terradons'),horned:rosterPadRow(crChamp).includes('Horned One')}};
             });
             console.log('BASE',JSON.stringify(result));
-            if(result.faction!=='Lizardmen'||result.counts.characters!==9||result.counts.regiments!==8||result.counts.monsters!==4||result.counts.specials!==8) throw new Error('Lizardmen dataset did not load');
-            const expected={slann:400,slannBsb:475,mummy:250,saurusHero:118,saurusCold:155,saurusCarno:306,skinkHero:53,skinkMissile:63,skinkTerradon:91,shamanCold:46,skinks10:40,skinksBlow:50,skinksPoison:60,skinksKrox:164,temple:100,saurus:75,saurusSpear:90,coldRiders:180,coldChampion:246,krox:150,chameleon:85,greatCrested:90,terradons:126,stegadon:200,stegadonUp:250,salamander:80,swarm:40};
-            for(const [key,value] of Object.entries(expected)) if(result.costs[key]!==value) throw new Error(`${key} expected ${value}, got ${result.costs[key]}`);
-            const m=result.magic;if(!m.skinkDagger||!m.skinkCloak||m.mountedCloak||m.saurusDagger||m.saurusSlann||!m.slannOldOnes||m.mummyWeapon||m.mummyArmour) throw new Error(`Magic restriction regression ${JSON.stringify(m)}`);
-            const b=result.banners;if(!b.skinkSkavenpelt||b.saurusSkavenpelt||!b.saurusJaguar) throw new Error(`Banner restriction regression ${JSON.stringify(b)}`);
-            if(!result.bsbControl) throw new Error('Slann BSB control missing');
-            const saves={saurus:'4+',temple:'3+',cold:'2+',great:'3+',krox:'4+',ox:'5+',maz:'4+'};for(const [key,value] of Object.entries(saves)) if(result.saves[key]!==value) throw new Error(`${key} save expected ${value}, got ${result.saves[key]}`);
-            if(result.jungleRegimentPoints!==40) throw new Error(`First Jungle Swarm regiment allocation failed: ${result.jungleRegimentPoints}`);
-            if(Object.values(result.pad).some(v=>!v)) throw new Error(`Roster Pad subprofiles failed ${JSON.stringify(result.pad)}`);
-
-            const construction=await page.evaluate(()=>{
-              state.roster=[]; const count=id=>state.roster.filter(e=>e.unitId===id).length;
-              addUnit('regiments','chameleon_skinks');addUnit('regiments','chameleon_skinks');const chameleon01=count('chameleon_skinks')===1;
-              addUnit('regiments','terradon_riders');addUnit('regiments','terradon_riders');const terradon01=count('terradon_riders')===1;
-              state.roster=[];addUnit('characters','saurus_bsb');addUnit('specialCharacters','tenehuini');const oneBsb=count('saurus_bsb')+count('tenehuini')===1;
-              return {chameleon01,terradon01,oneBsb};
-            });
-            if(Object.values(construction).some(v=>!v)) throw new Error(`Construction regression ${JSON.stringify(construction)}`);
-            if(errors.length) throw new Error(errors.join(' | '));
-            await browser.close();
+            if(result.faction!=='Lizardmen'||JSON.stringify(result.counts)!=='[9,8,4,8]') throw new Error('Lizardmen dataset did not load');
+            const expected={slann:400,slannBsb:475,mummy:250,saurusHero:118,saurusCold:155,saurusCarno:306,skinkHero:53,skinkMissile:63,skinkTerradon:91,shamanCold:46,skinks10:40,skinksBlow:50,skinksPoison:60,skinksKrox:164,temple:100,saurus:75,saurusSpear:90,coldRiders:180,coldChampion:246,krox:150,chameleon:85,greatCrested:90,terradons:126,stegadon:200,stegadonUp:250,salamander:80,swarm:40};for(const[k,v]of Object.entries(expected))if(result.costs[k]!==v)throw new Error(`${k} expected ${v}, got ${result.costs[k]}`);
+            const m=result.magic;if(!m.skinkDagger||!m.skinkCloak||m.mountedCloak||m.saurusRestricted||!m.slannOldOnes||m.mummyWeapon||m.mummyArmour)throw new Error(`Magic restriction regression ${JSON.stringify(m)}`);
+            const b=result.banners;if(!b.skinkSkavenpelt||b.saurusSkavenpelt||!b.saurusJaguar)throw new Error(`Banner restriction regression ${JSON.stringify(b)}`);if(!result.bsbControl)throw new Error('Slann BSB control missing');
+            const saves={saurus:'4+',temple:'3+',cold:'2+',great:'3+',krox:'4+',ox:'5+',maz:'4+'};for(const[k,v]of Object.entries(saves))if(result.saves[k]!==v)throw new Error(`${k} save expected ${v}, got ${result.saves[k]}`);if(result.jungleRegimentPoints!==40)throw new Error(`First Jungle Swarm regiment allocation failed: ${result.jungleRegimentPoints}`);if(Object.values(result.pad).some(v=>!v))throw new Error(`Roster Pad subprofiles failed ${JSON.stringify(result.pad)}`);
+            const construction=await page.evaluate(()=>{state.roster=[];const count=id=>state.roster.filter(e=>e.unitId===id).length;addUnit('regiments','chameleon_skinks');addUnit('regiments','chameleon_skinks');const chameleon01=count('chameleon_skinks')===1;addUnit('regiments','terradon_riders');addUnit('regiments','terradon_riders');const terradon01=count('terradon_riders')===1;state.roster=[];addUnit('characters','saurus_bsb');addUnit('specialCharacters','tenehuini');const oneBsb=count('saurus_bsb')+count('tenehuini')===1;return{chameleon01,terradon01,oneBsb}});if(Object.values(construction).some(v=>!v))throw new Error(`Construction regression ${JSON.stringify(construction)}`);
+            if(errors.length)throw new Error(errors.join(' | '));await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
