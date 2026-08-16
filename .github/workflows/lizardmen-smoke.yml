@@ -16,6 +16,10 @@ jobs:
           const fs=require('fs'),zlib=require('zlib');
           const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_lizardmen_v0_1.payload','utf8').trim(),'base64')));
           console.log(`LIZ chars=${d.faction.characters.length} regs=${d.faction.regiments.length} monsters=${d.faction.warMachines.length} specials=${d.faction.specialCharacters.length}`);
+          console.log('CHAR_IDS', d.faction.characters.map(x=>x.id));
+          console.log('REG_IDS', d.faction.regiments.map(x=>x.id));
+          console.log('MONSTER_IDS', d.faction.warMachines.map(x=>x.id));
+          console.log('SPECIAL_IDS', d.faction.specialCharacters.map(x=>x.id));
           if(d.faction.characters.length!==9 || d.faction.regiments.length!==8 || d.faction.warMachines.length!==4 || d.faction.specialCharacters.length!==8) process.exit(1);
           JS
       - name: Install Playwright
