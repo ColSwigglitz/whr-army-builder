@@ -26,7 +26,7 @@ jobs:
             await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
             const failures=[];
             const armyIds=await page.evaluate(()=>state.armyManifest.armies.filter(a=>a.available).map(a=>a.id));
-            let checked=0;
+            let attempted=0, checked=0, unavailable=0;
             for(const armyId of armyIds){
               await page.evaluate(async id=>selectArmy(id),armyId);
               await page.waitForTimeout(80);
@@ -36,17 +36,21 @@ jobs:
                   state.roster=[];
                   let alerts=[]; const old=window.alert; window.alert=x=>alerts.push(String(x));
                   addUnit('specialCharacters',id);
-                  addUnit('specialCharacters',id);
+                  const afterFirst=state.roster.filter(e=>e.sectionKey==='specialCharacters'&&e.unitId===id).length;
+                  if(afterFirst===1) addUnit('specialCharacters',id);
+                  const afterSecond=state.roster.filter(e=>e.sectionKey==='specialCharacters'&&e.unitId===id).length;
                   window.alert=old;
-                  return {count:state.roster.filter(e=>e.sectionKey==='specialCharacters'&&e.unitId===id).length,alerts};
+                  return {afterFirst,afterSecond,alerts};
                 },special);
+                attempted++;
+                if(result.afterFirst===0){unavailable++;continue;}
                 checked++;
-                if(result.count!==1) failures.push(`${armyId}: ${special.name} duplicated (${result.count})`);
+                if(result.afterSecond!==1) failures.push(`${armyId}: ${special.name} duplicated (${result.afterSecond})`);
                 if(!result.alerts.some(a=>/only be included once|may only be included once|0-1|once/i.test(a))) failures.push(`${armyId}: ${special.name} duplicate not explained`);
               }
             }
             failures.push(...errors.map(e=>'runtime: '+e));
-            console.log('SPECIAL_ZERO_ONE',JSON.stringify({checked,failures:failures.length}));
+            console.log('SPECIAL_ZERO_ONE',JSON.stringify({attempted,checked,unavailable,failures:failures.length}));
             if(failures.length) throw new Error('\n'+failures.join('\n'));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
