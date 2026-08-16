@@ -145,6 +145,20 @@
     renderArmy();
   };
 
+  // The Warrior Priest's large chariot is drawn by two barded warhorses.
+  // Print their profile as well as the chariot body profile.
+  const previousRosterPadMountRow = rosterPadMountRow;
+  rosterPadMountRow = function(entry, unit) {
+    let html = previousRosterPadMountRow(entry, unit);
+    if (state.data?.faction?.id === "empire" && entry?.mount === "warrior_priest_chariot") {
+      html += rosterPadUnitMountRow(entry, {
+        ...unit,
+        unitMount: { mountId:"warhorse", name:"2 Barded Warhorses", equipment:["barding"] }
+      });
+    }
+    return html;
+  };
+
   // Expose invariant helpers for the all-army regression workflow.
   window.whrUnitHasStandardBearer = unitHasStandardBearer;
 })();
