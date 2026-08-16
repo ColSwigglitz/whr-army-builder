@@ -2,37 +2,29 @@
 (() => {
   const previousFetch = window.fetch.bind(window);
 
-  const zeroOneIds = new Set([
-    "longbeards",
-    "hammerers",
-    "ironbreakers",
-    "rangers",
-    "miners",
-    "goblin_hewer"
-  ]);
-
-  const zeroOneNames = new Set([
-    "longbeards",
-    "long beards",
-    "hammerers",
-    "ironbreakers",
-    "rangers",
-    "miners",
-    "dwarf miners",
-    "goblin hewer",
-    "goblin hewer war machine"
-  ]);
-
-  function normaliseName(value) {
+  function normalise(value) {
     return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  }
+
+  function zeroOneKey(unit) {
+    const id = normalise(unit?.id);
+    const name = normalise(unit?.name);
+    const combined = `${id} ${name}`;
+
+    if (/\blong\s*beards?\b/.test(combined) || /\blongbeards?\b/.test(combined)) return "longbeards";
+    if (/\bhammerers?\b/.test(combined)) return "hammerers";
+    if (/\biron\s*breakers?\b/.test(combined) || /\bironbreakers?\b/.test(combined)) return "ironbreakers";
+    if (/\brangers?\b/.test(combined)) return "rangers";
+    if (/\bminers?\b/.test(combined)) return "miners";
+    if (/\bgoblin\s+hewer\b/.test(combined)) return "goblin_hewer";
+    return null;
   }
 
   function markZeroOneChoices(data) {
     for (const sectionKey of ["regiments", "warMachines"]) {
       for (const unit of data?.faction?.[sectionKey] || []) {
-        const restricted = zeroOneIds.has(String(unit.id || "").toLowerCase()) || zeroOneNames.has(normaliseName(unit.name));
-        if (!restricted) continue;
-        unit.rules = unit.rules || [];
+        if (!zeroOneKey(unit)) continue;
+        unit.rules = Array.isArray(unit.rules) ? unit.rules : [];
         if (!unit.rules.some(rule => /^0\s*-\s*1$/i.test(String(rule).trim()))) unit.rules.unshift("0-1");
         unit.maxUnits = 1;
       }
