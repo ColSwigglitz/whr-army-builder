@@ -1,0 +1,125 @@
+name: Kislev smoke test
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  test-kislev:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax and payload
+        run: |
+          node --check kislev_loader.js
+          node --check kislev_extensions.js
+          node - <<'JS'
+          const fs=require('fs'),zlib=require('zlib');
+          const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_kislev_v0_1.payload','utf8').trim(),'base64')));
+          console.log('KISLEV COUNTS', d.faction.characters.length, d.faction.regiments.length, d.faction.warMachines.length, d.faction.specialCharacters.length, d.factionMagicItems.length);
+          console.log('CHARS',d.faction.characters.map(x=>[x.id,x.name,x.points]));
+          console.log('REGS',d.faction.regiments.map(x=>[x.id,x.name,x.points,x.selection]));
+          console.log('WM',d.faction.warMachines.map(x=>[x.id,x.name,x.points,x.options]));
+          console.log('SPECIALS',d.faction.specialCharacters.map(x=>[x.id,x.name,x.points,x.mount,x.mountOptions]));
+          console.log('MONSTER PROFILES',d.profiles.filter(x=>/wyvern|griffon|manticore|chimera|bear|wolf/i.test(x.id)).map(x=>[x.id,x.stats]));
+          if(d.faction.characters.length!==8 || d.faction.regiments.length!==11 || d.faction.warMachines.length!==2 || d.faction.specialCharacters.length!==9 || d.factionMagicItems.length!==12) process.exit(1);
+          JS
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Browser regression
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage();
+            const errors=[]; const dialogs=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+            page.on('dialog',async d=>{dialogs.push(d.message());await d.dismiss()});
+            await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            await page.locator('[data-army-id="kislev"]').click();
+            await page.waitForTimeout(1000);
+
+            const result=await page.evaluate(()=>{
+              const f=state.data.faction;
+              const find=(section,name)=>f[section].find(u=>u.name===name);
+              const make=(section,name,size)=>{const u=find(section,name);if(!u)throw new Error(`Missing ${section}: ${name}`);const e=createEntry(section,u);if(size!=null)e.size=size;return [u,e]};
+              const calcMount=(section,name,mount)=>{const [u,e]=make(section,name);e.mount=mount;return calculateEntry(e)};
+
+              const [boyar,boyarE]=make('characters','Boyar');
+              const [bsb,bsbE]=make('characters','Battle Standard Bearer');
+              const [hetman,hetmanE]=make('characters','Hetman');
+              const [priest,priestE]=make('characters','Priest of Ursun');
+              const witches=['Ice Witch Lady (Level 4)','Ice Witch Mistress (Level 3)','Ice Witch Champion (Level 2)','Ice Witch (Level 1)'].map(n=>make('characters',n));
+
+              const regNames=['Gryphon Legion','Brotherhood of the Bear','Sons of Ursa','Kislev Kossars','Hand Gunners','Hunters','Guards','Road Wardens','Kislev Horse Archers','Kislev Winged Lancers','Beasts and Beastmasters'];
+              const regs=Object.fromEntries(regNames.map(n=>[n,make('regiments',n)]));
+              const costs={
+                boyar:calculateEntry(boyarE),boyarHorse:calcMount('characters','Boyar','warhorse'),boyarBear:calcMount('characters','Boyar','great_bear'),
+                bsb:calculateEntry(bsbE),bsbHorse:calcMount('characters','Battle Standard Bearer','warhorse'),bsbBear:calcMount('characters','Battle Standard Bearer','great_bear'),
+                hetman:calculateEntry(hetmanE),hetmanHorse:calcMount('characters','Hetman','warhorse'),hetmanBear:calcMount('characters','Hetman','great_bear'),
+                priest:calculateEntry(priestE),priestHorse:calcMount('characters','Priest of Ursun','warhorse'),priestBear:calcMount('characters','Priest of Ursun','great_bear'),
+                witches:witches.map(([,e])=>calculateEntry(e)),
+                witchLadyBear:calcMount('characters','Ice Witch Lady (Level 4)','great_bear')
+              };
+              for(const [n,size] of [['Gryphon Legion',5],['Brotherhood of the Bear',5],['Sons of Ursa',3],['Kislev Kossars',10],['Hand Gunners',10],['Hunters',5],['Guards',5],['Road Wardens',5],['Kislev Horse Archers',5],['Kislev Winged Lancers',5]]){
+                const [u,e]=regs[n];e.size=size;costs[n]=calculateEntry(e);
+              }
+              const [,wing]=regs['Kislev Winged Lancers'];const wingB=createEntry('regiments',find('regiments','Kislev Winged Lancers'));wingB.size=5;wingB.optionSelections.shrieking_back_banners=true;costs.wingedShriek=calculateEntry(wingB);
+              const [pack,packE]=regs['Beasts and Beastmasters'];costs.pack=calculateEntry(packE);const packW=createEntry('regiments',pack);packW.optionSelections.beastmasters=2;packW.optionSelections.beastType='wolves';packW.optionSelections.beasts=4;costs.packWolves=calculateEntry(packW);
+              const [mortar,mortarE]=make('warMachines','Mortar'),[urugan,uruganE]=make('warMachines','Urugan Cannon');const mortar5=createEntry('warMachines',mortar);mortar5.optionSelections.extra_crew=2;costs.mortar=calculateEntry(mortarE);costs.mortar5=calculateEntry(mortar5);costs.urugan=calculateEntry(uruganE);
+
+              const [igor,igorE]=make('specialCharacters','Igor the Terrible');
+              const [miska,miskaE]=make('specialCharacters','Miska the Slaughterer');
+              const [ilja,iljaE]=make('specialCharacters','Ilja of Murova');
+              const specials={
+                igorBase:calculateEntry(igorE),igorMount:igorE.mount,igorOptions:(igor.mountOptions||[]).map(x=>[x.mountId,x.cost]),
+                igorBear:calcMount('specialCharacters','Igor the Terrible','great_bear'),igorSpider:calcMount('specialCharacters','Igor the Terrible','monstrous_spider'),igorWyvern:calcMount('specialCharacters','Igor the Terrible','wyvern'),igorGriffon:calcMount('specialCharacters','Igor the Terrible','griffon'),igorManticore:calcMount('specialCharacters','Igor the Terrible','manticore'),igorChimera:calcMount('specialCharacters','Igor the Terrible','chimera'),
+                miskaBase:calculateEntry(miskaE),miskaMount:miskaE.mount,miskaOptions:(miska.mountOptions||[]).map(x=>[x.mountId,x.cost]),miskaBear:calcMount('specialCharacters','Miska the Slaughterer','great_bear')
+              };
+
+              state.roster=[];
+              const normalBoyarItems=getAllowedMagicItems(boyar,'character');
+              const lady=witches[0][0], ladyItems=getAllowedMagicItems(lady,'character');
+              state.roster=[iljaE];
+              const boyarAfterIlja=getAllowedMagicItems(boyar,'character');
+              state.roster=[];
+
+              return {
+                name:f.name,
+                counts:[f.characters.length,f.regiments.length,f.warMachines.length,f.specialCharacters.length,state.data.factionMagicItems.length],
+                costs,specials,
+                magic:{boyarIce:normalBoyarItems.some(i=>i.id==='ice_armour'),ladyIce:ladyItems.some(i=>i.id==='ice_armour'),boyarWyrmBefore:normalBoyarItems.some(i=>i.id==='wyrmslayer_sword'),boyarWyrmAfter:boyarAfterIlja.some(i=>i.id==='wyrmslayer_sword')},
+                pad:{pack:rosterPadRow(packW).includes('Giant Wolf'),mortar:rosterPadRow(mortar5).includes('Crew')},
+                ids:{gryphon:find('regiments','Gryphon Legion').id,brotherhood:find('regiments','Brotherhood of the Bear').id,sons:find('regiments','Sons of Ursa').id,pack:pack.id,bsb:bsb.id,radinov:find('specialCharacters','Prince Ivan Radinov').id,katarin:find('specialCharacters','Tzarina Katarin').id,boris:find('specialCharacters','Boris Ursus').id,igor:igor.id}
+              };
+            });
+            console.log('KISLEV',JSON.stringify(result));
+            if(result.name!=='Kislev'||JSON.stringify(result.counts)!=='[8,11,2,9,12]')throw new Error(`Load/count regression ${JSON.stringify(result.counts)}`);
+            const ex={boyar:100,boyarHorse:120,boyarBear:145,bsb:80,bsbHorse:90,bsbBear:115,hetman:60,hetmanHorse:75,hetmanBear:100,priest:65,priestHorse:115,priestBear:140,'Gryphon Legion':125,'Brotherhood of the Bear':90,'Sons of Ursa':150,'Kislev Kossars':90,'Hand Gunners':100,Hunters:55,Guards:50,'Road Wardens':85,'Kislev Horse Archers':50,'Kislev Winged Lancers':85,wingedShriek:100,pack:57,packWolves:64,mortar:80,mortar5:90,urugan:80};
+            for(const[k,v]of Object.entries(ex))if(result.costs[k]!==v)throw new Error(`${k} expected ${v}, got ${result.costs[k]}`);
+            if(JSON.stringify(result.costs.witches)!=='[240,170,110,50]'||result.costs.witchLadyBear!==270)throw new Error(`Ice Witch pricing ${JSON.stringify(result.costs.witches)} / ${result.costs.witchLadyBear}`);
+            const s=result.specials;if(s.igorBase!==120||s.igorMount!=='warhorse'||s.igorBear!==165||s.igorSpider!==175||s.igorWyvern!==275||s.igorGriffon!==295||s.igorManticore!==335||s.igorChimera!==385||s.miskaBase!==250||s.miskaMount!=='warhorse'||s.miskaBear!==280)throw new Error(`Special mount pricing ${JSON.stringify(s)}`);
+            if(!s.igorOptions.some(x=>x[0]==='warhorse'&&x[1]===0)||!s.miskaOptions.some(x=>x[0]==='warhorse'&&x[1]===0))throw new Error('Included special-character Warhorse missing from editor options');
+            if(result.magic.boyarIce||!result.magic.ladyIce||!result.magic.boyarWyrmBefore||result.magic.boyarWyrmAfter)throw new Error(`Magic restriction regression ${JSON.stringify(result.magic)}`);
+            if(!result.pad.pack||!result.pad.mortar)throw new Error(`Roster Pad regression ${JSON.stringify(result.pad)}`);
+
+            const construction=await page.evaluate(ids=>{
+              const count=id=>state.roster.filter(e=>e.unitId===id).length;
+              const one=(section,id)=>{state.roster=[];addUnit(section,id);addUnit(section,id);return count(id)===1};
+              const out={gryphon:one('regiments',ids.gryphon),brotherhood:one('regiments',ids.brotherhood),sons:one('regiments',ids.sons),pack:one('regiments',ids.pack),bsb:one('characters',ids.bsb)};
+              state.roster=[];addUnit('specialCharacters',ids.radinov);out.radinovBlocked=state.roster.length===0;
+              state.roster=[];addUnit('regiments',ids.gryphon);addUnit('specialCharacters',ids.radinov);out.radinovAllowed=count(ids.radinov)===1;
+              state.roster=[];addUnit('specialCharacters',ids.katarin);addUnit('specialCharacters',ids.boris);out.triad=count(ids.katarin)===1&&count(ids.boris)===0;
+              return out;
+            },result.ids);
+            console.log('CONSTRUCTION',JSON.stringify(construction));
+            if(Object.values(construction).some(v=>!v))throw new Error(`Construction regression ${JSON.stringify(construction)}`);
+            if(errors.length)throw new Error(errors.join(' | '));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
