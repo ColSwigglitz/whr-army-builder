@@ -1,0 +1,37 @@
+name: Special character mount audit
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Inventory special character mounts
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const b=await chromium.launch({headless:true}),p=await b.newPage();
+            await p.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            const ids=await p.evaluate(()=>state.armyManifest.armies.filter(a=>a.available).map(a=>a.id));
+            for(const id of ids){
+              await p.evaluate(async id=>selectArmy(id),id); await p.waitForTimeout(60);
+              const rows=await p.evaluate(()=> (state.data.faction.specialCharacters||[]).map(u=>{
+                const entry=createEntry('specialCharacters',u);
+                const text=[...(u.rules||[]),u.description||'',u.sourceNotes||''].join(' ');
+                const mountish=/\b(rides?|mounted|chariot|dragon|manticore|wyvern|griffon|gryphon|horse|steed|bear|wolf|boar|cold one|horned one|stegadon|terradon|pegasus|eagle|mammoth|squig)\b/i.test(text) || (u.mountOptions||[]).length || u.unitMount || u.fixedMount || u.mount || u.defaultMount;
+                if(!mountish)return null;
+                return {army:state.selectedArmyId,id:u.id,name:u.name,mountOptions:u.mountOptions||[],unitMount:u.unitMount||null,fixedMount:u.fixedMount||null,mount:u.mount||null,defaultMount:u.defaultMount||null,entryMount:entry.mount||null,rules:u.rules||[],pad:String(rosterPadRow(entry))};
+              }).filter(Boolean));
+              rows.forEach(r=>console.log('SPECIAL_MOUNT',JSON.stringify(r)));
+            }
+            await b.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
