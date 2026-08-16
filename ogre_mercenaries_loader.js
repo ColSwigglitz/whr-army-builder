@@ -76,6 +76,9 @@
       if (tribe === "common_goblins") {
         out.rules = [...(out.rules || []), "Ogre ally: Common Goblins do not receive the higher-Leadership-without-Orcs benefit."];
       }
+      if (["common_goblins","hobgoblins","halflings"].includes(tribe) && (out.tags || []).some(t => ["chariot","war_machine","classic_modern_machine"].includes(t))) {
+        out.ogreAllyLimitedChoice = true;
+      }
       return out;
     };
     return {
@@ -97,6 +100,99 @@
   function pushUnique(target, additions) {
     const seen = new Set(target.map(x => x.id));
     for (const item of additions || []) if (item?.id && !seen.has(item.id)) { target.push(item); seen.add(item.id); }
+  }
+
+  function installGoblinShamans(data) {
+    const prefix = "ogally_orcs_goblins_";
+    const levels = [
+      { key:"shaman_lord", title:"Shaman Lord", level:4, common:170, forest:170, night:180, profile:"goblin_shaman_lord" },
+      { key:"master_shaman", title:"Master Shaman", level:3, common:120, forest:120, night:130, profile:"goblin_master_shaman" },
+      { key:"shaman_champion", title:"Shaman Champion", level:2, common:75, forest:75, night:85, profile:"goblin_shaman_champion" },
+      { key:"shaman", title:"Shaman", level:1, common:30, forest:30, night:40, profile:"goblin_shaman" }
+    ];
+    const configs = {
+      common_goblins: {
+        label:"Common Goblin", costKey:"common",
+        mounts:[
+          {mountId:`${prefix}giant_wolf`,cost:0},
+          {mountId:`${prefix}goblin_wolf_chariot_character`,cost:44,ogreAllyLimitedChoice:true},
+          {mountId:`${prefix}monstrous_spider`,cost:32}
+        ],
+        rules:["Waaagh! Shaman; uses Waaagh! spells.","Ogre ally: Common Goblins do not receive the higher-Leadership-without-Orcs benefit."]
+      },
+      forest_goblins: {
+        label:"Forest Goblin", costKey:"forest",
+        mounts:[{mountId:`${prefix}giant_spider`,cost:0},{mountId:`${prefix}monstrous_spider`,cost:32}],
+        rules:["Waaagh! Shaman; uses Waaagh! spells.","Forester.","On the specified failed Waaagh! result the Shaman enters a trance instead of taking the normal Toughness test, and moves 1D6 inches randomly as described in the army book."]
+      },
+      night_goblins: {
+        label:"Night Goblin", costKey:"night",
+        mounts:[{mountId:`${prefix}monstrous_spider`,cost:32}],
+        rules:["Waaagh! Shaman; uses Waaagh! spells.","Hates Dwarfs (not Chaos Dwarfs).","Carries one magic mushroom: after Winds of Magic are dealt it may be consumed for 1D6 extra magic cards usable only by this Shaman, with the army-book risk on a subsequent failed Waaagh! test."]
+      }
+    };
+    for (const [tribe,cfg] of Object.entries(configs)) {
+      for (const row of levels) {
+        const id = `${prefix}${tribe.replace(/s$/,"")}_${row.key}`;
+        if (data.faction.characters.some(u => u.id === id)) continue;
+        data.faction.characters.push({
+          id,
+          name:`${cfg.label} ${row.title} — Allied`,
+          profileId:`${prefix}${row.profile}`,
+          points:{type:"fixed",value:row[cfg.costKey]},
+          tags:["wizard","shaman",`${tribe.replace(/s$/,"")}`,"ogre_ally",`ogre_ally_${tribe}`,"ogre_ally_source_orcs_goblins"],
+          wizard:{level:row.level,lore:"Waaagh!"},
+          magicItems:{maximum:row.level,allowedPools:["common","faction"],allowedCategories:["magic_weapon","enchanted_item","arcane_item","familiar"]},
+          mountOptions:cfg.mounts.map(x=>({...x})),
+          rules:[...cfg.rules],
+          ogreAllyTribe:tribe,
+          ogreAllySource:"orcs_goblins",
+          ogreAllyRequiresRegiment:true
+        });
+      }
+    }
+  }
+
+  function installGoblinChariotMount(data) {
+    const id="ogally_orcs_goblins_goblin_wolf_chariot_character";
+    if (!data.mounts.some(m=>m.id===id)) {
+      data.mounts.push({
+        id,
+        name:"Goblin Wolf Chariot",
+        profileId:"ogally_orcs_goblins_light_chariot",
+        type:"chariot",
+        rules:["Light Chariot","Pulled by two Giant Wolves and normally crewed by two Common Goblins.","Combined armour save 5+."],
+        displayProfileOnRoster:true,
+        ogreAllyLimitedChoice:true
+      });
+    }
+    // The home O&G entries permit Common Goblin Warlords and Heroes to ride a
+    // Wolf Chariot for the price of the chariot. Preserve that option as allies.
+    for (const unit of data.faction.characters.filter(u=>u.ogreAllyTribe==="common_goblins" && /warlord|hero/i.test(u.name))) {
+      unit.mountOptions=unit.mountOptions||[];
+      if(!unit.mountOptions.some(m=>m.mountId===id))unit.mountOptions.push({mountId:id,cost:44,ogreAllyLimitedChoice:true});
+      unit.ogreAllyRequiresRegiment=true;
+    }
+  }
+
+  function installCommonGoblinArtillery(data) {
+    const commonTags=["ogre_ally","ogre_ally_common_goblins","ogre_ally_source_orcs_goblins","war_machine"];
+    const crew={baseCount:3,profileId:"ogally_orcs_goblins_common_goblin",name:"Common Goblins",extraCrewOptionId:"extra_crew"};
+    const extraCrew={id:"extra_crew",label:"Extra Common Goblin crew",type:"quantity",minimum:0,maximum:2,cost:{value:2.5}};
+    const machines=[
+      {id:"ogally_orcs_goblins_goblin_spear_chukka",name:"Spear Chukka, Goblins — Allied",cost:42.5,rules:["Bolt Thrower with three Common Goblin crewmen."],extra:true},
+      {id:"ogally_orcs_goblins_goblin_small_rock_lobber",name:"Small Rock Lobber, Goblins — Allied",cost:72.5,rules:["Small Stone Thrower with three Common Goblin crewmen."],extra:true},
+      {id:"ogally_orcs_goblins_goblin_large_rock_lobber",name:"Large Rock Lobber, Goblins — Allied",cost:87.5,rules:["Large Stone Thrower with three Common Goblin crewmen."],extra:true},
+      {id:"ogally_orcs_goblins_goblin_doom_diver",name:"Goblin Doom Diver — Allied",cost:67.5,rules:["Uses an endless supply of Common Goblins, counting as three crewmen.","Shoots using the WHR Doom Diver rules: large-stone-thrower style attack with a 2-inch template, steerable scatter and its own misfire rules."],extra:false}
+    ];
+    for(const m of machines){
+      if(data.faction.warMachines.some(u=>u.id===m.id))continue;
+      data.faction.warMachines.push({
+        id:m.id,name:m.name,profileId:"ogally_orcs_goblins_war_machine",points:{type:"fixed",value:m.cost},
+        options:m.extra?[{...extraCrew}]:[],crew:{...crew,...(!m.extra?{extraCrewOptionId:null}:{})},rules:m.rules,
+        tags:[...commonTags],ogreAllyTribe:"common_goblins",ogreAllySource:"orcs_goblins",ogreAllyLimitedChoice:true,ogreAllyRequiresRegiment:true
+      });
+    }
   }
 
   window.fetch = async function(input, init) {
@@ -131,6 +227,11 @@
         pushUnique(data.faction.regiments, pool.regiments);
         pushUnique(data.faction.warMachines, pool.warMachines);
       }
+
+      installGoblinChariotMount(data);
+      installGoblinShamans(data);
+      installCommonGoblinArtillery(data);
+
       return new Response(JSON.stringify(data), {status:200, headers:{"Content-Type":"application/json"}});
     } catch (error) {
       console.error("Unable to load Ogre Mercenaries data", error);
