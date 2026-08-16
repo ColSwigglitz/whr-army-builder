@@ -4,6 +4,7 @@
   const tags = unit => unit?.tags || [];
   const isAlly = unit => tags(unit).includes("ogre_ally");
   const isBsb = unit => tags(unit).includes("bsb") || tags(unit).includes("battle_standard_bearer") || /battle standard|\bbsb\b/i.test(unit?.name || "");
+  const isWizard = unit => tags(unit).includes("wizard") || /wizard|shaman|sorcer/i.test(unit?.name || "") || Number(unit?.wizardLevel || 0) > 0;
   const nativePoints = () => state.roster.reduce((sum, entry) => {
     const unit = getUnit(entry.sectionKey, entry.unitId);
     return sum + (unit && !isAlly(unit) ? calculateEntry(entry) : 0);
@@ -52,15 +53,20 @@
     if (!isOgre() || !isAlly(unit)) return base;
 
     let settings = context === "champion" ? unit.champion?.magicItems : unit.magicItems;
-    if (!settings && context === "character" && Number(unit.magicItemLimit || 0) > 0) settings = {allowedCategories:["magic_weapon","magic_armour","enchanted_item","arcane_item","familiar"]};
+    const legacyLimit = context === "character" && Number(unit.magicItemLimit || 0) > 0;
+    if (!settings && legacyLimit) settings = {allowedCategories:["magic_weapon","magic_armour","enchanted_item"]};
     if (!settings) return base;
 
     const categories = new Set(settings.allowedCategories || ["magic_weapon","magic_armour","enchanted_item","arcane_item","familiar"]);
+    if (!isWizard(unit)) { categories.delete("arcane_item"); categories.delete("familiar"); }
+
     const sourceItems = (state.data.factionMagicItems || []).filter(item =>
       item.ogreAllySource === unit.ogreAllySource && categories.has(item.category) && sourceBearerAllows(item, unit)
     );
+    const commonItems = legacyLimit ? (state.data.commonMagicItems || []).filter(item => categories.has(item.category)) : [];
 
-    const byId = new Map(base.map(item => [item.id,item]));
+    const byId = new Map(base.filter(item => categories.has(item.category)).map(item => [item.id,item]));
+    for (const item of commonItems) byId.set(item.id,item);
     for (const item of sourceItems) byId.set(item.id,item);
     return [...byId.values()].filter(item => !["iron_boot","iron_fist","smuckle_buckle"].includes(item.id));
   };
