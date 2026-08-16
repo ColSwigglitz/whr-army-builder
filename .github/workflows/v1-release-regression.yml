@@ -15,3 +15,5 @@ jobs:
           node-version: '22'
       - name: Run WHR v1 release regression
         run: node tests/v1_release_regression.mjs
+      - name: Run General system regression
+        run: node tests/general_system_regression.mjs
