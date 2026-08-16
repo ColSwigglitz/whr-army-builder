@@ -1,0 +1,34 @@
+name: Special character audit
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          npm init -y >/dev/null 2>&1
+          npm install playwright@1.55.0 >/dev/null 2>&1
+          npx playwright install chromium >/dev/null
+      - name: Audit special characters
+        run: |
+          python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
+          PID=$!; trap 'kill $PID || true' EXIT
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const b=await chromium.launch({headless:true}),p=await b.newPage();
+            await p.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            const ids=await p.evaluate(()=>state.armyManifest.armies.filter(a=>a.available).map(a=>a.id));
+            for(const id of ids){
+              await p.evaluate(async id=>selectArmy(id),id);await p.waitForTimeout(80);
+              const rows=await p.evaluate(()=>(state.data.faction.specialCharacters||[]).map(u=>({
+                army:state.selectedArmyId,name:u.name,id:u.id,magicItems:u.magicItems||null,magicItemLimit:u.magicItemLimit??null,
+                fixedMagicItems:u.fixedMagicItems||[],fixedEquipment:u.fixedEquipment||[],rules:u.rules||[],description:u.description||'',sourceNotes:u.sourceNotes||''
+              })));
+              for(const r of rows) console.log('SPECIAL',JSON.stringify(r));
+            }
+            await b.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
