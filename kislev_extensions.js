@@ -8,7 +8,30 @@
     tzarina_katarin: "fearfrost",
     boris_ursus: "shard_blade",
     tzar_saltan: "black_blade",
+    ilja_murova: "wyrmslayer_sword",
     igor_terrible: "bloodedge"
+  };
+
+  // A few named characters have a steed included in their listed points and may
+  // swap it for another mount. Expose the included steed as a free editor option
+  // so editing the character cannot accidentally drop the compulsory base mount.
+  function ensureIncludedSpecialMounts() {
+    if (!isKislev()) return;
+    for (const unit of state.data.faction.specialCharacters || []) {
+      if (!unit.mount || !(unit.mountOptions || []).length) continue;
+      if (!unit.mountOptions.some(option => option.mountId === unit.mount)) {
+        unit.mountOptions.unshift({ mountId: unit.mount, cost: 0, includedMount: true });
+      }
+    }
+  }
+
+  const oldSelectArmy = selectArmy;
+  selectArmy = async function(armyId) {
+    await oldSelectArmy(armyId);
+    if (!isKislev()) return;
+    ensureIncludedSpecialMounts();
+    renderUnitBrowser();
+    renderArmy();
   };
 
   const oldCreateEntry = createEntry;
