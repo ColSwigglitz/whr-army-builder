@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect Ogre payload options
+      - name: Inspect Goblin magic schema
         run: |
           node - <<'JS'
-          const fs=require('fs'),zlib=require('zlib');
-          const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_ogre_mercenaries_v0_1.payload','utf8').trim(),'base64')));
-          for(const u of [...d.faction.characters,...d.faction.regiments,...d.faction.warMachines]) console.log(u.id,JSON.stringify({points:u.points,options:u.options,equipmentOptions:u.equipmentOptions,mountOptions:u.mountOptions,champion:u.champion}));
+          const fs=require('fs');const d=JSON.parse(fs.readFileSync('data/whr_orcs_goblins_v0_1.json','utf8'));
+          console.log('ITEMS',d.factionMagicItems?.length,d.factionMagicItems?.slice(0,5));
+          for(const u of d.faction.characters.filter(u=>/goblin/i.test(u.name)))console.log('CHAR',JSON.stringify(u));
           JS
