@@ -1,28 +1,67 @@
-/* Keep the army-book unit list visibly scrollable on ChromeOS and desktop browsers. */
-.unit-sections {
+/* Always-visible custom scrollbar for the Add to Army unit list.
+   ChromeOS may hide/overlay native scrollbars regardless of CSS, so the
+   visible track/thumb below is independent of the operating-system scrollbar. */
+.unit-scroll-shell {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.unit-scroll-shell .unit-sections {
+  height: 100%;
   overflow-x: hidden;
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
-  scrollbar-width: auto;
-  scrollbar-color: #9a7840 #eee5d6;
+  overflow-y: auto;
+  padding-right: 26px;
+  scrollbar-width: none;
 }
 
-.unit-sections::-webkit-scrollbar {
-  width: 12px;
+.unit-scroll-shell .unit-sections::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
-.unit-sections::-webkit-scrollbar-track {
-  background: #eee5d6;
-  border-left: 1px solid #d8cfbf;
-}
-
-.unit-sections::-webkit-scrollbar-thumb {
-  min-height: 44px;
-  background: #9a7840;
-  border: 3px solid #eee5d6;
+.unit-custom-scrollbar {
+  position: absolute;
+  z-index: 5;
+  top: 8px;
+  right: 5px;
+  bottom: 8px;
+  width: 14px;
+  padding: 2px;
+  border: 1px solid #d2c5ae;
   border-radius: 999px;
+  background: #eee5d6;
+  box-shadow: inset 0 1px 2px rgba(70, 54, 31, .08);
+  cursor: pointer;
+  touch-action: none;
 }
 
-.unit-sections::-webkit-scrollbar-thumb:hover {
+.unit-custom-scrollbar[hidden] {
+  display: none;
+}
+
+.unit-custom-scrollbar-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  min-height: 46px;
+  border-radius: 999px;
+  background: #9a7840;
+  border: 1px solid #765a2f;
+  box-shadow: 0 1px 2px rgba(59, 42, 19, .22);
+  cursor: grab;
+}
+
+.unit-custom-scrollbar-thumb:hover,
+.unit-custom-scrollbar-thumb:focus-visible {
   background: #7b5e2f;
+  outline: 2px solid rgba(123, 33, 27, .25);
+  outline-offset: 1px;
+}
+
+.unit-custom-scrollbar-thumb.is-dragging {
+  cursor: grabbing;
+  background: #6b4d25;
 }
