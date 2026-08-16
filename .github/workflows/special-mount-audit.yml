@@ -11,7 +11,7 @@ jobs:
           npm init -y >/dev/null 2>&1
           npm install playwright@1.55.0 >/dev/null 2>&1
           npx playwright install chromium >/dev/null
-      - name: Inventory special character mounts
+      - name: Verify special character mounts
         run: |
           python3 -m http.server 8000 >/tmp/whr-http.log 2>&1 &
           PID=$!; trap 'kill $PID || true' EXIT
@@ -19,19 +19,51 @@ jobs:
           const {chromium}=require('playwright');
           (async()=>{
             const b=await chromium.launch({headless:true}),p=await b.newPage();
+            const runtime=[];p.on('pageerror',e=>runtime.push(e.message));p.on('console',m=>{if(m.type()==='error')runtime.push(m.text())});
             await p.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
+            const failures=[];
+            const check=async(army,id,tests,mutate=null)=>{
+              await p.evaluate(async army=>selectArmy(army),army);await p.waitForTimeout(70);
+              const r=await p.evaluate(({id,tests,mutate})=>{
+                const u=(state.data.faction.specialCharacters||[]).find(x=>x.id===id);if(!u)return {fail:[`missing ${id}`]};
+                const e=createEntry('specialCharacters',u);
+                if(mutate==='malekith_chariot')e.mount='whr_special_malekith_cold_one_chariot';
+                const pad=String(rosterPadRow(e));const fail=[];
+                for(const t of tests)if(!pad.includes(t))fail.push(`${u.name}: missing ${t}`);
+                return {fail,mount:e.mount,pad};
+              },{id,tests,mutate});
+              failures.push(...r.fail.map(x=>`${army}: ${x}`));
+            };
+            // Generic defaultMount compatibility.
+            await check('high_elves','tyrion',['Malhandir','10</td>']);
+            await check('high_elves','imrik',['Emperor Dragon']);
+            await check('high_elves','eltharion',['Griffon']);
+            await check('classic_undead','dieter',['Manticore']);
+            // Explicit fixed/composite rides.
+            await check('lizardmen','mazdamundi',['Stegadon','<td class="stat">6</td>','<td class="stat">7</td>','<td class="stat">5</td>']);
+            await check('slann_empire','emperor_mazdamundi',['Stegadon','<td class="stat">6</td>','<td class="stat">7</td>','<td class="stat">5</td>']);
+            await check('tomb_kings','arkhan',["Arkhan's Flying Heavy Chariot",'4 Undead Steeds','3 Skeleton crewmen']);
+            await check('dwarfs','thorgrim',['Throne of Power','Bearers provide four additional attacks','Cannot march']);
+            await check('dark_elves','malekith',['Cold One Chariot','2 Cold Ones','2 Elven Warrior crew'],'malekith_chariot');
+            // Sweep every declared default/fixed mount for a resolvable printed row.
             const ids=await p.evaluate(()=>state.armyManifest.armies.filter(a=>a.available).map(a=>a.id));
-            for(const id of ids){
-              await p.evaluate(async id=>selectArmy(id),id); await p.waitForTimeout(60);
-              const rows=await p.evaluate(()=> (state.data.faction.specialCharacters||[]).map(u=>{
-                const entry=createEntry('specialCharacters',u);
-                const text=[...(u.rules||[]),u.description||'',u.sourceNotes||''].join(' ');
-                const mountish=/\b(rides?|mounted|chariot|dragon|manticore|wyvern|griffon|gryphon|horse|steed|bear|wolf|boar|cold one|horned one|stegadon|terradon|pegasus|eagle|mammoth|squig)\b/i.test(text) || (u.mountOptions||[]).length || u.unitMount || u.fixedMount || u.mount || u.defaultMount;
-                if(!mountish)return null;
-                return {army:state.selectedArmyId,id:u.id,name:u.name,mountOptions:u.mountOptions||[],unitMount:u.unitMount||null,fixedMount:u.fixedMount||null,mount:u.mount||null,defaultMount:u.defaultMount||null,entryMount:entry.mount||null,rules:u.rules||[],pad:String(rosterPadRow(entry))};
-              }).filter(Boolean));
-              rows.forEach(r=>console.log('SPECIAL_MOUNT',JSON.stringify(r)));
+            for(const army of ids){
+              await p.evaluate(async army=>selectArmy(army),army);await p.waitForTimeout(35);
+              const f=await p.evaluate(()=>{
+                const fail=[];
+                for(const u of state.data.faction.specialCharacters||[]){
+                  const expected=u.defaultMount||u.mount||u.unitMount?.mountId||null;if(!expected)continue;
+                  const e=createEntry('specialCharacters',u),pad=String(rosterPadRow(e));
+                  if((u.defaultMount||u.mount)&&e.mount!==(u.defaultMount||u.mount))fail.push(`${u.name}: fixed/default mount not selected`);
+                  const name=u.unitMount?.name||mountById.get(expected)?.name||'';
+                  if(name&&!pad.includes(name))fail.push(`${u.name}: ${name} not printed`);
+                }
+                return fail;
+              });
+              failures.push(...f.map(x=>`${army}: ${x}`));
             }
-            await b.close();
+            failures.push(...runtime.map(x=>`runtime: ${x}`));
+            console.log('SPECIAL_MOUNT_TOTAL',JSON.stringify({armies:ids.length,failures:failures.length}));
+            await b.close();if(failures.length)throw new Error('\n'+failures.join('\n'));
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
