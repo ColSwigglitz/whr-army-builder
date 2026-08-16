@@ -1,0 +1,18 @@
+name: Ogre ally source inspect
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect source data
+        run: |
+          node - <<'JS'
+          const fs=require('fs');
+          const og=JSON.parse(fs.readFileSync('data/whr_orcs_goblins_v0_1.json','utf8'));
+          console.log('OG CHARS',og.faction.characters.map(u=>[u.id,u.name,u.tags]));
+          console.log('OG REGS',og.faction.regiments.map(u=>[u.id,u.name,u.tags]));
+          console.log('OG WM',og.faction.warMachines.map(u=>[u.id,u.name,u.tags]));
+          JS
