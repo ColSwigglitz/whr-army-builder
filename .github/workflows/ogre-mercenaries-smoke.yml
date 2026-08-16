@@ -16,8 +16,7 @@ jobs:
           node - <<'JS'
           const fs=require('fs'),zlib=require('zlib');
           const d=JSON.parse(zlib.gunzipSync(Buffer.from(fs.readFileSync('data/whr_ogre_mercenaries_v0_1.payload','utf8').trim(),'base64')));
-          console.log(`OGRE native chars=${d.faction.characters.length} regs=${d.faction.regiments.length} monsters=${d.faction.warMachines.length} specials=${d.faction.specialCharacters.length} items=${d.factionMagicItems.length}`);
-          if(d.faction.characters.length!==5 || d.faction.regiments.length!==4 || d.faction.warMachines.length!==2 || d.faction.specialCharacters.length!==0 || d.factionMagicItems.length!==3) process.exit(1);
+          if(d.faction.characters.length!==5||d.faction.regiments.length!==4||d.faction.warMachines.length!==2||d.faction.specialCharacters.length!==0||d.factionMagicItems.length!==3)process.exit(1);
           JS
       - name: Install Playwright
         run: |
@@ -32,84 +31,35 @@ jobs:
           const {chromium}=require('playwright');
           (async()=>{
             const browser=await chromium.launch({headless:true});
-            const page=await browser.newPage();
-            const errors=[];
-            page.on('pageerror',e=>errors.push(e.message));
-            page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
-            page.on('dialog',async d=>{await d.dismiss()});
-            await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});
-            await page.locator('[data-army-id="ogre_mercenaries"]').click();
-            await page.waitForTimeout(1200);
-
-            const base=await page.evaluate(()=>{
-              const f=state.data.faction;
-              const find=(s,id)=>f[s].find(u=>u.id===id);
-              const mk=(s,id,size)=>{const u=find(s,id);if(!u)throw new Error(`Missing ${s}/${id}`);const e=createEntry(s,u);if(size)e.size=size;return[u,e]};
-              const [lord,lordE]=mk('characters','ogre_lord'),[hero,heroE]=mk('characters','ogre_hero'),[bsb,bsbE]=mk('characters','ogre_bsb'),[shaman,shamanE]=mk('characters','ogre_shaman'),[shamChamp,shamChampE]=mk('characters','ogre_shaman_champion');
-              const [pack,packE]=mk('regiments','ogre_beastmaster_pack');const packBig=createEntry('regiments',pack);packBig.optionSelections.beastmasters=2;packBig.optionSelections.sabretooths=3;
-              const [ogres,o3]=mk('regiments','ogres',3);const oHeavy=createEntry('regiments',ogres);oHeavy.size=3;oHeavy.optionSelections.armour_upgrade='heavy_armour';const oAhw=createEntry('regiments',ogres);oAhw.size=3;oAhw.optionSelections.weapon_upgrade='additional_hand_weapon';const oDhw=createEntry('regiments',ogres);oDhw.size=3;oDhw.optionSelections.weapon_upgrade='double_handed_weapon';
-              const [maneaters,m3]=mk('regiments','ogre_maneaters',3);const mAll=createEntry('regiments',maneaters);mAll.size=3;mAll.optionSelections.weapon_upgrade='all_three_weapons';
-              const [lead,l3]=mk('regiments','ogre_leadbelchers',3);const lHeavy=createEntry('regiments',lead);lHeavy.size=3;lHeavy.optionSelections.armour='heavy_armour';
-              const [giant,g]=mk('warMachines','giant_cyclops');const cyclops=createEntry('warMachines',giant);cyclops.optionSelections.cyclops=true;
-              const [rhino,r]=mk('warMachines','rhino_rider');const rUp=createEntry('warMachines',rhino);rUp.optionSelections.extra_tusks_horns=true;
-
-              const nativeItems=getAllowedMagicItems(lord,'character');
-              const shamanItems=getAllowedMagicItems(shaman,'character');
-              const tribes={};
-              for(const t of ['common_goblins','forest_goblins','night_goblins','hobgoblins','halflings']) tribes[t]={chars:f.characters.filter(u=>u.ogreAllyTribe===t).map(u=>u.name),regs:f.regiments.filter(u=>u.ogreAllyTribe===t).map(u=>u.name),machines:f.warMachines.filter(u=>u.ogreAllyTribe===t).map(u=>u.name)};
-              const forestUnits=f.regiments.filter(u=>u.ogreAllyTribe==='forest_goblins');
-              const halfChar=f.characters.find(u=>u.ogreAllyTribe==='halflings'), hobChar=f.characters.find(u=>u.ogreAllyTribe==='hobgoblins'), commonChar=f.characters.find(u=>u.ogreAllyTribe==='common_goblins');
-              const oldDraft=state.draft;
-              state.draft=halfChar?createEntry('characters',halfChar):null;const halfItems=halfChar?getAllowedMagicItems(halfChar,'character'):[];
-              state.draft=hobChar?createEntry('characters',hobChar):null;const hobItems=hobChar?getAllowedMagicItems(hobChar,'character'):[];
-              state.draft=commonChar?createEntry('characters',commonChar):null;const commonItems=commonChar?getAllowedMagicItems(commonChar,'character'):[];
-              state.draft=oldDraft;
-              const hunters=find('regiments','ogre_ally_night_goblin_squig_hunters'),hunterE=createEntry('regiments',hunters);
-              const nightInf=find('regiments','ogre_ally_night_goblin_infantry'),fanE=createEntry('regiments',nightInf);fanE.size=20;fanE.optionSelections.fanatics=2;fanE.optionSelections.mad_cap_mushroom=true;
-              state.armyOptions.ogreAllyTribe='night_goblins';
-              const snapshot=makeRosterSnapshot();
-              return {
-                counts:{nativeChars:f.characters.filter(u=>!(u.tags||[]).includes('ogre_ally')).length,nativeRegs:f.regiments.filter(u=>!(u.tags||[]).includes('ogre_ally')).length,nativeMachines:f.warMachines.filter(u=>!(u.tags||[]).includes('ogre_ally')).length},
-                costs:{lord:calculateEntry(lordE),hero:calculateEntry(heroE),bsb:calculateEntry(bsbE),shaman:calculateEntry(shamanE),shamanChampion:calculateEntry(shamChampE),pack:calculateEntry(packE),packBig:calculateEntry(packBig),ogres:calculateEntry(o3),ogresHeavy:calculateEntry(oHeavy),ogresAhw:calculateEntry(oAhw),ogresDhw:calculateEntry(oDhw),maneaters:calculateEntry(m3),maneatersAll:calculateEntry(mAll),lead:calculateEntry(l3),leadHeavy:calculateEntry(lHeavy),giant:calculateEntry(g),cyclops:calculateEntry(cyclops),rhino:calculateEntry(r),rhinoUp:calculateEntry(rUp),hunters:calculateEntry(hunterE),fanatics:calculateEntry(fanE)},
-                tribes,
-                forestHasPoisonOption:forestUnits.some(u=>[...(u.options||[]),...(u.equipmentOptions||[])].some(o=>JSON.stringify(o).toLowerCase().includes('poison'))),
-                magic:{nativeOgre:['iron_boot','iron_fist','smuckle_buckle'].every(id=>nativeItems.some(i=>i.id===id)),nativeHasAlly:nativeItems.some(i=>i.ogreAllySource),shamanFamiliar:shamanItems.some(i=>i.category==='familiar'),halfHasLiberated:halfItems.some(i=>i.ogreAllySource==='halflings_moot'),halfHasOgre:halfItems.some(i=>['iron_boot','iron_fist','smuckle_buckle'].includes(i.id)),hobIllegal:hobItems.some(i=>i.ogreAllySource==='chaos_dwarfs'&&!i.id.startsWith('ogally_chaos_dwarfs_og_')),commonOwn:commonItems.some(i=>i.ogreAllySource==='orcs_goblins'),commonHasOgre:commonItems.some(i=>['iron_boot','iron_fist','smuckle_buckle'].includes(i.id))},
-                pad:{pack:rosterPadRow(packBig).includes('Sabretooth'),rhino:rosterPadRow(rUp).includes('Rhino'),hunters:rosterPadRow(hunterE).includes('Cave Squigs'),fanatics:rosterPadRow(fanE).includes('Night Goblin Fanatic')},
-                snapshotTribe:snapshot.armyOptions?.ogreAllyTribe
-              };
+            const page=await browser.newPage();const errors=[];
+            page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});page.on('dialog',async d=>d.dismiss());
+            await page.goto('http://127.0.0.1:8000/',{waitUntil:'networkidle'});await page.locator('[data-army-id="ogre_mercenaries"]').click();await page.waitForTimeout(1000);
+            const result=await page.evaluate(()=>{
+              const f=state.data.faction,find=(s,id)=>f[s].find(u=>u.id===id),mk=(s,id,n)=>{const u=find(s,id),e=createEntry(s,u);if(n)e.size=n;return[u,e]};
+              const [lord,lordE]=mk('characters','ogre_lord'),[hero,heroE]=mk('characters','ogre_hero'),[bsb,bsbE]=mk('characters','ogre_bsb'),[shaman,shamanE]=mk('characters','ogre_shaman'),[sc,scE]=mk('characters','ogre_shaman_champion');
+              const [pack,packE]=mk('regiments','ogre_beastmaster_pack'),pack2=createEntry('regiments',pack);pack2.optionSelections.beastmasters=2;pack2.optionSelections.sabretooths=3;
+              const [ogres,o]=mk('regiments','ogres',3),oh=createEntry('regiments',ogres),oa=createEntry('regiments',ogres),od=createEntry('regiments',ogres);[oh,oa,od].forEach(e=>e.size=3);oh.optionSelections.armour_upgrade='heavy_armour';oa.optionSelections.weapon_upgrade='additional_hand_weapon';od.optionSelections.weapon_upgrade='double_handed_weapon';
+              const [mane,m]=mk('regiments','ogre_maneaters',3),ma=createEntry('regiments',mane);ma.size=3;ma.optionSelections.weapon_upgrade='all_three_weapons';
+              const [lead,l]=mk('regiments','ogre_leadbelchers',3),lh=createEntry('regiments',lead);lh.size=3;lh.optionSelections.armour='heavy_armour';
+              const [giant,g]=mk('warMachines','giant_cyclops'),cy=createEntry('warMachines',giant);cy.optionSelections.cyclops=true;const [rhino,r]=mk('warMachines','rhino_rider'),ru=createEntry('warMachines',rhino);ru.optionSelections.extra_tusks_horns=true;
+              const hunters=find('regiments','ogre_ally_night_goblin_squig_hunters'),he=createEntry('regiments',hunters),night=find('regiments','ogre_ally_night_goblin_infantry'),ne=createEntry('regiments',night);ne.size=20;ne.optionSelections.fanatics=2;ne.optionSelections.mad_cap_mushroom=true;
+              const nativeItems=getAllowedMagicItems(lord,'character'),shamanItems=getAllowedMagicItems(shaman,'character');
+              const allyMagic={};for(const t of ['common_goblins','hobgoblins','halflings']){const u=f.characters.find(x=>x.ogreAllyTribe===t);state.draft=createEntry('characters',u);allyMagic[t]=getAllowedMagicItems(u,'character').map(i=>({id:i.id,src:i.ogreAllySource||'',cat:i.category}));}state.draft=null;
+              const tribes={};for(const t of ['common_goblins','forest_goblins','night_goblins','hobgoblins','halflings'])tribes[t]=f.regiments.filter(u=>u.ogreAllyTribe===t).map(u=>u.name);
+              state.armyOptions.ogreAllyTribe='night_goblins';const snap=makeRosterSnapshot();
+              return {counts:[f.characters.filter(u=>!(u.tags||[]).includes('ogre_ally')).length,f.regiments.filter(u=>!(u.tags||[]).includes('ogre_ally')).length,f.warMachines.filter(u=>!(u.tags||[]).includes('ogre_ally')).length],costs:{lord:calculateEntry(lordE),hero:calculateEntry(heroE),bsb:calculateEntry(bsbE),shaman:calculateEntry(shamanE),sc:calculateEntry(scE),pack:calculateEntry(packE),pack2:calculateEntry(pack2),o:calculateEntry(o),oh:calculateEntry(oh),oa:calculateEntry(oa),od:calculateEntry(od),m:calculateEntry(m),ma:calculateEntry(ma),l:calculateEntry(l),lh:calculateEntry(lh),g:calculateEntry(g),cy:calculateEntry(cy),r:calculateEntry(r),ru:calculateEntry(ru),he:calculateEntry(he),ne:calculateEntry(ne)},tribes,forestBad:f.regiments.filter(u=>u.ogreAllyTribe==='forest_goblins').some(u=>JSON.stringify([u.options,u.equipmentOptions]).toLowerCase().includes('poison')||u.name.toLowerCase().includes('gargantuan')),halfBad:JSON.stringify([...f.characters,...f.regiments,...f.warMachines].filter(u=>u.ogreAllyTribe==='halflings').map(u=>u.name)).toLowerCase(),nativeMagic:['iron_boot','iron_fist','smuckle_buckle'].every(id=>nativeItems.some(i=>i.id===id))&&!nativeItems.some(i=>i.ogreAllySource),shamanFam:shamanItems.some(i=>i.category==='familiar'),allyMagic,pad:[rosterPadRow(pack2).includes('Sabretooth'),rosterPadRow(ru).includes('Rhino'),rosterPadRow(he).includes('Cave Squigs'),rosterPadRow(ne).includes('Night Goblin Fanatic')],snap:snap.armyOptions?.ogreAllyTribe};
             });
-            console.log('BASE',JSON.stringify(base));
-            if(JSON.stringify(base.counts)!==JSON.stringify({nativeChars:5,nativeRegs:4,nativeMachines:2})) throw new Error(`Native counts wrong ${JSON.stringify(base.counts)}`);
-            const expected={lord:244,hero:171,bsb:128,shaman:98,shamanChampion:182,pack:50,packBig:120,ogres:72,ogresHeavy:84,ogresAhw:90,ogresDhw:96,maneaters:108,maneatersAll:138,lead:108,leadHeavy:126,giant:200,cyclops:250,rhino:80,rhinoUp:100,hunters:54,fanatics:110};
-            for(const[k,v]of Object.entries(expected))if(base.costs[k]!==v)throw new Error(`${k} expected ${v}, got ${base.costs[k]}`);
-            if(!base.tribes.forest_goblins.regs.some(n=>n.includes('Forest Goblin Infantry')))throw new Error('Forest Goblin Infantry missing');
-            for(const n of ['Night Goblin Infantry','Squig-Hoppers','Squig-Hunters','Netters and Clubbers'])if(!base.tribes.night_goblins.regs.some(x=>x.includes(n)))throw new Error(`Night Goblin allied unit missing: ${n}`);
-            if(base.forestHasPoisonOption||JSON.stringify(base.tribes.forest_goblins).toLowerCase().includes('gargantuan spider'))throw new Error('Illegal Forest Goblin option imported');
-            const half=JSON.stringify(base.tribes.halflings).toLowerCase();if(half.includes('wizard')||half.includes('wood elf')||half.includes('treeman'))throw new Error(`Illegal Halfling ally imported ${half}`);
-            const m=base.magic;if(!m.nativeOgre||m.nativeHasAlly||m.shamanFamiliar||m.halfHasLiberated||m.halfHasOgre||m.hobIllegal||!m.commonOwn||m.commonHasOgre)throw new Error(`Magic isolation regression ${JSON.stringify(m)}`);
-            if(Object.values(base.pad).some(v=>!v))throw new Error(`Roster Pad regression ${JSON.stringify(base.pad)}`);
-            if(base.snapshotTribe!=='night_goblins')throw new Error('Allied tribe did not persist in roster snapshot');
-
-            const ui=await page.evaluate(()=>{
-              const results={};
-              for(const t of ['common_goblins','forest_goblins','night_goblins','hobgoblins','halflings']){state.armyOptions.ogreAllyTribe=t;renderUnitBrowser();const text=els.unitBrowser.textContent;results[t]=text.includes('Allied')&&(!t.includes('night')||text.includes('Squig-Hunters'));}
-              return results;
-            });
-            if(Object.values(ui).some(v=>!v))throw new Error(`Ally selector/browser regression ${JSON.stringify(ui)}`);
-
-            const construction=await page.evaluate(()=>{
-              const count=id=>state.roster.filter(e=>e.unitId===id).length;
-              state.roster=[];state.armyOptions.ogreAllyTribe='';addUnit('regiments','ogre_beastmaster_pack');addUnit('regiments','ogre_beastmaster_pack');const pack01=count('ogre_beastmaster_pack')===1;
-              state.roster=[];addUnit('regiments','ogre_maneaters');addUnit('regiments','ogre_maneaters');const maneater01=count('ogre_maneaters')===1;
-              state.roster=[];addUnit('regiments','ogre_leadbelchers');addUnit('regiments','ogre_leadbelchers');const lead01=count('ogre_leadbelchers')===1;
-              state.roster=[];addUnit('characters','ogre_bsb');addUnit('characters','ogre_bsb');const bsb01=count('ogre_bsb')===1;
-              state.roster=[];state.armyOptions.ogreAllyTribe='common_goblins';const machine=state.data.faction.warMachines.find(u=>u.ogreAllyTribe==='common_goblins');addUnit('warMachines',machine.id);const machineBlockedAtZero=state.roster.length===0;
-              const lord=state.data.faction.characters.find(u=>u.id==='ogre_lord'),ogres=state.data.faction.regiments.find(u=>u.id==='ogres'),pack=state.data.faction.regiments.find(u=>u.id==='ogre_beastmaster_pack');
-              const le=createEntry('characters',lord),oe=createEntry('regiments',ogres),pe=createEntry('regiments',pack);oe.size=30;state.roster=[le,oe,pe];addUnit('warMachines',machine.id);addUnit('warMachines',machine.id);const oneMachine=count(machine.id)===1;
-              return {pack01,maneater01,lead01,bsb01,machineBlockedAtZero,oneMachine};
-            });
-            if(Object.values(construction).some(v=>!v))throw new Error(`Construction regression ${JSON.stringify(construction)}`);
-            if(errors.length)throw new Error(errors.join(' | '));
-            await browser.close();
+            console.log('OGRE',JSON.stringify(result));
+            if(JSON.stringify(result.counts)!=='[5,4,2]')throw new Error('Native Ogre counts wrong');
+            const ex={lord:244,hero:171,bsb:128,shaman:98,sc:182,pack:50,pack2:120,o:72,oh:84,oa:90,od:96,m:108,ma:138,l:108,lh:126,g:200,cy:250,r:80,ru:100,he:54,ne:130};for(const[k,v]of Object.entries(ex))if(result.costs[k]!==v)throw new Error(`${k}: expected ${v}, got ${result.costs[k]}`);
+            if(!result.tribes.forest_goblins.some(n=>n.includes('Forest Goblin Infantry')))throw new Error('Forest Goblin Infantry missing');for(const n of ['Night Goblin Infantry','Squig-Hoppers','Squig-Hunters','Netters and Clubbers'])if(!result.tribes.night_goblins.some(x=>x.includes(n)))throw new Error(`Missing ${n}`);
+            if(result.forestBad)throw new Error('Illegal Forest Goblin option');if(/wizard|wood elf|treeman/.test(result.halfBad))throw new Error('Illegal Halfling ally');
+            if(!result.nativeMagic||result.shamanFam)throw new Error('Native Ogre magic regression');
+            if(!result.allyMagic.common_goblins.some(i=>i.src==='orcs_goblins')||result.allyMagic.common_goblins.some(i=>['iron_boot','iron_fist','smuckle_buckle'].includes(i.id)))throw new Error('Common Goblin magic regression');
+            if(result.allyMagic.hobgoblins.some(i=>i.src==='chaos_dwarfs'&&!i.id.startsWith('ogally_chaos_dwarfs_og_')))throw new Error('Hobgoblin magic regression');if(result.allyMagic.halflings.some(i=>i.src==='halflings_moot'))throw new Error('Halfling liberated magic leaked');
+            if(result.pad.some(v=>!v)||result.snap!=='night_goblins')throw new Error('Roster pad/save regression');
+            const ui=await page.evaluate(()=>{const r={};for(const t of ['common_goblins','forest_goblins','night_goblins','hobgoblins','halflings']){state.armyOptions.ogreAllyTribe=t;renderUnitBrowser();r[t]=els.unitBrowser.textContent.includes('Allied');}return r});if(Object.values(ui).some(v=>!v))throw new Error(`Ally UI regression ${JSON.stringify(ui)}`);
+            const construction=await page.evaluate(()=>{const count=id=>state.roster.filter(e=>e.unitId===id).length;state.roster=[];state.armyOptions.ogreAllyTribe='';addUnit('regiments','ogre_beastmaster_pack');addUnit('regiments','ogre_beastmaster_pack');const p=count('ogre_beastmaster_pack')===1;state.roster=[];addUnit('regiments','ogre_maneaters');addUnit('regiments','ogre_maneaters');const m=count('ogre_maneaters')===1;state.roster=[];addUnit('regiments','ogre_leadbelchers');addUnit('regiments','ogre_leadbelchers');const l=count('ogre_leadbelchers')===1;state.roster=[];addUnit('characters','ogre_bsb');addUnit('characters','ogre_bsb');const b=count('ogre_bsb')===1;state.roster=[];state.armyOptions.ogreAllyTribe='common_goblins';const machine=state.data.faction.warMachines.find(u=>u.ogreAllyTribe==='common_goblins');addUnit('warMachines',machine.id);const z=state.roster.length===0;const lord=state.data.faction.characters.find(u=>u.id==='ogre_lord'),ogres=state.data.faction.regiments.find(u=>u.id==='ogres'),pack=state.data.faction.regiments.find(u=>u.id==='ogre_beastmaster_pack'),le=createEntry('characters',lord),oe=createEntry('regiments',ogres),pe=createEntry('regiments',pack);oe.size=30;state.roster=[le,oe,pe];addUnit('warMachines',machine.id);addUnit('warMachines',machine.id);return{p,m,l,b,z,one:count(machine.id)===1}});if(Object.values(construction).some(v=>!v))throw new Error(`Construction regression ${JSON.stringify(construction)}`);
+            if(errors.length)throw new Error(errors.join(' | '));await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
