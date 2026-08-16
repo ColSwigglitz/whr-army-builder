@@ -23,17 +23,14 @@ jobs:
             await p.evaluate(async()=>selectArmy('ogre_mercenaries'));await p.waitForTimeout(200);
             const out=await p.evaluate(()=>{
               const f=state.data.faction;
-              const groups={};
-              for(const tribe of ['common_goblins','forest_goblins','night_goblins','hobgoblins','halflings']){
-                groups[tribe]={
-                  characters:f.characters.filter(u=>u.ogreAllyTribe===tribe).map(u=>({id:u.id,name:u.name,tags:u.tags,magicItems:u.magicItems,rules:u.rules})),
-                  regiments:f.regiments.filter(u=>u.ogreAllyTribe===tribe).map(u=>({id:u.id,name:u.name})),
-                  warMachines:f.warMachines.filter(u=>u.ogreAllyTribe===tribe).map(u=>({id:u.id,name:u.name,tags:u.tags}))
-                };
-              }
-              return groups;
+              return {
+                commonCharacters:f.characters.filter(u=>u.ogreAllyTribe==='common_goblins').map(u=>({id:u.id,name:u.name,mountOptions:u.mountOptions,profileId:u.profileId})),
+                commonMachines:f.warMachines.filter(u=>u.ogreAllyTribe==='common_goblins'),
+                mounts:state.data.mounts.filter(m=>String(m.id).includes('ogally_orcs_goblins')),
+                profiles:state.data.profiles.filter(x=>String(x.id).includes('ogally_orcs_goblins')).map(x=>({id:x.id,name:x.name,stats:x.stats}))
+              };
             });
-            console.log('OGRE_ALLIES_AUDIT',JSON.stringify(out,null,2));
+            console.log('OGRE_ALLIES_DETAIL',JSON.stringify(out,null,2));
             await b.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           JS
