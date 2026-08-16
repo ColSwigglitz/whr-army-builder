@@ -64,6 +64,18 @@
       out.tags = [...(out.tags || []), "ogre_ally", `ogre_ally_${tribe}`, `ogre_ally_source_${sourceKey}`];
       out.ogreAllyTribe = tribe;
       out.ogreAllySource = sourceKey;
+
+      // The Ogre army has two explicit exceptions to the Forest Goblin list.
+      if (tribe === "forest_goblins") {
+        out.options = (out.options || []).filter(option => !lower(JSON.stringify(option)).includes("poison"));
+        out.equipmentOptions = (out.equipmentOptions || []).map(group => ({
+          ...group,
+          choices: (group.choices || []).filter(choice => !lower(JSON.stringify(choice)).includes("poison"))
+        }));
+      }
+      if (tribe === "common_goblins") {
+        out.rules = [...(out.rules || []), "Ogre ally: Common Goblins do not receive the higher-Leadership-without-Orcs benefit."];
+      }
       return out;
     };
     return {
@@ -72,7 +84,7 @@
       equipment:(source.equipment || []).map(e => ({...deep(e), id:prefix+e.id})),
       items:(source.factionMagicItems || []).map(i => ({...deep(i), id:prefix+i.id, ogreAllySource:sourceKey})),
       characters:(source.faction?.characters || []).filter(u => selectors.character(u) && !isBsb(u)).map(cloneUnit),
-      regiments:(source.faction?.regiments || []).filter(selectors.regiment).map(cloneUnit),
+      regiments:(source.faction?.regiments || []).filter(u => selectors.regiment(u) && !(tribe === "forest_goblins" && lower(u.name).includes("gargantuan spider"))).map(cloneUnit),
       warMachines:(source.faction?.warMachines || []).filter(selectors.warMachine).map(cloneUnit)
     };
   }
@@ -80,6 +92,11 @@
   async function sourceJson(path) {
     const response = await previousFetch(path, {cache:"no-store"});
     return response.ok ? response.json() : null;
+  }
+
+  function pushUnique(target, additions) {
+    const seen = new Set(target.map(x => x.id));
+    for (const item of additions || []) if (item?.id && !seen.has(item.id)) { target.push(item); seen.add(item.id); }
   }
 
   window.fetch = async function(input, init) {
@@ -90,6 +107,7 @@
       const stub = await response.clone().json();
       if (!stub?.meta?.payloadFile) return response;
       const payload = await previousFetch(`./data/${stub.meta.payloadFile}`, {cache:"no-store"});
+      if (!payload.ok) throw new Error(`Could not load ${stub.meta.payloadFile}`);
       const data = JSON.parse(await inflate(await payload.text()));
       const empire = await sourceJson("./data/whr_empire_v0_1.json");
       if (empire) data.commonMagicItems = empire.commonMagicItems || [];
@@ -102,11 +120,16 @@
       const pools=[];
       for (const tribe of ["common_goblins","forest_goblins","night_goblins"]) if (og) pools.push(prefixSource(og,"orcs_goblins",tribe,{character:u=>belongsToTribe(u,tribe),regiment:u=>belongsToTribe(u,tribe),warMachine:u=>tribe==="common_goblins"&&isAllowedWarMachine(u,tribe)}));
       if (cd) pools.push(prefixSource(cd,"chaos_dwarfs","hobgoblins",{character:u=>belongsToTribe(u,"hobgoblins"),regiment:u=>belongsToTribe(u,"hobgoblins"),warMachine:u=>isAllowedWarMachine(u,"hobgoblins")}));
-      if (hf) pools.push(prefixSource(hf,"halflings_moot","halflings",{character:u=>belongsToTribe(u,"halflings"),regiment:u=>belongsToTribe(u,"halflings")&&!lower(u.name).includes("wood elf")&&!lower(u.name).includes("empire"),warMachine:u=>isAllowedWarMachine(u,"halflings")}));
+      if (hf) pools.push(prefixSource(hf,"halflings_moot","halflings",{character:u=>belongsToTribe(u,"halflings"),regiment:u=>belongsToTribe(u,"halflings")&&!lower(u.name).includes("wood elf")&&!lower(u.name).includes("empire")&&!lower(u.name).includes("treeman"),warMachine:u=>isAllowedWarMachine(u,"halflings")}));
 
       for (const pool of pools) {
-        data.profiles.push(...pool.profiles); data.mounts.push(...pool.mounts); data.equipment.push(...pool.equipment); data.factionMagicItems.push(...pool.items);
-        data.faction.characters.push(...pool.characters); data.faction.regiments.push(...pool.regiments); data.faction.warMachines.push(...pool.warMachines);
+        pushUnique(data.profiles, pool.profiles);
+        pushUnique(data.mounts, pool.mounts);
+        pushUnique(data.equipment, pool.equipment);
+        pushUnique(data.factionMagicItems, pool.items);
+        pushUnique(data.faction.characters, pool.characters);
+        pushUnique(data.faction.regiments, pool.regiments);
+        pushUnique(data.faction.warMachines, pool.warMachines);
       }
       return new Response(JSON.stringify(data), {status:200, headers:{"Content-Type":"application/json"}});
     } catch (error) {
