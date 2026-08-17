@@ -53,7 +53,7 @@
           retentionScript.src = "dev_retention.js?v=1"; retentionScript.async = false;
           retentionScript.onload = () => {
             const sharedScript = document.createElement("script");
-            sharedScript.src = "dev_shared_armies.js?v=1"; sharedScript.async = false;
+            sharedScript.src = "dev_shared_armies.js?v=2"; sharedScript.async = false;
             document.body.appendChild(sharedScript);
           };
           document.body.appendChild(retentionScript);
