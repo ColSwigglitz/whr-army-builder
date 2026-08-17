@@ -47,7 +47,12 @@
       landingArmiesScript.src = "dev_landing_armies.js?v=1"; landingArmiesScript.async = false;
       landingArmiesScript.onload = () => {
         const privacyScript = document.createElement("script");
-        privacyScript.src = "dev_privacy_account.js?v=1"; privacyScript.async = false;
+        privacyScript.src = "dev_privacy_account.js?v=2"; privacyScript.async = false;
+        privacyScript.onload = () => {
+          const retentionScript = document.createElement("script");
+          retentionScript.src = "dev_retention.js?v=1"; retentionScript.async = false;
+          document.body.appendChild(retentionScript);
+        };
         document.body.appendChild(privacyScript);
       };
       document.body.appendChild(landingArmiesScript);
