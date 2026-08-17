@@ -57,7 +57,7 @@
   authScript.async = false;
   authScript.onload = () => {
     const cloudSaveScript = document.createElement("script");
-    cloudSaveScript.src = "dev_cloud_saves.js?v=1";
+    cloudSaveScript.src = "dev_cloud_saves.js?v=2";
     cloudSaveScript.async = false;
     document.body.appendChild(cloudSaveScript);
   };
