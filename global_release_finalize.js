@@ -8,15 +8,9 @@
     if (typeof window.whrMagicItemEligibleForBearer === "function") {
       items = items.filter(item => window.whrMagicItemEligibleForBearer(item, unit, context));
     }
-
-    const selectedIds = context === "champion"
-      ? (state.draft?.champion?.magicItems || [])
-      : (state.draft?.magicItems || []);
+    const selectedIds = context === "champion" ? (state.draft?.champion?.magicItems || []) : (state.draft?.magicItems || []);
     const selectedArmour = selectedIds.find(id => getMagicItem(id)?.category === "magic_armour");
-    if (selectedArmour) {
-      items = items.filter(item => item.category !== "magic_armour" || item.id === selectedArmour);
-    }
-
+    if (selectedArmour) items = items.filter(item => item.category !== "magic_armour" || item.id === selectedArmour);
     return [...new Map(items.map(item => [item.id, item])).values()];
   };
 
@@ -24,16 +18,10 @@
   selectArmy = async function(armyId) {
     await previousSelectArmy(armyId);
     if (!state.data) return;
-    if (typeof window.whrApplyEffectiveRegimentMinimums === "function") {
-      window.whrApplyEffectiveRegimentMinimums();
-    }
-    renderUnitBrowser();
-    renderArmy();
+    if (typeof window.whrApplyEffectiveRegimentMinimums === "function") window.whrApplyEffectiveRegimentMinimums();
+    renderUnitBrowser(); renderArmy();
   };
 
-  // General selection is deliberately loaded last so it evaluates the final,
-  // army-specific character data and wraps the completed roster/status UI.
-  // Edge-case overrides then layer forced/prohibited General rules on top.
   const generalScript = document.createElement("script");
   generalScript.src = "general_system.js?v=2";
   generalScript.async = false;
@@ -45,24 +33,23 @@
   };
   document.body.appendChild(generalScript);
 
-  // Development-only account/cloud layers. These files exist only on develop,
-  // keeping production v1 independent of Supabase functionality.
   const authStyle = document.createElement("link");
-  authStyle.rel = "stylesheet";
-  authStyle.href = "dev_auth.css?v=1";
+  authStyle.rel = "stylesheet"; authStyle.href = "dev_auth.css?v=1";
   document.head.appendChild(authStyle);
 
   const authScript = document.createElement("script");
-  authScript.src = "dev_auth.js?v=1";
-  authScript.async = false;
+  authScript.src = "dev_auth.js?v=2"; authScript.async = false;
   authScript.onload = () => {
     const cloudSaveScript = document.createElement("script");
-    cloudSaveScript.src = "dev_cloud_saves.js?v=3";
-    cloudSaveScript.async = false;
+    cloudSaveScript.src = "dev_cloud_saves.js?v=3"; cloudSaveScript.async = false;
     cloudSaveScript.onload = () => {
       const landingArmiesScript = document.createElement("script");
-      landingArmiesScript.src = "dev_landing_armies.js?v=1";
-      landingArmiesScript.async = false;
+      landingArmiesScript.src = "dev_landing_armies.js?v=1"; landingArmiesScript.async = false;
+      landingArmiesScript.onload = () => {
+        const privacyScript = document.createElement("script");
+        privacyScript.src = "dev_privacy_account.js?v=1"; privacyScript.async = false;
+        document.body.appendChild(privacyScript);
+      };
       document.body.appendChild(landingArmiesScript);
     };
     document.body.appendChild(cloudSaveScript);
