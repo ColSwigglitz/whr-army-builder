@@ -1,0 +1,41 @@
+name: Deploy develop to dev site
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Prepare deployment copy
+        run: |
+          rm -rf .deploy
+          mkdir .deploy
+          rsync -a --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'CNAME' \
+            ./ .deploy/
+          touch .deploy/.nojekyll
+
+      - name: Push to development deployment repository
+        env:
+          GH_TOKEN: ${{ secrets.DEV_DEPLOY_TOKEN }}
+        run: |
+          cd .deploy
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy develop ${GITHUB_SHA}"
+          git branch -M main
+          git remote add origin https://x-access-token:${GH_TOKEN}@github.com/ColSwigglitz/whr-army-builder-dev.git
+          git push --force origin main
