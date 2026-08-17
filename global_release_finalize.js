@@ -45,7 +45,7 @@
   };
   document.body.appendChild(generalScript);
 
-  // Development-only account layer. This file exists only on the develop line,
+  // Development-only account layer. These files exist only on the develop line,
   // so production v1 remains completely independent of Supabase/Auth changes.
   const authStyle = document.createElement("link");
   authStyle.rel = "stylesheet";
@@ -55,5 +55,11 @@
   const authScript = document.createElement("script");
   authScript.src = "dev_auth.js?v=1";
   authScript.async = false;
+  authScript.onload = () => {
+    const cloudSaveScript = document.createElement("script");
+    cloudSaveScript.src = "dev_cloud_saves.js?v=1";
+    cloudSaveScript.async = false;
+    document.body.appendChild(cloudSaveScript);
+  };
   document.body.appendChild(authScript);
 })();
