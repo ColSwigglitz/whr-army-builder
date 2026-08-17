@@ -43,6 +43,10 @@
             const retentionScript = document.createElement("script"); retentionScript.src = "dev_retention.js?v=1"; retentionScript.async = false;
             retentionScript.onload = () => {
               const sharedScript = document.createElement("script"); sharedScript.src = "dev_shared_armies.js?v=3"; sharedScript.async = false;
+              sharedScript.onload = () => {
+                const campaignScript = document.createElement("script"); campaignScript.src = "dev_campaigns.js?v=1"; campaignScript.async = false;
+                document.body.appendChild(campaignScript);
+              };
               document.body.appendChild(sharedScript);
             };
             document.body.appendChild(retentionScript);
