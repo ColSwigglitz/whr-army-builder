@@ -1,0 +1,127 @@
+.dev-account-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 8px 18px;
+  background: #2b2822;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,.16);
+  font-size: 13px;
+}
+
+.dev-account-status {
+  color: rgba(255,255,255,.8);
+}
+
+.dev-account-email {
+  color: #fff;
+  font-weight: 800;
+}
+
+.dev-auth-button {
+  padding: 7px 12px;
+  color: #fff;
+  background: #7b211b;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.dev-auth-button:hover { background: #561713; }
+.dev-auth-button-secondary { background: transparent; }
+.dev-auth-button-secondary:hover { background: rgba(255,255,255,.1); }
+
+.dev-auth-dialog {
+  width: min(430px, calc(100% - 28px));
+  padding: 0;
+  color: #29251f;
+  background: #fffdf8;
+  border: 1px solid #d8cfbf;
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.28);
+}
+
+.dev-auth-dialog::backdrop { background: rgba(20,16,12,.62); }
+
+.dev-auth-card { padding: 24px; }
+
+.dev-auth-card h2 {
+  margin: 0 0 7px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 26px;
+}
+
+.dev-auth-intro {
+  margin: 0 0 20px;
+  color: #6f685e;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dev-auth-field {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dev-auth-field input {
+  width: 100%;
+  padding: 11px 12px;
+  color: #29251f;
+  background: #fff;
+  border: 1px solid #d8cfbf;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.dev-auth-field input:focus {
+  outline: none;
+  border-color: #b08a3b;
+  box-shadow: 0 0 0 3px rgba(176,138,59,.14);
+}
+
+.dev-auth-message {
+  min-height: 20px;
+  margin: 4px 0 12px;
+  color: #9d2b25;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.dev-auth-message.success { color: #316b43; }
+
+.dev-auth-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+}
+
+.dev-auth-switch {
+  margin: 16px 0 0;
+  padding-top: 15px;
+  color: #6f685e;
+  border-top: 1px solid #e5ded1;
+  text-align: center;
+  font-size: 12px;
+}
+
+.dev-auth-switch button {
+  padding: 0;
+  color: #7b211b;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .dev-account-bar { justify-content: center; flex-wrap: wrap; padding: 8px 10px; }
+  .dev-account-status { width: 100%; text-align: center; }
+}
