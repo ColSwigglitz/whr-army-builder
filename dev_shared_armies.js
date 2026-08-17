@@ -17,6 +17,7 @@
       .shared-army-name { font-weight:900; font-size:16px; }
       .shared-army-meta { margin-top:5px; color:#616a73; font-size:12px; line-height:1.45; }
       .shared-army-owner { font-weight:800; color:#423832; }
+      .shared-army-yours { display:inline-block; margin-left:7px; padding:2px 7px; border-radius:999px; background:#eef3ff; color:#294c8a; border:1px solid #b8c8e6; font-size:10px; font-weight:900; letter-spacing:.04em; text-transform:uppercase; vertical-align:middle; }
       .shared-army-view { min-height:34px; padding:7px 12px; border:1px solid #7b211b; border-radius:5px; background:#7b211b; color:#fff; font-weight:800; cursor:pointer; white-space:nowrap; }
       .shared-army-view:hover { background:#651a16; }
       .shared-armies-empty { padding:30px 12px; text-align:center; color:#626b74; }
@@ -80,7 +81,6 @@
       .from("army_lists")
       .select("id,owner_id,name,army_id,faction_id,faction_name,points_limit,total_points,roster_data,visibility,updated_at")
       .eq("visibility", "shared")
-      .neq("owner_id", currentUser.id)
       .order("updated_at", { ascending:false });
     if (error) throw error;
 
@@ -91,7 +91,11 @@
       const profiles = await window.whrSupabase.from("profiles").select("id,display_name").in("id", ownerIds);
       if (!profiles.error) for (const p of profiles.data || []) names.set(p.id, p.display_name);
     }
-    return rows.map(row => ({ ...row, ownerName:names.get(row.owner_id) || "WHR Player" }));
+    return rows.map(row => ({
+      ...row,
+      ownerName:names.get(row.owner_id) || "WHR Player",
+      isOwnArmy: row.owner_id === currentUser.id
+    }));
   }
 
   async function openSharedArmies() {
@@ -103,12 +107,13 @@
     try {
       const armies = await getSharedArmies();
       if (!armies.length) {
-        list.innerHTML = `<div class="shared-armies-empty"><strong>No shared armies yet.</strong><div style="margin-top:6px">When another player marks an army as Shared, it will appear here.</div></div>`;
+        list.innerHTML = `<div class="shared-armies-empty"><strong>No shared armies yet.</strong><div style="margin-top:6px">When a player marks an army as Shared, it will appear here.</div></div>`;
         return;
       }
       list.innerHTML = armies.map(row => {
         const when = row.updated_at ? new Date(row.updated_at).toLocaleString() : "";
-        return `<article class="shared-army-card"><div><div class="shared-army-name">${escape(row.name || "Unnamed Army")}</div><div class="shared-army-meta"><span class="shared-army-owner">${escape(row.ownerName)}</span> · ${escape(row.faction_name || "Unknown Army")} · ${Number(row.total_points || 0)} / ${Number(row.points_limit || 0)} pts${when ? ` · Updated ${escape(when)}` : ""}</div></div><button class="shared-army-view" type="button" data-view-shared-army="${escape(row.id)}">View Army</button></article>`;
+        const yours = row.isOwnArmy ? `<span class="shared-army-yours">Your army</span>` : "";
+        return `<article class="shared-army-card"><div><div class="shared-army-name">${escape(row.name || "Unnamed Army")}${yours}</div><div class="shared-army-meta"><span class="shared-army-owner">${escape(row.ownerName)}</span> · ${escape(row.faction_name || "Unknown Army")} · ${Number(row.total_points || 0)} / ${Number(row.points_limit || 0)} pts${when ? ` · Updated ${escape(when)}` : ""}</div></div><button class="shared-army-view" type="button" data-view-shared-army="${escape(row.id)}">View Army</button></article>`;
       }).join("");
       list.querySelectorAll("[data-view-shared-army]").forEach(btn => btn.addEventListener("click", () => viewSharedArmy(btn.dataset.viewSharedArmy)));
     } catch (error) {
