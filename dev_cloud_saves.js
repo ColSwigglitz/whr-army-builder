@@ -34,18 +34,37 @@
     return snapshot;
   }
 
+  function updateCloudUi() {
+    if (!els.savedRostersBtn) return;
+    els.savedRostersBtn.textContent = currentUser ? "My Armies" : "Saved Rosters";
+    els.savedRostersBtn.title = currentUser
+      ? "View armies saved to your WHR Army Builder account"
+      : "View armies saved in this browser";
+  }
+
+  function setSavedDialogHeading(title, eyebrow) {
+    const header = els.savedRostersDialog?.querySelector(".dialog-header");
+    const heading = header?.querySelector("h2");
+    const kicker = header?.querySelector(".eyebrow");
+    if (heading) heading.textContent = title;
+    if (kicker) kicker.textContent = eyebrow;
+  }
+
   async function refreshCurrentUser() {
     if (!window.whrSupabase) {
       currentUser = null;
+      updateCloudUi();
       return null;
     }
 
     const { data, error } = await window.whrSupabase.auth.getUser();
     if (error) {
       currentUser = null;
+      updateCloudUi();
       return null;
     }
     currentUser = data?.user || null;
+    updateCloudUi();
     return currentUser;
   }
 
@@ -91,6 +110,7 @@
   }
 
   async function openCloudSavedRosters() {
+    setSavedDialogHeading("My Armies", "Cloud Armies");
     els.savedRostersList.innerHTML = `<div class="saved-roster-empty">Loading your cloud-saved armies…</div>`;
     els.savedRostersDialog.showModal();
 
@@ -108,6 +128,12 @@
     }
   }
 
+  function visibilityLabel(roster) {
+    return roster.visibility === "shared"
+      ? `<span class="cloud-visibility shared" title="Other signed-in WHR Army Builder users can view this army">Shared</span>`
+      : `<span class="cloud-visibility private" title="Only you can view this army">Private</span>`;
+  }
+
   function renderCloudSavedRosters(rosters) {
     if (!rosters.length) {
       els.savedRostersList.innerHTML = `
@@ -121,19 +147,26 @@
 
     els.savedRostersList.innerHTML = rosters.map(roster => {
       const when = roster.updatedAt ? new Date(roster.updatedAt).toLocaleString() : "";
+      const shared = roster.visibility === "shared";
       return `
-        <article class="saved-roster-card">
+        <article class="saved-roster-card cloud-roster-card">
           <div>
-            <div class="saved-roster-name">${escapeHtml(roster.name || "Unnamed Army")}</div>
+            <div class="saved-roster-name">${escapeHtml(roster.name || "Unnamed Army")} ${visibilityLabel(roster)}</div>
             <div class="saved-roster-meta">
               ${escapeHtml(roster.factionName || "Unknown Army")} ·
               ${formatPoints(roster.totalPoints || 0)} / ${formatPoints(roster.pointsLimit || 0)} pts
               ${when ? ` · Saved ${escapeHtml(when)}` : ""}
-              · Account
+              · ☁ Cloud saved
+            </div>
+            <div class="cloud-visibility-help">
+              ${shared
+                ? "Shared armies can be viewed by other signed-in users."
+                : "Private armies are visible only to you."}
             </div>
           </div>
           <div class="saved-roster-actions">
             <button class="load-roster-button" type="button" data-cloud-load-roster="${escapeHtml(roster.id)}">Load</button>
+            <button class="cloud-visibility-button" type="button" data-cloud-toggle-visibility="${escapeHtml(roster.id)}" data-current-visibility="${shared ? "shared" : "private"}">${shared ? "Make Private" : "Share Army"}</button>
             <button class="delete-roster-button" type="button" data-cloud-delete-roster="${escapeHtml(roster.id)}">Delete</button>
           </div>
         </article>
@@ -208,6 +241,31 @@
     }
   }
 
+  async function toggleCloudRosterVisibility(id, currentVisibility) {
+    if (!currentUser || !window.whrSupabase) return;
+    const nextVisibility = currentVisibility === "shared" ? "private" : "shared";
+
+    const { error } = await window.whrSupabase
+      .from("army_lists")
+      .update({
+        visibility: nextVisibility,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", id)
+      .eq("owner_id", currentUser.id);
+
+    if (error) {
+      console.error("Could not update army visibility", error);
+      window.alert(`Could not change army visibility: ${error.message}`);
+      return;
+    }
+
+    showToast(nextVisibility === "shared"
+      ? "Army is now shared with other users"
+      : "Army is now private");
+    await openCloudSavedRosters();
+  }
+
   async function deleteCloudRoster(id) {
     let roster;
     try {
@@ -265,6 +323,18 @@
       return;
     }
 
+    const visibilityButton = event.target.closest?.("[data-cloud-toggle-visibility]");
+    if (visibilityButton) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      toggleCloudRosterVisibility(
+        visibilityButton.dataset.cloudToggleVisibility,
+        visibilityButton.dataset.currentVisibility
+      );
+      return;
+    }
+
     const deleteButton = event.target.closest?.("[data-cloud-delete-roster]");
     if (deleteButton) {
       event.preventDefault();
@@ -274,14 +344,51 @@
     }
   }
 
+  function installCloudStyles() {
+    if (document.getElementById("whrCloudSaveStyles")) return;
+    const style = document.createElement("style");
+    style.id = "whrCloudSaveStyles";
+    style.textContent = `
+      .cloud-visibility {
+        display: inline-block;
+        margin-left: 7px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        font-size: 10px;
+        line-height: 1.4;
+        font-weight: 900;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        vertical-align: middle;
+      }
+      .cloud-visibility.private { background: #eceff3; color: #444; border: 1px solid #cfd5dc; }
+      .cloud-visibility.shared { background: #e8f6ec; color: #216b35; border: 1px solid #a8d6b4; }
+      .cloud-visibility-help { margin-top: 5px; color: #69727d; font-size: 11px; }
+      .cloud-visibility-button {
+        min-height: 32px;
+        padding: 6px 10px;
+        border: 1px solid #9aa6b2;
+        border-radius: 5px;
+        background: #fff;
+        color: #26323d;
+        font-weight: 750;
+        cursor: pointer;
+      }
+      .cloud-visibility-button:hover { background: #f1f4f6; }
+    `;
+    document.head.appendChild(style);
+  }
+
   async function initialiseCloudSaves() {
     if (initialised || !window.whrSupabase) return;
     initialised = true;
 
+    installCloudStyles();
     await refreshCurrentUser();
     window.whrSupabase.auth.onAuthStateChange((_event, session) => {
       currentUser = session?.user || null;
       if (!currentUser) state.currentSaveId = null;
+      updateCloudUi();
     });
 
     document.addEventListener("click", interceptCloudActions, true);
@@ -291,6 +398,7 @@
       list: getCloudRosters,
       load: loadCloudRoster,
       delete: deleteCloudRoster,
+      setVisibility: toggleCloudRosterVisibility,
       currentUser: () => currentUser
     };
   }
