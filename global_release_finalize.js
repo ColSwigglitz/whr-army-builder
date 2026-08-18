@@ -53,6 +53,12 @@
                     const territoryScript = document.createElement("script");
                     territoryScript.src = "dev_campaign_territories.js?v=1";
                     territoryScript.async = false;
+                    territoryScript.onload = () => {
+                      const territoryPermissionScript = document.createElement("script");
+                      territoryPermissionScript.src = "dev_territory_permissions.js?v=1";
+                      territoryPermissionScript.async = false;
+                      document.body.appendChild(territoryPermissionScript);
+                    };
                     document.body.appendChild(territoryScript);
                   };
                   document.body.appendChild(campaignArmiesScript);
