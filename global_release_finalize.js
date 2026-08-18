@@ -49,6 +49,12 @@
                   const campaignArmiesScript = document.createElement("script");
                   campaignArmiesScript.src = "dev_campaign_armies.js?v=1";
                   campaignArmiesScript.async = false;
+                  campaignArmiesScript.onload = () => {
+                    const territoryScript = document.createElement("script");
+                    territoryScript.src = "dev_campaign_territories.js?v=1";
+                    territoryScript.async = false;
+                    document.body.appendChild(territoryScript);
+                  };
                   document.body.appendChild(campaignArmiesScript);
                 };
                 document.body.appendChild(campaignScript);
