@@ -57,6 +57,12 @@
                       const territoryPermissionScript = document.createElement("script");
                       territoryPermissionScript.src = "dev_territory_permissions.js?v=1";
                       territoryPermissionScript.async = false;
+                      territoryPermissionScript.onload = () => {
+                        const campaignDialogGuard = document.createElement("script");
+                        campaignDialogGuard.src = "dev_campaign_dialog_guard.js?v=1";
+                        campaignDialogGuard.async = false;
+                        document.body.appendChild(campaignDialogGuard);
+                      };
                       document.body.appendChild(territoryPermissionScript);
                     };
                     document.body.appendChild(territoryScript);
