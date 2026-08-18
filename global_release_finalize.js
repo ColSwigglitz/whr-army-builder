@@ -44,7 +44,13 @@
             retentionScript.onload = () => {
               const sharedScript = document.createElement("script"); sharedScript.src = "dev_shared_armies.js?v=3"; sharedScript.async = false;
               sharedScript.onload = () => {
-                const campaignScript = document.createElement("script"); campaignScript.src = "dev_campaigns.js?v=1"; campaignScript.async = false;
+                const campaignScript = document.createElement("script"); campaignScript.src = "dev_campaigns.js?v=2"; campaignScript.async = false;
+                campaignScript.onload = () => {
+                  const campaignArmiesScript = document.createElement("script");
+                  campaignArmiesScript.src = "dev_campaign_armies.js?v=1";
+                  campaignArmiesScript.async = false;
+                  document.body.appendChild(campaignArmiesScript);
+                };
                 document.body.appendChild(campaignScript);
               };
               document.body.appendChild(sharedScript);
