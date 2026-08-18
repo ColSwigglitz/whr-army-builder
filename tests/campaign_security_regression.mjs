@@ -12,7 +12,6 @@ const check = (name,fn) => {
 const contains = (text,needle,message=needle) => assert.ok(text.includes(needle),`Expected ${message}`);
 
 const m004 = read('supabase/004_campaign_foundation.sql');
-const m005 = read('supabase/005_campaign_rls_fix.sql');
 const m006 = read('supabase/006_campaign_armies.sql');
 const m007 = read('supabase/007_campaign_territories.sql');
 const m008 = read('supabase/008_territory_permissions_admin.sql');
@@ -33,11 +32,10 @@ check('Territory tables have RLS enabled', () => {
   contains(m008,'alter table public.territory_value_history enable row level security','territory value history RLS');
 });
 
-check('Territory tables expose no direct write policies', () => {
-  const combined = `${m007}\n${m008}\n${m009}\n${m010}\n${m011}`.toLowerCase();
-  for (const op of ['for insert','for update','for delete']) {
-    const territoryPolicyPattern = new RegExp(`create\\s+policy[\\s\\S]{0,180}on\\s+public\\.campaign_territories[\\s\\S]{0,100}${op.replace(' ','\\s+')}`,'i');
-    assert.ok(!territoryPolicyPattern.test(combined),`campaign_territories must not have a direct ${op} policy`);
+check('Territory instances have no direct client write policy', () => {
+  const policies = [...`${m007}\n${m008}\n${m009}\n${m010}\n${m011}`.matchAll(/create\s+policy\s+"[^"]+"\s+on\s+public\.campaign_territories[\s\S]*?;/gi)].map(m => m[0].toLowerCase());
+  for (const policy of policies) {
+    assert.ok(!/for\s+(insert|update|delete)/i.test(policy),`Direct territory write policy found: ${policy.slice(0,120)}`);
   }
 });
 
@@ -86,9 +84,10 @@ check('12-territory limit is enforced server-side', () => {
   contains(m010,"if v_count>=12 then raise exception 'The receiving player already owns 12 territories'");
 });
 
-check('Campaign army writes remain owner-only', () => {
+check('Campaign army writes remain owner-only and member-bound', () => {
   contains(m006,'owner_id = auth.uid()');
-  contains(m006,'public.whr_is_current_user_campaign_member(campaign_id)');
+  contains(m010,'Owners can insert armies');
+  contains(m010,'public.whr_is_current_user_campaign_member(campaign_id)');
   const base = read('supabase/001_army_lists.sql');
   contains(base,'for delete');
   contains(base,'using (owner_id = auth.uid())');
@@ -100,6 +99,7 @@ check('Campaign members can read campaign armies', () => {
 });
 
 check('Private campaign members can discover fellow members for transfers', () => {
+  contains(m011,'Campaign membership readable to participants and public campaigns');
   contains(m011,'public.whr_is_current_user_campaign_member(campaign_id)');
 });
 
