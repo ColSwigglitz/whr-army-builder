@@ -66,10 +66,16 @@
                           specificTerritoryScript.src = "dev_territory_specific_create.js?v=1";
                           specificTerritoryScript.async = false;
                           specificTerritoryScript.onload = () => {
-                            const campaignDialogGuard = document.createElement("script");
-                            campaignDialogGuard.src = "dev_campaign_dialog_guard.js?v=1";
-                            campaignDialogGuard.async = false;
-                            document.body.appendChild(campaignDialogGuard);
+                            const campaignDeleteScript = document.createElement("script");
+                            campaignDeleteScript.src = "dev_campaign_delete.js?v=1";
+                            campaignDeleteScript.async = false;
+                            campaignDeleteScript.onload = () => {
+                              const campaignDialogGuard = document.createElement("script");
+                              campaignDialogGuard.src = "dev_campaign_dialog_guard.js?v=1";
+                              campaignDialogGuard.async = false;
+                              document.body.appendChild(campaignDialogGuard);
+                            };
+                            document.body.appendChild(campaignDeleteScript);
                           };
                           document.body.appendChild(specificTerritoryScript);
                         };
