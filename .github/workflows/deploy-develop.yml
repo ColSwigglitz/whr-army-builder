@@ -32,6 +32,8 @@ jobs:
             --exclude '.github' \
             --exclude 'CNAME' \
             ./ .deploy/
+          SHORT_SHA="${GITHUB_SHA::8}"
+          sed -E -i "s#global_release_finalize\\.js\\?v=[^\"]+#global_release_finalize.js?v=${SHORT_SHA}#g" .deploy/index.html
           touch .deploy/.nojekyll
 
       - name: Push to development deployment repository
