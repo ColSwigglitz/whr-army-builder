@@ -20,6 +20,15 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Run site integrity regression
+        run: node tests/site_integrity.mjs
+
+      - name: Run WHR v1 release regression
+        run: node tests/v1_release_regression.mjs
+
+      - name: Run General system regression
+        run: node tests/general_system_regression.mjs
+
       - name: Run campaign security regression
         run: node tests/campaign_security_regression.mjs
 
