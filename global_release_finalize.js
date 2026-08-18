@@ -58,16 +58,22 @@
                       territoryPermissionScript.src = "dev_territory_permissions.js?v=1";
                       territoryPermissionScript.async = false;
                       territoryPermissionScript.onload = () => {
-                        const specificTerritoryScript = document.createElement("script");
-                        specificTerritoryScript.src = "dev_territory_specific_create.js?v=1";
-                        specificTerritoryScript.async = false;
-                        specificTerritoryScript.onload = () => {
-                          const campaignDialogGuard = document.createElement("script");
-                          campaignDialogGuard.src = "dev_campaign_dialog_guard.js?v=1";
-                          campaignDialogGuard.async = false;
-                          document.body.appendChild(campaignDialogGuard);
+                        const randomSecurityScript = document.createElement("script");
+                        randomSecurityScript.src = "dev_territory_random_server.js?v=1";
+                        randomSecurityScript.async = false;
+                        randomSecurityScript.onload = () => {
+                          const specificTerritoryScript = document.createElement("script");
+                          specificTerritoryScript.src = "dev_territory_specific_create.js?v=1";
+                          specificTerritoryScript.async = false;
+                          specificTerritoryScript.onload = () => {
+                            const campaignDialogGuard = document.createElement("script");
+                            campaignDialogGuard.src = "dev_campaign_dialog_guard.js?v=1";
+                            campaignDialogGuard.async = false;
+                            document.body.appendChild(campaignDialogGuard);
+                          };
+                          document.body.appendChild(specificTerritoryScript);
                         };
-                        document.body.appendChild(specificTerritoryScript);
+                        document.body.appendChild(randomSecurityScript);
                       };
                       document.body.appendChild(territoryPermissionScript);
                     };
