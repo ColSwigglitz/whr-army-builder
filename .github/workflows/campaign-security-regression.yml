@@ -1,0 +1,30 @@
+name: Campaign security regression
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - 'supabase/**'
+      - 'dev_campaign*.js'
+      - 'dev_territory*.js'
+      - 'global_release_finalize.js'
+      - 'tests/campaign_security_regression.mjs'
+      - '.github/workflows/campaign-security-regression.yml'
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'dev_campaign*.js'
+      - 'dev_territory*.js'
+      - 'global_release_finalize.js'
+      - 'tests/campaign_security_regression.mjs'
+
+jobs:
+  security-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run campaign security regression
+        run: node tests/campaign_security_regression.mjs
