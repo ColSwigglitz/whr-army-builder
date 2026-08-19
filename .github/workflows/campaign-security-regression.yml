@@ -2,7 +2,7 @@ name: Campaign security regression
 
 on:
   push:
-    branches: [develop]
+    branches: [develop, main]
     paths:
       - 'supabase/**'
       - 'dev_campaign*.js'
