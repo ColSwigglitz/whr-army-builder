@@ -155,3 +155,95 @@
     }
   };
 })();
+
+// Roster Pad support for the three Regiments of Renown that were already in
+// the compact Dogs of War payload. Their leaders are compulsory champions, and
+// Oglah Khan's Wolfboyz are all mounted on Giant Wolves.
+(() => {
+  const isDoW = () => state.data?.faction?.id === "dogs_of_war" && state.selectedArmyId === "dogs_of_war";
+
+  const SUPPORT_PROFILES = [
+    {id:"dow_richter_kreugar",name:"Richter Kreugar",stats:{M:4,WS:5,BS:0,S:5,T:5,W:2,I:5,A:3,Ld:9}},
+    {id:"dow_oglah_khan",name:"Oglah Khan",stats:{M:4,WS:5,BS:5,S:4,T:4,W:2,I:4,A:3,Ld:7}},
+    {id:"dow_giant_wolf",name:"Giant Wolf",stats:{M:9,WS:4,BS:0,S:3,T:3,W:1,I:3,A:1,Ld:3}}
+  ];
+
+  function patchRosterPadProfiles() {
+    if (!isDoW() || state.data.__dowRorRosterPadProfilesPatched) return;
+    state.data.__dowRorRosterPadProfilesPatched = true;
+
+    state.data.profiles = state.data.profiles || [];
+    for (const profile of SUPPORT_PROFILES) {
+      if (!state.data.profiles.some(existing => existing.id === profile.id)) state.data.profiles.push(profile);
+    }
+
+    state.data.mounts = state.data.mounts || [];
+    if (!state.data.mounts.some(mount => mount.id === "dow_giant_wolf")) {
+      state.data.mounts.push({
+        id:"dow_giant_wolf",
+        name:"Giant Wolf",
+        profileId:"dow_giant_wolf",
+        type:"cavalry_mount",
+        displayProfileOnRoster:true
+      });
+    }
+
+    const regiments = state.data.faction?.regiments || [];
+
+    const cursed = regiments.find(unit => unit.id === "cursed_company");
+    if (cursed) {
+      cursed.champion = cursed.champion || {};
+      cursed.champion.name = "Richter Kreugar";
+      cursed.champion.profileId = "dow_richter_kreugar";
+      cursed.champion.cost = cursed.champion.cost || {value:0};
+    }
+
+    const wolfboyz = regiments.find(unit => unit.id === "oglah_khans_wolfboyz");
+    if (wolfboyz) {
+      wolfboyz.champion = wolfboyz.champion || {};
+      wolfboyz.champion.name = "Oglah Khan";
+      wolfboyz.champion.profileId = "dow_oglah_khan";
+      wolfboyz.champion.cost = wolfboyz.champion.cost || {value:0};
+      wolfboyz.unitMount = {
+        mountId:"dow_giant_wolf",
+        name:"Giant Wolves"
+      };
+    }
+
+    if (typeof buildIndexes === "function") buildIndexes();
+  }
+
+  const oldSelectArmy = selectArmy;
+  selectArmy = async function(armyId) {
+    await oldSelectArmy(armyId);
+    patchRosterPadProfiles();
+    if (isDoW()) {
+      // Existing/new RoR entries use compulsory leaders; make sure any roster
+      // created before this fix also prints the leader profile.
+      for (const entry of state.roster || []) {
+        if (["cursed_company","oglah_khans_wolfboyz"].includes(entry.unitId)) {
+          entry.champion = entry.champion || {magicItems:[]};
+          entry.champion.selected = true;
+          entry.champion.magicItems = entry.champion.magicItems || [];
+        }
+      }
+      renderArmy();
+    }
+  };
+
+  const oldLoadRoster = loadRoster;
+  loadRoster = async function(id) {
+    await oldLoadRoster(id);
+    patchRosterPadProfiles();
+    if (isDoW()) {
+      for (const entry of state.roster || []) {
+        if (["cursed_company","oglah_khans_wolfboyz"].includes(entry.unitId)) {
+          entry.champion = entry.champion || {magicItems:[]};
+          entry.champion.selected = true;
+          entry.champion.magicItems = entry.champion.magicItems || [];
+        }
+      }
+      renderArmy();
+    }
+  };
+})();
