@@ -30,7 +30,7 @@
   document.body.appendChild(generalScript);
 
   const authStyle = document.createElement("link"); authStyle.rel = "stylesheet"; authStyle.href = "dev_auth.css?v=1"; document.head.appendChild(authStyle);
-  const authScript = document.createElement("script"); authScript.src = "dev_auth.js?v=2"; authScript.async = false;
+  const authScript = document.createElement("script"); authScript.src = "dev_auth.js?v=3"; authScript.async = false;
   authScript.onload = () => {
     const visibilityPatch = document.createElement("script"); visibilityPatch.src = "dev_cloud_visibility_preserve.js?v=1"; visibilityPatch.async = false;
     visibilityPatch.onload = () => {
