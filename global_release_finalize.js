@@ -73,6 +73,12 @@
                               const campaignDialogGuard = document.createElement("script");
                               campaignDialogGuard.src = "dev_campaign_dialog_guard.js?v=1";
                               campaignDialogGuard.async = false;
+                              campaignDialogGuard.onload = () => {
+                                const modalCloseScript = document.createElement("script");
+                                modalCloseScript.src = "dev_modal_close.js?v=1";
+                                modalCloseScript.async = false;
+                                document.body.appendChild(modalCloseScript);
+                              };
                               document.body.appendChild(campaignDialogGuard);
                             };
                             document.body.appendChild(campaignDeleteScript);
