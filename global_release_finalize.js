@@ -20,6 +20,11 @@
     renderUnitBrowser(); renderArmy();
   };
 
+  const daemonRegimentItems = document.createElement("script");
+  daemonRegimentItems.src = "chaos_daemon_regiment_items.js?v=1";
+  daemonRegimentItems.async = false;
+  document.body.appendChild(daemonRegimentItems);
+
   const generalScript = document.createElement("script");
   generalScript.src = "general_system.js?v=2"; generalScript.async = false;
   generalScript.onload = () => {
