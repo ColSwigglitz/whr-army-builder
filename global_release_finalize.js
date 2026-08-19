@@ -25,6 +25,11 @@
   daemonRegimentItems.async = false;
   document.body.appendChild(daemonRegimentItems);
 
+  const dogsOfWarRoR = document.createElement("script");
+  dogsOfWarRoR.src = "dogs_of_war_regiments_of_renown.js?v=1";
+  dogsOfWarRoR.async = false;
+  document.body.appendChild(dogsOfWarRoR);
+
   const generalScript = document.createElement("script");
   generalScript.src = "general_system.js?v=2"; generalScript.async = false;
   generalScript.onload = () => {
