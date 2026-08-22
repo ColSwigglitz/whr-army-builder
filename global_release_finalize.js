@@ -2,6 +2,17 @@
 // Loaded after every army-specific extension so final runtime units and item
 // lists still obey the universal WHR release rules.
 (() => {
+  const previousArmyMonogram = armyMonogram;
+  armyMonogram = function(name) {
+    const cleaned = String(name || "").replace(/^the\s+/i, "").trim();
+    const ampersandMatch = cleaned.match(/^([^\s&]+)\s*&\s*([^\s&]+)/);
+    if (ampersandMatch) {
+      return `${ampersandMatch[1][0]}&${ampersandMatch[2][0]}`.toUpperCase();
+    }
+    return previousArmyMonogram(name);
+  };
+  if (state.armyManifest) renderArmySelection();
+
   const previousAllowedMagicItems = getAllowedMagicItems;
   getAllowedMagicItems = function(unit, context) {
     let items = previousAllowedMagicItems(unit, context) || [];
