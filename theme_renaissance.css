@@ -1,0 +1,138 @@
+/*
+ * WHR Army Builder — Renaissance visual theme (DEV ONLY)
+ *
+ * This file is deliberately an override layer. The original styles.css is
+ * untouched, so reverting is as simple as removing this stylesheet from
+ * index.html.
+ */
+
+:root {
+  --whr-ink: #171716;
+  --whr-charcoal: #22211f;
+  --whr-charcoal-soft: #2d2b28;
+  --whr-paper: #f1eadb;
+  --whr-paper-light: #fbf7ee;
+  --whr-parchment: #e4d8bf;
+  --whr-line: #aa9670;
+  --whr-line-dark: #766446;
+  --whr-crimson: #762019;
+  --whr-crimson-dark: #4e1511;
+  --whr-gold: #b69a5b;
+  --whr-steel: #cbc5b8;
+  --whr-display: Georgia, "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+
+body {
+  color: #25221d;
+  background:
+    linear-gradient(rgba(232,225,210,.95), rgba(232,225,210,.95)),
+    repeating-linear-gradient(135deg, rgba(39,34,27,.035) 0, rgba(39,34,27,.035) 1px, transparent 1px, transparent 11px);
+}
+
+.selection-hero h1,
+.selection-heading h2,
+.brand h1,
+.panel-header h2,
+.roster-section-title,
+.dialog-header h2,
+.editor-section-title,
+.empty-state h3,
+.community-acknowledgement h2 {
+  font-family: var(--whr-display);
+  font-weight: 700;
+  letter-spacing: .025em;
+}
+
+.eyebrow,
+.selection-kicker,
+.selection-version,
+.army-card-badge,
+.unit-section h3 { letter-spacing: .15em; }
+
+.selection-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(182,154,91,.13), transparent 42%),
+    linear-gradient(145deg, #131312, #26231f 58%, #171513);
+  border-bottom: 3px solid var(--whr-gold);
+}
+
+/* Keep the full lockup as branding, not a full-screen hero image. */
+.selection-hero .selection-logo,
+.selection-hero .selection-logo-full,
+.selection-hero img[src*="whr-logo-full"] {
+  display: block;
+  width: min(300px, 62vw);
+  max-width: 300px;
+  max-height: 330px;
+  height: auto;
+  object-fit: contain;
+  margin: 0 auto 16px;
+}
+
+.selection-hero::after {
+  content: "";
+  position: absolute;
+  left: 8%; right: 8%; bottom: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(182,154,91,.65), transparent);
+  pointer-events: none;
+}
+
+.selection-hero h1 { color: #f5efe2; text-shadow: 0 2px 12px rgba(0,0,0,.45); }
+.selection-kicker, .selection-version { color: #c7b58d; }
+.selection-intro { color: rgba(245,239,226,.78); }
+.selection-content { background: transparent; }
+
+.army-card {
+  border: 1px solid #c7b994;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #fbf7ee, #f0e7d6);
+  box-shadow: 0 8px 24px rgba(38,31,22,.08);
+}
+.army-card.available:hover { border-color: var(--whr-line-dark); box-shadow: 0 10px 28px rgba(38,31,22,.14); }
+.army-card-monogram { border-radius: 2px; background: #25221f; border-color: #b89c62; color: #f4eddf; font-family: var(--whr-display); }
+.army-card h3 { font-family: var(--whr-display); letter-spacing: .015em; }
+.army-card-action, .unit-choice-cost, .roster-card-points { color: var(--whr-crimson); }
+
+.app-header { background: linear-gradient(90deg, rgba(18,18,17,.99), rgba(42,39,35,.99)); border-bottom: 3px solid var(--whr-gold); box-shadow: 0 7px 22px rgba(0,0,0,.24); }
+.brand h1 { text-transform: uppercase; letter-spacing: .06em; }
+.brand p { color: rgba(242,235,220,.7); }
+.points-limit, .points-total, .roster-name-field { border-color: rgba(203,197,184,.22); background: rgba(255,255,255,.065); }
+
+.panel, .dialog-card, .unit-dialog { border-radius: 4px; }
+.panel { border-color: #c5b894; box-shadow: 0 12px 30px rgba(37,30,21,.09); }
+.panel-header, .dialog-header { background: linear-gradient(180deg, #faf6ed, #ece1ce); border-bottom-color: #bba983; }
+.panel-header h2, .dialog-header h2, .editor-section-title, .roster-section-title { color: #342b20; }
+.roster-section-title { padding-bottom: 8px; border-bottom: 1px solid var(--whr-line-dark); text-transform: uppercase; letter-spacing: .065em; }
+.roster-section-title::after { content: ""; display: block; width: 52px; height: 2px; margin-top: 7px; background: var(--whr-crimson); }
+
+.browser-controls input, .dialog-field input, .dialog-field select, .magic-search, .roster-name-field input, .points-limit input { border-radius: 3px; }
+.browser-controls input:focus, .dialog-field input:focus, .dialog-field select:focus, .magic-search:focus { border-color: #9e834e; box-shadow: 0 0 0 2px rgba(182,154,91,.18); }
+.unit-choice, .roster-card, .status-card, .check-row { border-radius: 3px; }
+.unit-choice { background: #fdfaf3; }
+.unit-choice:hover { background: #f5ecdc; border-color: #9e895d; }
+.roster-card { border-left: 3px solid #8c774e; background: #fffdf8; }
+
+.button, .header-button, .edit-button, .remove-button, .back-armies-button { border-radius: 3px; letter-spacing: .02em; }
+.button-primary, .header-button-primary { color: #fff; background: linear-gradient(180deg, #84271f, #641b16); border-color: #46110e; }
+.button-primary:hover, .header-button-primary:hover { color: #fff; background: #50130f; }
+.button-secondary, .edit-button { background: #f7f0e2; border-color: #b9a478; }
+.eyebrow { color: var(--whr-crimson); }
+.magic-counter, .unit-model-count { border-radius: 2px; background: #e9dfca; color: #4d3d26; }
+
+.unit-dialog::backdrop { background: rgba(14,13,12,.72); }
+.editor-section { border-bottom-color: #cec0a3; }
+.dialog-footer { background: #ede3d1; border-top-color: #bca983; }
+.community-acknowledgement, .legal-disclaimer { border-color: #c4b28e; }
+.community-acknowledgement { background: linear-gradient(180deg, #f5efe3, #eae0cc); }
+
+@media (max-width: 760px) {
+  .selection-hero::after { left: 4%; right: 4%; }
+  .selection-hero .selection-logo,
+  .selection-hero .selection-logo-full,
+  .selection-hero img[src*="whr-logo-full"] { width: min(220px, 58vw); max-width: 220px; max-height: 245px; }
+  .brand h1 { letter-spacing: .035em; }
+  .panel, .army-card, .dialog-card { border-radius: 3px; }
+}

@@ -37,10 +37,8 @@ create table if not exists public.mighty_empire_hexes (
   unique (campaign_id, q, r)
 );
 
-create index if not exists mighty_empire_hexes_campaign_idx
-  on public.mighty_empire_hexes(campaign_id);
-create index if not exists mighty_empire_hexes_owner_idx
-  on public.mighty_empire_hexes(campaign_id, owner_id);
+create index if not exists mighty_empire_hexes_campaign_idx on public.mighty_empire_hexes(campaign_id);
+create index if not exists mighty_empire_hexes_owner_idx on public.mighty_empire_hexes(campaign_id, owner_id);
 
 create table if not exists public.mighty_empire_hex_exploration (
   campaign_id uuid not null references public.campaigns(id) on delete cascade,
@@ -50,9 +48,7 @@ create table if not exists public.mighty_empire_hex_exploration (
   explored_at timestamptz,
   primary key (hex_id, user_id)
 );
-
-create index if not exists mighty_empire_exploration_user_idx
-  on public.mighty_empire_hex_exploration(campaign_id, user_id);
+create index if not exists mighty_empire_exploration_user_idx on public.mighty_empire_hex_exploration(campaign_id, user_id);
 
 create table if not exists public.mighty_empire_banners (
   id uuid primary key default gen_random_uuid(),
@@ -69,99 +65,65 @@ create table if not exists public.mighty_empire_banners (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
-create index if not exists mighty_empire_banners_campaign_idx
-  on public.mighty_empire_banners(campaign_id);
-create index if not exists mighty_empire_banners_owner_idx
-  on public.mighty_empire_banners(campaign_id, owner_id);
-create index if not exists mighty_empire_banners_hex_idx
-  on public.mighty_empire_banners(hex_id);
+create index if not exists mighty_empire_banners_campaign_idx on public.mighty_empire_banners(campaign_id);
+create index if not exists mighty_empire_banners_owner_idx on public.mighty_empire_banners(campaign_id, owner_id);
+create index if not exists mighty_empire_banners_hex_idx on public.mighty_empire_banners(hex_id);
 
 alter table public.mighty_empire_hexes enable row level security;
 alter table public.mighty_empire_hex_exploration enable row level security;
 alter table public.mighty_empire_banners enable row level security;
 
 drop policy if exists "Campaign members can read Mighty Empires hexes" on public.mighty_empire_hexes;
-create policy "Campaign members can read Mighty Empires hexes"
-on public.mighty_empire_hexes for select to authenticated
-using (public.whr_is_campaign_member(campaign_id, auth.uid()));
+create policy "Campaign members can read Mighty Empires hexes" on public.mighty_empire_hexes
+for select to authenticated using (public.whr_is_campaign_member(campaign_id, auth.uid()));
 
 drop policy if exists "Campaign owners can manage Mighty Empires hexes" on public.mighty_empire_hexes;
-create policy "Campaign owners can manage Mighty Empires hexes"
-on public.mighty_empire_hexes for all to authenticated
+create policy "Campaign owners can manage Mighty Empires hexes" on public.mighty_empire_hexes
+for all to authenticated
 using (public.whr_is_campaign_owner(campaign_id, auth.uid()))
 with check (public.whr_is_campaign_owner(campaign_id, auth.uid()));
 
 drop policy if exists "Players can read their Mighty Empires exploration" on public.mighty_empire_hex_exploration;
-create policy "Players can read their Mighty Empires exploration"
-on public.mighty_empire_hex_exploration for select to authenticated
-using (
-  user_id = auth.uid()
-  or public.whr_is_campaign_owner(campaign_id, auth.uid())
-);
+create policy "Players can read their Mighty Empires exploration" on public.mighty_empire_hex_exploration
+for select to authenticated
+using (user_id = auth.uid() or public.whr_is_campaign_owner(campaign_id, auth.uid()));
 
 drop policy if exists "Players can manage their Mighty Empires exploration" on public.mighty_empire_hex_exploration;
-create policy "Players can manage their Mighty Empires exploration"
-on public.mighty_empire_hex_exploration for all to authenticated
-using (
-  user_id = auth.uid()
-  and public.whr_is_campaign_member(campaign_id, auth.uid())
-)
-with check (
-  user_id = auth.uid()
-  and public.whr_is_campaign_member(campaign_id, auth.uid())
-);
+create policy "Players can manage their Mighty Empires exploration" on public.mighty_empire_hex_exploration
+for all to authenticated
+using (user_id = auth.uid() and public.whr_is_campaign_member(campaign_id, auth.uid()))
+with check (user_id = auth.uid() and public.whr_is_campaign_member(campaign_id, auth.uid()));
 
 drop policy if exists "Campaign members can read Mighty Empires banners" on public.mighty_empire_banners;
-create policy "Campaign members can read Mighty Empires banners"
-on public.mighty_empire_banners for select to authenticated
-using (public.whr_is_campaign_member(campaign_id, auth.uid()));
+create policy "Campaign members can read Mighty Empires banners" on public.mighty_empire_banners
+for select to authenticated using (public.whr_is_campaign_member(campaign_id, auth.uid()));
 
 drop policy if exists "Players can manage their Mighty Empires banners" on public.mighty_empire_banners;
-create policy "Players can manage their Mighty Empires banners"
-on public.mighty_empire_banners for all to authenticated
-using (
-  owner_id = auth.uid()
-  and public.whr_is_campaign_member(campaign_id, auth.uid())
-)
-with check (
-  owner_id = auth.uid()
-  and public.whr_is_campaign_member(campaign_id, auth.uid())
-);
+create policy "Players can manage their Mighty Empires banners" on public.mighty_empire_banners
+for all to authenticated
+using (owner_id = auth.uid() and public.whr_is_campaign_member(campaign_id, auth.uid()))
+with check (owner_id = auth.uid() and public.whr_is_campaign_member(campaign_id, auth.uid()));
 
--- Guard against accidentally attaching Mighty Empires data to another campaign type.
 create or replace function public.whr_validate_mighty_empire_campaign()
-returns trigger
-language plpgsql
-security definer
-set search_path=public
-as $$
-declare
-  v_type text;
+returns trigger language plpgsql security definer set search_path=public as $$
+declare v_type text;
 begin
-  select campaign_type_id into v_type
-  from public.campaigns
-  where id = new.campaign_id;
-
+  select campaign_type_id into v_type from public.campaigns where id = new.campaign_id;
   if v_type is distinct from 'mighty_empires' then
     raise exception 'Mighty Empires data can only belong to a Mighty Empires campaign';
   end if;
-
   return new;
 end;
 $$;
 
 drop trigger if exists whr_validate_mighty_empire_hex on public.mighty_empire_hexes;
-create trigger whr_validate_mighty_empire_hex
-before insert or update on public.mighty_empire_hexes
+create trigger whr_validate_mighty_empire_hex before insert or update on public.mighty_empire_hexes
 for each row execute function public.whr_validate_mighty_empire_campaign();
 
 drop trigger if exists whr_validate_mighty_empire_exploration on public.mighty_empire_hex_exploration;
-create trigger whr_validate_mighty_empire_exploration
-before insert or update on public.mighty_empire_hex_exploration
+create trigger whr_validate_mighty_empire_exploration before insert or update on public.mighty_empire_hex_exploration
 for each row execute function public.whr_validate_mighty_empire_campaign();
 
 drop trigger if exists whr_validate_mighty_empire_banner on public.mighty_empire_banners;
-create trigger whr_validate_mighty_empire_banner
-before insert or update on public.mighty_empire_banners
+create trigger whr_validate_mighty_empire_banner before insert or update on public.mighty_empire_banners
 for each row execute function public.whr_validate_mighty_empire_campaign();

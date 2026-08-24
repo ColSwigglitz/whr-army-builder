@@ -84,8 +84,6 @@
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
 
-  // Account email-management is a small optional extension loaded here so it
-  // runs after the account settings UI and the standard modal layer are ready.
   if (!document.querySelector('script[data-whr-account-email]')) {
     const accountEmailScript = document.createElement("script");
     accountEmailScript.src = "dev_account_email.js?v=1";

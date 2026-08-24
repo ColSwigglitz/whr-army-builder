@@ -181,8 +181,6 @@
       });
       window.whrSupabase = client;
 
-      // Register before getSession so PASSWORD_RECOVERY cannot be missed while
-      // Supabase processes the recovery token from the redirected URL.
       client.auth.onAuthStateChange((event, session) => {
         renderSession(session);
         if (event === "PASSWORD_RECOVERY") {
@@ -257,8 +255,6 @@
           const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl });
           if (error) throw error;
 
-          // Keep this response deliberately generic so the UI does not reveal
-          // whether an email address is registered with WHR Army Builder.
           setMessage("If an account exists for that email address, a password reset email has been sent.", true);
         } else if (mode === "recovery") {
           const confirmPassword = ui.confirmPassword.value;
