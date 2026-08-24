@@ -1,0 +1,66 @@
+name: Live Regression & Security
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-test-suite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout LIVE
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Repository reliability and static security checks
+        run: python tests/validate_repo.py
+
+      - name: Validate generated JavaScript bundles
+        run: |
+          node --check dev_startup_bundle.js
+          node --check dev_army_bundle.js
+          node --check dev_account_bundle.js
+          node --check dev_campaign_bundle.js
+
+      - name: V1 release regression
+        run: node tests/v1_release_regression.mjs
+
+      - name: General system regression
+        run: node tests/general_system_regression.mjs
+
+      - name: Campaign security regression
+        run: node tests/campaign_security_regression.mjs
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Start local LIVE copy
+        run: |
+          python -m http.server 8000 --bind 127.0.0.1 > /tmp/whr-http.log 2>&1 &
+          echo $! > /tmp/whr-http.pid
+          sleep 2
+
+      - name: Browser smoke test across all army books
+        run: python tests/smoke_browser.py
+
+      - name: Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
