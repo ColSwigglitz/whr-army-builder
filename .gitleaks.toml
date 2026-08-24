@@ -1,0 +1,15 @@
+title = "WHR Army Builder Gitleaks configuration"
+
+# Supabase publishable keys are deliberately shipped to the browser and are not
+# privileged secrets. Keep the allow-list tightly scoped to the two frontend
+# files that contain the public client key. Service-role/private credentials
+# remain covered by the default Gitleaks rules and our own static checks.
+[allowlist]
+description = "Allow public Supabase publishable client key"
+paths = [
+  '''^dev_auth\.js$''',
+  '''^dev_account_bundle\.js$'''
+]
+regexes = [
+  '''sb_publishable_[A-Za-z0-9_-]+'''
+]
