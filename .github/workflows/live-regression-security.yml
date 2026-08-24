@@ -60,6 +60,9 @@ jobs:
       - name: Browser smoke test across all army books
         run: python tests/smoke_browser.py
 
+      - name: Build representative armies on deployed LIVE site
+        run: python tests/live_build_armies.py
+
       - name: Gitleaks secret scan
         uses: gitleaks/gitleaks-action@v2
         env:
