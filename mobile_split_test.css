@@ -10,13 +10,18 @@
     align-items: start;
   }
 
-  /* Both halves are independent full-height scroll regions. */
+  /* Keep both panes comfortably inside the visible mobile viewport. Using a
+     full 100dvh pane here meant the panel could start below the header but
+     still claim a full viewport of height, leaving its true bottom below the
+     visible screen. A shorter viewport-relative pane avoids that trap while
+     preserving independent scrolling on both sides. */
   .unit-browser,
   .roster-panel {
     position: sticky;
     top: 6px;
-    height: calc(100dvh - 12px);
-    max-height: calc(100dvh - 12px);
+    height: 68dvh;
+    max-height: calc(100dvh - 24px);
+    min-height: 360px;
     min-width: 0;
     overflow-x: hidden;
     overflow-y: scroll;
@@ -28,11 +33,11 @@
   }
 
   .roster-panel {
-    scroll-padding-bottom: max(56px, calc(env(safe-area-inset-bottom) + 28px));
+    scroll-padding-bottom: max(72px, calc(env(safe-area-inset-bottom) + 40px));
   }
 
   .roster-panel .roster {
-    padding-bottom: max(88px, calc(env(safe-area-inset-bottom) + 56px));
+    padding: 7px 6px max(110px, calc(env(safe-area-inset-bottom) + 72px));
   }
 
   .unit-browser::-webkit-scrollbar,
@@ -82,7 +87,6 @@
   .status-card { padding: 5px 6px; }
   .status-card span { font-size: 8px; }
   .status-card strong { margin-top: 1px; font-size: 12px; }
-  .roster { padding: 7px 6px; }
   .empty-state { padding: 25px 7px; font-size: 10px; }
   .empty-state h3 { font-size: 14px; }
   .roster-section { margin-bottom: 12px; }
