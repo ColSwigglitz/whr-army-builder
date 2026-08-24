@@ -10,66 +10,42 @@
     align-items: start;
   }
 
-  /* Left side remains a single independent scroll region. */
-  .unit-browser {
-    position: sticky;
-    top: 6px;
-    height: calc(100dvh - 12px);
-    max-height: calc(100dvh - 12px);
-    min-width: 0;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: auto;
-    scrollbar-color: #765a2f #e5dac5;
-    box-sizing: border-box;
-  }
-
-  /* Keep the roster panel fixed-height but make the roster itself the scroll
-     container. renderArmy() replaces roster contents during reorder, so this
-     avoids stale parent scroll metrics on mobile browsers. */
+  /* Both halves are independent full-height scroll regions. */
+  .unit-browser,
   .roster-panel {
     position: sticky;
     top: 6px;
     height: calc(100dvh - 12px);
     max-height: calc(100dvh - 12px);
     min-width: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-
-  .roster-panel > .panel-header,
-  .roster-panel > .army-status {
-    flex: 0 0 auto;
-  }
-
-  .roster-panel .roster {
-    flex: 1 1 auto;
-    min-height: 0;
     overflow-x: hidden;
     overflow-y: scroll;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: auto;
     scrollbar-color: #765a2f #e5dac5;
+    box-sizing: border-box;
+  }
+
+  .roster-panel {
     scroll-padding-bottom: max(56px, calc(env(safe-area-inset-bottom) + 28px));
-    padding: 7px 6px max(72px, calc(env(safe-area-inset-bottom) + 44px));
+  }
+
+  .roster-panel .roster {
+    padding-bottom: max(88px, calc(env(safe-area-inset-bottom) + 56px));
   }
 
   .unit-browser::-webkit-scrollbar,
-  .roster-panel .roster::-webkit-scrollbar { width: 10px; }
+  .roster-panel::-webkit-scrollbar { width: 10px; }
 
   .unit-browser::-webkit-scrollbar-track,
-  .roster-panel .roster::-webkit-scrollbar-track {
+  .roster-panel::-webkit-scrollbar-track {
     background: #e5dac5;
     border-left: 1px solid #c6b28b;
   }
 
   .unit-browser::-webkit-scrollbar-thumb,
-  .roster-panel .roster::-webkit-scrollbar-thumb {
+  .roster-panel::-webkit-scrollbar-thumb {
     min-height: 48px;
     background: #8a6a36;
     border: 2px solid #e5dac5;
@@ -77,7 +53,7 @@
   }
 
   .unit-browser::-webkit-scrollbar-thumb:active,
-  .roster-panel .roster::-webkit-scrollbar-thumb:active { background: #604820; }
+  .roster-panel::-webkit-scrollbar-thumb:active { background: #604820; }
 
   .panel-header { padding: 10px 8px 8px; }
   .panel-header h2 { font-size: 16px; }
@@ -106,6 +82,7 @@
   .status-card { padding: 5px 6px; }
   .status-card span { font-size: 8px; }
   .status-card strong { margin-top: 1px; font-size: 12px; }
+  .roster { padding: 7px 6px; }
   .empty-state { padding: 25px 7px; font-size: 10px; }
   .empty-state h3 { font-size: 14px; }
   .roster-section { margin-bottom: 12px; }
