@@ -25,6 +25,15 @@
     }
   }
 
+  // New armies pass through selectArmy(), but cloud/local saved-army loading can
+  // replace state.data directly and then call buildIndexes(). Patch at that common
+  // point as well so daemon regiment items are restored regardless of load path.
+  const previousBuildIndexes = buildIndexes;
+  buildIndexes = function(){
+    previousBuildIndexes();
+    patchRegiments();
+  };
+
   const previousSelectArmy = selectArmy;
   selectArmy = async function(armyId){ await previousSelectArmy(armyId); patchRegiments(); if (isRelevantChaosArmy()){ renderUnitBrowser(); renderArmy(); } };
 
