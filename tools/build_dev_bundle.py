@@ -3,10 +3,6 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Keep initial page startup deliberately small. This is enough to fetch and
-# render data/armies.json, provide the loading overlay, and install the dev
-# wrappers. The heavier army-specific rules are loaded after the army cards
-# have rendered.
 STARTUP_SOURCES = [
     "app.js",
     "dev_startup_gate.js",
@@ -153,15 +149,12 @@ for filename, sources in BUNDLES.items():
 index_path = ROOT / "index.html"
 index = index_path.read_text(encoding="utf-8")
 
-# Keep cache-busting versions stable across automatic bundle rebuilds.
 index = re.sub(
     r'mobile_split_test\.css\?v=\d+',
-    'mobile_split_test.css?v=3',
+    'mobile_split_test.css?v=4',
     index,
 )
 
-# Remove existing generated/external application script tags and the previous
-# lazy-bundle loader block. CSS and inline page markup remain untouched.
 index = re.sub(r'<script\s+src="[^"]+"\s*></script>', '', index)
 index = re.sub(
     r'<!-- DEV_BUNDLE_LOADER_START -->.*?<!-- DEV_BUNDLE_LOADER_END -->',
@@ -212,9 +205,6 @@ bundle_tags = '''<script src="dev_startup_bundle.js?v=1"></script>
     }
   };
 
-  // Do not parse the large army rule bundle until the tiny army manifest has
-  // rendered. This keeps the landing-page army cards responsive even on a
-  // slower phone or cold-cache request.
   const waitForArmyCards = () => {
     if (window.state?.armyManifest || (typeof state !== 'undefined' && state.armyManifest)) {
       requestAnimationFrame(() => requestAnimationFrame(startDeferredBundles));
