@@ -1,6 +1,7 @@
 (() => {
   let currentUser = null;
   let viewingSharedArmy = false;
+  let currentSharedArmy = null;
   let sharedArmiesCache = [];
 
   function installStyles() {
@@ -30,12 +31,15 @@
       .shared-army-view { min-height:36px; padding:8px 13px; border:1px solid #7b211b; border-radius:5px; background:#7b211b; color:#fff; font-weight:800; cursor:pointer; white-space:nowrap; }
       .shared-army-view:hover { background:#651a16; }
       .shared-armies-empty { padding:30px 12px; text-align:center; color:#626b74; }
-      .shared-view-banner { margin:14px 18px 0; padding:10px 14px; border:1px solid #d6b56c; border-left:5px solid #9a6a10; border-radius:6px; background:#fff8e8; color:#513d16; font-weight:750; }
+      .shared-view-banner { margin:14px 18px 0; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; border:1px solid #d6b56c; border-left:5px solid #9a6a10; border-radius:6px; background:#fff8e8; color:#513d16; font-weight:750; }
+      .shared-view-banner-message { flex:1 1 420px; }
+      .shared-copy-button { min-height:36px; padding:8px 13px; border:1px solid #7b211b; border-radius:5px; background:#7b211b; color:#fff; font-weight:850; cursor:pointer; white-space:nowrap; }
+      .shared-copy-button:hover { background:#651a16; }
       .shared-readonly-mode .unit-browser { display:none !important; }
       .shared-readonly-mode .builder-layout { grid-template-columns:minmax(0,1fr) !important; }
       .shared-readonly-mode #saveRosterBtn,.shared-readonly-mode #newRosterBtn,.shared-readonly-mode #savedRostersBtn,.shared-readonly-mode #clearArmyBtn { display:none !important; }
       .shared-readonly-mode #roster button { display:none !important; }
-      @media (max-width:760px){ .shared-armies-tools{grid-template-columns:1fr 1fr}.shared-army-card{grid-template-columns:1fr}.shared-army-view{width:100%} }
+      @media (max-width:760px){ .shared-armies-tools{grid-template-columns:1fr 1fr}.shared-army-card{grid-template-columns:1fr}.shared-army-view{width:100%}.shared-copy-button{width:100%} }
       @media (max-width:520px){ .shared-armies-tools{grid-template-columns:1fr} }
     `;
     document.head.appendChild(style);
@@ -192,24 +196,67 @@
   }
 
   function clearReadOnly() {
-    if (!viewingSharedArmy) return;
+    const wasViewing = viewingSharedArmy;
     viewingSharedArmy = false;
+    currentSharedArmy = null;
+    if (!wasViewing) return;
     document.body.classList.remove("shared-readonly-mode");
     document.getElementById("sharedViewBanner")?.remove();
     if (els?.rosterName) els.rosterName.disabled = false;
     if (els?.pointsLimit) els.pointsLimit.disabled = false;
   }
 
-  function enableReadOnly(ownerName) {
+  async function copySharedArmy() {
+    if (!viewingSharedArmy || !currentSharedArmy) return;
+    if (!currentUser) { document.getElementById("devSignInBtn")?.click(); return; }
+
+    const source = currentSharedArmy;
+    const sourceName = state.rosterName || source.name || "Shared Army";
+    const copyName = (/^copy of /i.test(sourceName) ? sourceName : `Copy of ${sourceName}`).slice(0, 80);
+
+    viewingSharedArmy = false;
+    currentSharedArmy = null;
+    document.body.classList.remove("shared-readonly-mode");
+    document.getElementById("sharedViewBanner")?.remove();
+    if (els?.rosterName) { els.rosterName.disabled = false; els.rosterName.value = copyName; }
+    if (els?.pointsLimit) els.pointsLimit.disabled = false;
+
+    state.currentSaveId = null;
+    state.rosterName = copyName;
+    renderUnitBrowser();
+    renderArmy();
+
+    if (window.whrCloudSaves?.save) {
+      await window.whrCloudSaves.save();
+    } else if (typeof showToast === "function") {
+      showToast(`Created editable copy of "${copyName}". Use Save to keep it.`);
+    }
+  }
+
+  function enableReadOnly(row) {
     viewingSharedArmy = true;
+    currentSharedArmy = row;
     document.body.classList.add("shared-readonly-mode");
     if (els?.rosterName) els.rosterName.disabled = true;
     if (els?.pointsLimit) els.pointsLimit.disabled = true;
     document.getElementById("sharedViewBanner")?.remove();
+
     const banner = document.createElement("div");
     banner.id = "sharedViewBanner";
     banner.className = "shared-view-banner";
-    banner.textContent = `Read-only shared army · owned by ${ownerName}. You can view and print this list, but only its owner can change it.`;
+
+    const message = document.createElement("span");
+    message.className = "shared-view-banner-message";
+    message.textContent = `Read-only shared army · owned by ${row.ownerName}. You can view and print this list, or make your own editable copy.`;
+
+    const copyButton = document.createElement("button");
+    copyButton.id = "copySharedArmyBtn";
+    copyButton.className = "shared-copy-button";
+    copyButton.type = "button";
+    copyButton.textContent = "Copy to My Armies";
+    copyButton.addEventListener("click", copySharedArmy);
+
+    banner.append(message, copyButton);
     document.querySelector("#builderScreen .app-header")?.insertAdjacentElement("afterend", banner);
   }
 
@@ -230,7 +277,7 @@
       els.factionName.textContent = state.data.faction?.name || row.faction_name || army.name;
       els.rosterName.value = state.rosterName; els.pointsLimit.value = state.pointsLimit;
       buildDialog().close(); els.armySelectionScreen.hidden = true; els.builderScreen.hidden = false;
-      renderUnitBrowser(); renderArmy(); enableReadOnly(row.ownerName); window.scrollTo({ top:0, behavior:"instant" });
+      renderUnitBrowser(); renderArmy(); enableReadOnly(row); window.scrollTo({ top:0, behavior:"instant" });
     } catch (error) {
       console.error("Could not view shared army", error);
       alert(`Could not open this shared army: ${error?.message || "Unknown error"}`);
