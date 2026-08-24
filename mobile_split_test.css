@@ -10,11 +10,6 @@
     align-items: start;
   }
 
-  /* Keep both panes comfortably inside the visible mobile viewport. Using a
-     full 100dvh pane here meant the panel could start below the header but
-     still claim a full viewport of height, leaving its true bottom below the
-     visible screen. A shorter viewport-relative pane avoids that trap while
-     preserving independent scrolling on both sides. */
   .unit-browser,
   .roster-panel {
     position: sticky;
@@ -33,11 +28,25 @@
   }
 
   .roster-panel {
-    scroll-padding-bottom: max(72px, calc(env(safe-area-inset-bottom) + 40px));
+    scroll-padding-bottom: 140px;
   }
 
   .roster-panel .roster {
-    padding: 7px 6px max(110px, calc(env(safe-area-inset-bottom) + 72px));
+    padding: 7px 6px 8px;
+  }
+
+  /* A real block at the end of the scrolling element is more reliable than
+     bottom padding on mobile Chrome after the roster DOM has been rebuilt by
+     drag/reorder. It always contributes to scrollHeight, so the final unit can
+     be moved completely above the browser/gesture area. */
+  .roster-panel::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: max(140px, calc(env(safe-area-inset-bottom) + 96px));
+    min-height: max(140px, calc(env(safe-area-inset-bottom) + 96px));
+    flex: 0 0 auto;
+    pointer-events: none;
   }
 
   .unit-browser::-webkit-scrollbar,
