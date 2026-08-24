@@ -151,7 +151,7 @@ index = index_path.read_text(encoding="utf-8")
 
 index = re.sub(
     r'mobile_split_test\.css\?v=\d+',
-    'mobile_split_test.css?v=4',
+    'mobile_split_test.css?v=5',
     index,
 )
 
