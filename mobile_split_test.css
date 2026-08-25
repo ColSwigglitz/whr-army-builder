@@ -10,7 +10,6 @@
     align-items: start;
   }
 
-  /* Left pane: one independent scroll area. */
   .unit-browser {
     position: sticky;
     top: 6px;
@@ -25,63 +24,45 @@
     box-sizing: border-box;
   }
 
-  /* Right pane uses explicit grid rows rather than flex sizing. Reloading a
-     saved roster closes a modal, reveals the builder and repopulates the roster
-     in the same event cycle; mobile browsers can occasionally retain a stale
-     flex height in that sequence. Grid's minmax(0,1fr) row gives #roster a
-     deterministic remaining height whenever the panel is laid out again. */
+  /* The whole right pane scrolls. This keeps long army rules/status blocks from
+     consuming the fixed viewport and pushing the actual roster out of reach. */
   .roster-panel {
     position: sticky;
     top: 6px;
     height: 68dvh;
     min-width: 0;
-    display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr);
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-
-  .roster-panel > .panel-header,
-  .roster-panel > .army-status {
-    min-height: 0;
-  }
-
-  .roster-panel > .roster {
-    min-height: 0;
-    min-width: 0;
-    height: 100%;
+    display: block;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: auto;
     scrollbar-color: #765a2f #e5dac5;
+    box-sizing: border-box;
+    padding-bottom: max(120px, calc(env(safe-area-inset-bottom) + 72px));
+  }
+
+  /* #roster is normal-flow content on mobile; the parent owns scrolling. */
+  .roster-panel > .roster {
+    min-height: 0;
+    min-width: 0;
+    height: auto;
+    overflow: visible;
     padding: 7px 6px 8px;
     box-sizing: border-box;
   }
 
-  /* Real content at the end of the actual scrolling node. Unlike padding on
-     the parent, this always contributes to #roster.scrollHeight after render. */
-  .roster-panel > .roster::after {
-    content: "";
-    display: block;
-    height: max(120px, calc(env(safe-area-inset-bottom) + 72px));
-    min-height: max(120px, calc(env(safe-area-inset-bottom) + 72px));
-    width: 1px;
-    pointer-events: none;
-  }
-
   .unit-browser::-webkit-scrollbar,
-  .roster-panel > .roster::-webkit-scrollbar { width: 10px; }
+  .roster-panel::-webkit-scrollbar { width: 10px; }
 
   .unit-browser::-webkit-scrollbar-track,
-  .roster-panel > .roster::-webkit-scrollbar-track {
+  .roster-panel::-webkit-scrollbar-track {
     background: #e5dac5;
     border-left: 1px solid #c6b28b;
   }
 
   .unit-browser::-webkit-scrollbar-thumb,
-  .roster-panel > .roster::-webkit-scrollbar-thumb {
+  .roster-panel::-webkit-scrollbar-thumb {
     min-height: 48px;
     background: #8a6a36;
     border: 2px solid #e5dac5;
@@ -89,7 +70,7 @@
   }
 
   .unit-browser::-webkit-scrollbar-thumb:active,
-  .roster-panel > .roster::-webkit-scrollbar-thumb:active { background: #604820; }
+  .roster-panel::-webkit-scrollbar-thumb:active { background: #604820; }
 
   .panel-header { padding: 10px 8px 8px; }
   .panel-header h2 { font-size: 16px; }
