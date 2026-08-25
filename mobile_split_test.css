@@ -25,29 +25,31 @@
     box-sizing: border-box;
   }
 
-  /* Right pane: do NOT scroll the outer panel. Keep its heading/status fixed
-     and give the roster body the remaining height. This is the standard flex
-     scroll pattern and means every render/reorder gets a fresh scrollHeight. */
+  /* Right pane uses explicit grid rows rather than flex sizing. Reloading a
+     saved roster closes a modal, reveals the builder and repopulates the roster
+     in the same event cycle; mobile browsers can occasionally retain a stale
+     flex height in that sequence. Grid's minmax(0,1fr) row gives #roster a
+     deterministic remaining height whenever the panel is laid out again. */
   .roster-panel {
     position: sticky;
     top: 6px;
     height: 68dvh;
     min-width: 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
     overflow: hidden;
     box-sizing: border-box;
   }
 
   .roster-panel > .panel-header,
   .roster-panel > .army-status {
-    flex: 0 0 auto;
+    min-height: 0;
   }
 
   .roster-panel > .roster {
-    flex: 1 1 0;
     min-height: 0;
     min-width: 0;
+    height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
