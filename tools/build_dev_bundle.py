@@ -186,7 +186,7 @@ bundle_tags = '''<script src="dev_startup_bundle.js?v=1"></script>
 
   const startDeferredBundles = async () => {
     try {
-      await loadScript('dev_army_bundle.js?v=2');
+      await loadScript('dev_army_bundle.js?v=3');
       window.whrResolveArmyFeatures?.();
     } catch (error) {
       console.error(error);
