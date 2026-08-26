@@ -88,17 +88,11 @@
     decorateModelCounts();
   };
 
-  // The core regiment editor historically treated unit.size.minimum as a minimum
-  // number of ordinary troopers. In WHR the champion is an additional physical model,
-  // so it counts towards that published unit-size minimum. Adjust only the editor's
-  // trooper input: the army-list data continues to retain the actual published minimum.
   const previousRenderRegimentEditor = renderRegimentEditor;
   renderRegimentEditor = function(entry, unit) {
     const minimum = publishedMinimum(unit);
     const minimumTroopers = minimumTroopersForEntry(entry, unit);
 
-    // If a champion has just been removed from a minimum-sized unit, restore enough
-    // ordinary models to keep the regiment legal before rendering the editor.
     if (Number(entry.size || 0) < minimumTroopers) entry.size = minimumTroopers;
 
     let html = previousRenderRegimentEditor(entry, unit);
@@ -125,21 +119,19 @@
 
     sizeInput.min = String(minimumTroopersForEntry(entry, unit));
 
-    // Capture the size change before the legacy handler, which still clamps against
-    // unit.size.minimum without accounting for an additional champion model.
-    els.dialogContent.addEventListener("change", event => {
-      const control = event.target.closest?.('[data-field="size"]');
-      if (!control) return;
-
+    // Intercept every size change, not just the first one. The previous one-shot
+    // listener allowed later changes in the same editor session to fall back to
+    // older handlers, which could restore the previous value on some regiments.
+    sizeInput.addEventListener("change", event => {
       const minimumTroopers = minimumTroopersForEntry(entry, unit);
       entry.size = Math.max(
         minimumTroopers,
-        Math.floor(Number(control.value || minimumTroopers))
+        Math.floor(Number(sizeInput.value || minimumTroopers))
       );
-      control.value = entry.size;
+      sizeInput.value = entry.size;
       updateDialogTotal();
       event.stopImmediatePropagation();
-    }, { capture: true, once: true });
+    }, { capture: true });
   };
 
   window.whrTotalModelsForEntry = totalModelsForEntry;
