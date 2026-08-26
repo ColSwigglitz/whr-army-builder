@@ -31,26 +31,6 @@
     banner.querySelector('#thorskinsBackToCampaign')?.addEventListener('click',()=>{ clearReadOnly(); showArmySelection(); document.getElementById('landingCampaignsBtn')?.click(); });
   }
 
-  function beginCampaignArmy(campaign){
-    clearReadOnly();
-    setContext(campaign);
-    state.currentSaveId=null;
-    state.roster=[];
-    state.generalEntryId=null;
-    state.rosterName=`${campaign.name} — Army`;
-    if(els.rosterName) els.rosterName.value=state.rosterName;
-    document.getElementById('campaignFormDialog')?.close();
-    document.getElementById('campaignHubDialog')?.close();
-    // Do not call the generic showArmySelection wrapper here: the Phoenix Games
-    // campaign module clears campaign context when it runs. Show the already
-    // rendered army selection screen directly so the next army-card click keeps
-    // the Thorskins context and applies the fixed 1,500-point rules.
-    els.builderScreen.hidden=true;
-    els.armySelectionScreen.hidden=false;
-    window.scrollTo({top:0,behavior:'instant'});
-    showToast(`Choose an army book for ${campaign.name}`);
-  }
-
   async function viewCampaignArmy(id,campaign){
     const {data:row,error}=await window.whrSupabase.from('army_lists').select('id,owner_id,name,army_id,faction_id,faction_name,points_limit,total_points,roster_data,campaign_id').eq('id',id).eq('campaign_id',campaign.id).single();
     if(error)throw error;
@@ -62,17 +42,28 @@
 
   async function renderPanel(){
     const content=document.getElementById('campaignFormContent'); const dialog=document.getElementById('campaignFormDialog'); if(!content||!dialog?.open||!viewedCampaignId)return;
+    if(content.querySelector(`[data-thorskins-army-panel="${CSS.escape(viewedCampaignId)}"]`)) return;
     try{
       const [campaign,user]=await Promise.all([fetchCampaign(viewedCampaignId),currentUser()]); if(!user||campaign.campaign_type_id!==TYPE)return;
+      if(content.querySelector(`[data-thorskins-army-panel="${CSS.escape(campaign.id)}"]`)) return;
       const {data:membership,error:mErr}=await window.whrSupabase.from('campaign_members').select('campaign_id,user_id,role,team_id').eq('campaign_id',campaign.id).eq('user_id',user.id).maybeSingle(); if(mErr||!membership)return;
       const {data:armies,error}=await window.whrSupabase.from('army_lists').select('id,owner_id,name,faction_name,points_limit,total_points,updated_at,campaign_id').eq('campaign_id',campaign.id).order('updated_at',{ascending:false}); if(error)throw error;
       const rows=armies||[]; const ownerIds=[...new Set(rows.map(a=>a.owner_id))]; let names=new Map(); if(ownerIds.length){const {data:p}=await window.whrSupabase.from('profiles').select('id,display_name').in('id',ownerIds); names=new Map((p||[]).map(x=>[x.id,x.display_name]));}
       const own=rows.find(a=>a.owner_id===user.id); const owner=user.id===campaign.owner_id;
-      const old=content.querySelector(`[data-campaign-army-panel="${CSS.escape(campaign.id)}"]`); if(old)old.remove();
-      const panel=document.createElement('section'); panel.className='campaign-subpanel'; panel.dataset.campaignArmyPanel=campaign.id;
+      content.querySelector(`[data-campaign-army-panel="${CSS.escape(campaign.id)}"]`)?.remove();
+      const panel=document.createElement('section'); panel.className='campaign-subpanel'; panel.dataset.campaignArmyPanel=campaign.id; panel.dataset.thorskinsArmyPanel=campaign.id;
       panel.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0 0 4px">Campaign Armies</h3><div class="campaign-meta">Each competing player creates one standard ${POINTS}-point army. ${owner?'As Campaign Master you can view all player armies.':'You can view your own army and your team-mate’s army only.'}</div></div>${!owner&&!own?`<button class="campaign-button" type="button" data-thorskins-create-army>Create Army</button>`:''}</div><div style="display:grid;gap:8px;margin-top:12px">${rows.length?rows.map(a=>`<div class="campaign-person-row"><div><strong>${esc(a.name)}</strong><div class="campaign-meta">${esc(a.faction_name||'Army')} · ${formatPoints(a.total_points)} / ${formatPoints(a.points_limit)} pts · ${esc(names.get(a.owner_id)||'WHR Player')}</div></div><div class="campaign-actions">${a.owner_id===user.id?`<button class="campaign-button secondary" type="button" data-thorskins-edit="${esc(a.id)}">Load / Edit</button>`:`<button class="campaign-button secondary" type="button" data-thorskins-view="${esc(a.id)}">View Army</button>`}</div></div>`).join(''):`<div class="campaign-empty" style="padding:18px">No visible campaign armies have been created yet.</div>`}</div>`;
       content.prepend(panel);
-      panel.querySelector('[data-thorskins-create-army]')?.addEventListener('click',()=>beginCampaignArmy(campaign));
+      panel.querySelector('[data-thorskins-create-army]')?.addEventListener('click',()=>{
+        setContext(campaign);
+        state.currentSaveId=null; state.roster=[]; state.generalEntryId=null;
+        document.getElementById('campaignFormDialog')?.close();
+        document.getElementById('campaignHubDialog')?.close();
+        els.builderScreen.hidden=true;
+        els.armySelectionScreen.hidden=false;
+        window.scrollTo({top:0,behavior:'instant'});
+        showToast(`Choose an army book for ${campaign.name}`);
+      });
       panel.querySelectorAll('[data-thorskins-edit]').forEach(b=>b.addEventListener('click',async()=>{ clearReadOnly(); setContext(campaign); await window.whrCloudSaves?.load(b.dataset.thorskinsEdit); setContext(campaign); renderArmy(); }));
       panel.querySelectorAll('[data-thorskins-view]').forEach(b=>b.addEventListener('click',async()=>{ document.getElementById('campaignFormDialog')?.close(); document.getElementById('campaignHubDialog')?.close(); try{await viewCampaignArmy(b.dataset.thorskinsView,campaign);}catch(e){console.error(e);alert(`Could not view this campaign army: ${e?.message||'Unknown error'}`);} }));
     }catch(e){console.error('Could not render Thorskins armies',e);}
@@ -87,6 +78,6 @@
   }
 
   window.addEventListener('click',e=>{const open=e.target.closest?.('[data-open-campaign]');if(open?.dataset.openCampaign){viewedCampaignId=open.dataset.openCampaign;setTimeout(renderPanel,180);setTimeout(renderPanel,500);}},true);
-  new MutationObserver(()=>{const d=document.getElementById('campaignFormDialog');if(d?.open&&viewedCampaignId)setTimeout(renderPanel,0);}).observe(document.body,{childList:true,subtree:true});
+  new MutationObserver(()=>{const d=document.getElementById('campaignFormDialog');if(d?.open&&viewedCampaignId&&!document.querySelector(`[data-thorskins-army-panel="${CSS.escape(viewedCampaignId)}"]`))setTimeout(renderPanel,0);}).observe(document.body,{childList:true,subtree:true});
   installBuilderHooks();
 })();
