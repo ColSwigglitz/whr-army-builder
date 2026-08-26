@@ -110,6 +110,25 @@ CAMPAIGN_SOURCES = [
     "dev_territory_specific_create.js",
     "dev_campaign_delete.js",
     "dev_campaign_dialog_guard.js",
+    "dev_mighty_empire_manual_builder_v3.js",
+    "dev_mighty_empire_tray_scroll.js",
+    "dev_mighty_empire_map_scroll.js",
+    "dev_modal_close.js",
+]
+
+# Backward-compatible aliases for current filenames.
+CAMPAIGN_SOURCES = [
+    "campaign.js",
+    "dev_campaigns.js",
+    "dev_campaign_armies.js",
+    "dev_thorskins_island.js",
+    "dev_thorskins_campaign_armies.js",
+    "dev_campaign_territories.js",
+    "dev_territory_permissions.js",
+    "dev_territory_random_server.js",
+    "dev_territory_specific_create.js",
+    "dev_campaign_delete.js",
+    "dev_campaign_dialog_guard.js",
     "dev_mighty_empires_manual_builder_v3.js",
     "dev_mighty_empires_tray_scroll.js",
     "dev_mighty_empires_map_scroll.js",
@@ -201,7 +220,7 @@ bundle_tags = '''<script src="dev_startup_bundle.js?v=1"></script>
     }
 
     try {
-      await loadScript('dev_campaign_bundle.js?v=3');
+      await loadScript('dev_campaign_bundle.js?v=4');
     } catch (error) {
       console.warn('Campaign bundle failed to load; army builder remains available.', error);
     }
@@ -225,5 +244,5 @@ index_path.write_text(index, encoding="utf-8")
 
 print(
     "Built dev bundles: "
-    + ", ".join(f"{name} ({len(sources)} sources)" for name, sources in BUNDLES.items())
+    + ", ".join(f"{name} ({len(sources)} sources)' for name,sources in BUNDLES.items())
 )
