@@ -102,6 +102,8 @@ CAMPAIGN_SOURCES = [
     "campaign.js",
     "dev_campaigns.js",
     "dev_campaign_armies.js",
+    "dev_thorskins_island.js",
+    "dev_thorskins_campaign_armies.js",
     "dev_campaign_territories.js",
     "dev_territory_permissions.js",
     "dev_territory_random_server.js",
@@ -199,7 +201,7 @@ bundle_tags = '''<script src="dev_startup_bundle.js?v=1"></script>
     }
 
     try {
-      await loadScript('dev_campaign_bundle.js?v=1');
+      await loadScript('dev_campaign_bundle.js?v=3');
     } catch (error) {
       console.warn('Campaign bundle failed to load; army builder remains available.', error);
     }
