@@ -31,6 +31,26 @@
     banner.querySelector('#thorskinsBackToCampaign')?.addEventListener('click',()=>{ clearReadOnly(); showArmySelection(); document.getElementById('landingCampaignsBtn')?.click(); });
   }
 
+  function beginCampaignArmy(campaign){
+    clearReadOnly();
+    setContext(campaign);
+    state.currentSaveId=null;
+    state.roster=[];
+    state.generalEntryId=null;
+    state.rosterName=`${campaign.name} — Army`;
+    if(els.rosterName) els.rosterName.value=state.rosterName;
+    document.getElementById('campaignFormDialog')?.close();
+    document.getElementById('campaignHubDialog')?.close();
+    // Do not call the generic showArmySelection wrapper here: the Phoenix Games
+    // campaign module clears campaign context when it runs. Show the already
+    // rendered army selection screen directly so the next army-card click keeps
+    // the Thorskins context and applies the fixed 1,500-point rules.
+    els.builderScreen.hidden=true;
+    els.armySelectionScreen.hidden=false;
+    window.scrollTo({top:0,behavior:'instant'});
+    showToast(`Choose an army book for ${campaign.name}`);
+  }
+
   async function viewCampaignArmy(id,campaign){
     const {data:row,error}=await window.whrSupabase.from('army_lists').select('id,owner_id,name,army_id,faction_id,faction_name,points_limit,total_points,roster_data,campaign_id').eq('id',id).eq('campaign_id',campaign.id).single();
     if(error)throw error;
@@ -52,7 +72,7 @@
       const panel=document.createElement('section'); panel.className='campaign-subpanel'; panel.dataset.campaignArmyPanel=campaign.id;
       panel.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0 0 4px">Campaign Armies</h3><div class="campaign-meta">Each competing player creates one standard ${POINTS}-point army. ${owner?'As Campaign Master you can view all player armies.':'You can view your own army and your team-mate’s army only.'}</div></div>${!owner&&!own?`<button class="campaign-button" type="button" data-thorskins-create-army>Create Army</button>`:''}</div><div style="display:grid;gap:8px;margin-top:12px">${rows.length?rows.map(a=>`<div class="campaign-person-row"><div><strong>${esc(a.name)}</strong><div class="campaign-meta">${esc(a.faction_name||'Army')} · ${formatPoints(a.total_points)} / ${formatPoints(a.points_limit)} pts · ${esc(names.get(a.owner_id)||'WHR Player')}</div></div><div class="campaign-actions">${a.owner_id===user.id?`<button class="campaign-button secondary" type="button" data-thorskins-edit="${esc(a.id)}">Load / Edit</button>`:`<button class="campaign-button secondary" type="button" data-thorskins-view="${esc(a.id)}">View Army</button>`}</div></div>`).join(''):`<div class="campaign-empty" style="padding:18px">No visible campaign armies have been created yet.</div>`}</div>`;
       content.prepend(panel);
-      panel.querySelector('[data-thorskins-create-army]')?.addEventListener('click',()=>{ document.getElementById('campaignFormDialog')?.close(); document.getElementById('campaignHubDialog')?.close(); showArmySelection(); setContext(campaign); state.currentSaveId=null; state.roster=[]; state.generalEntryId=null; showToast(`Choose an army book for ${campaign.name}`); });
+      panel.querySelector('[data-thorskins-create-army]')?.addEventListener('click',()=>beginCampaignArmy(campaign));
       panel.querySelectorAll('[data-thorskins-edit]').forEach(b=>b.addEventListener('click',async()=>{ clearReadOnly(); setContext(campaign); await window.whrCloudSaves?.load(b.dataset.thorskinsEdit); setContext(campaign); renderArmy(); }));
       panel.querySelectorAll('[data-thorskins-view]').forEach(b=>b.addEventListener('click',async()=>{ document.getElementById('campaignFormDialog')?.close(); document.getElementById('campaignHubDialog')?.close(); try{await viewCampaignArmy(b.dataset.thorskinsView,campaign);}catch(e){console.error(e);alert(`Could not view this campaign army: ${e?.message||'Unknown error'}`);} }));
     }catch(e){console.error('Could not render Thorskins armies',e);}
